@@ -19,7 +19,7 @@ jobs:
 
       - name: 🚀 Deploy
         run: |
-          ssh websirama@103.170.188.110 << 'EOF'
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no websirama@103.170.188.110 << 'EOF'
           set -e
 
           cd ~/laravel-app
