@@ -19,7 +19,7 @@ jobs:
 
       - name: 🚀 Deploy
         run: |
-          ssh websirama@103.170.188.110 << 'EOF'
+            ssh -T websirama@103.170.188.110 << 'EOF'
             set -e
 
             cd ~/laravel-app
@@ -33,7 +33,7 @@ jobs:
             php artisan key:generate
             
             php artisan storage:link
-            
+
             echo "⚙️ Migrate"
             php artisan migrate --force
 
