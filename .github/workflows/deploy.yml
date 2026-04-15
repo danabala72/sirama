@@ -19,26 +19,22 @@ jobs:
 
       - name: 🚀 Deploy
         run: |
-            ssh -T websirama@103.170.188.110 << 'EOF'
-            set -e
+          ssh websirama@103.170.188.110 << 'EOF'
+          set -e
 
-            cd ~/laravel-app
+          cd ~/laravel-app
 
-            echo "🔄 Pull latest code"
-            git pull origin main
+          echo "🔄 Pull latest code"
+          git pull origin main
 
-            echo "📦 Install composer"
-            php ~/composer.phar install --no-dev --optimize-autoloader
-            
-            php artisan key:generate
-            
-            php artisan storage:link
+          echo "📦 Install composer"
+          php ~/composer.phar install --no-dev --optimize-autoloader
 
-            echo "⚙️ Migrate"
-            php artisan migrate --force
+          echo "⚙️ Migrate"
+          php artisan migrate --force
 
-            echo "⚡ Optimize"
-            php artisan optimize
+          echo "⚡ Optimize"
+          php artisan optimize
 
-            echo "✅ Done"
+          echo "✅ Done"
           EOF
