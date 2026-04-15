@@ -1,0 +1,44 @@
+name: Deploy Laravel via SSH
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔑 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          ssh-keyscan -H 103.170.188.110 >> ~/.ssh/known_hosts
+
+      - name: 🚀 Deploy
+        run: |
+          ssh websirama@103.170.188.110 << 'EOF'
+            set -e
+
+            cd ~/laravel-app
+
+            echo "🔄 Pull latest code"
+            git pull origin main
+
+            echo "📦 Install composer"
+            php ~/composer.phar install --no-dev --optimize-autoloader
+            
+            php artisan key:generate
+            
+            php artisan storage:link
+            
+            echo "⚙️ Migrate"
+            php artisan migrate --force
+
+            echo "⚡ Optimize"
+            php artisan optimize
+
+            echo "✅ Done"
+          EOF
