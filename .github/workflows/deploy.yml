@@ -1,4 +1,4 @@
-name: Deploy Laravel via SSH
+name: Laravel FTP Deploy
 
 on:
   push:
@@ -9,32 +9,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🔑 Setup SSH
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+
+      - name: 📦 Install Composer
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: 🏗️ Prepare Build
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          mkdir build
+          rsync -av \
+            --exclude=".git" \
+            --exclude="node_modules" \
+            --exclude=".env" \
+            ./ build/
 
-          ssh-keyscan -H 103.170.188.110 >> ~/.ssh/known_hosts
+      - name: 📤 Upload Laravel Core
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}
+          local-dir: build/
+          server-dir: /laravel-app/
 
-      - name: 🚀 Deploy
-        run: |
-          ssh websirama@103.170.188.110 << 'EOF'
-          set -e
-
-          cd ~/laravel-app
-
-          echo "🔄 Pull latest code"
-          git pull origin main
-
-          echo "📦 Install composer"
-          php ~/composer.phar install --no-dev --optimize-autoloader
-
-          echo "⚙️ Migrate"
-          php artisan migrate --force
-
-          echo "⚡ Optimize"
-          php artisan optimize
-
-          echo "✅ Done"
-          EOF
+      - name: 🌐 Upload Public Folder
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}
+          local-dir: public/
+          server-dir: /public_html/
