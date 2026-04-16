@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Registrasi User') }}
+            {{ __('Registrasi Asesor') }}
         </h2>
     </x-slot>
 
@@ -21,17 +21,17 @@
             <!-- Container Form (Disamakan dengan Edit: max-w-xl & p-2) -->
             <div class="bg-white overflow-hidden p-2 max-w-xl">
                 <div class="mb-2 pb-2">
-                    <h3 class="text-lg font-bold text-gray-800">Registrasi User</h3>
                     <p class="text-sm text-gray-500">Silakan isi kredensial untuk membuat user baru.</p>
                 </div>
 
-                <form action="{{ route('user.store') }}" method="POST">
+                <form action="{{ route('asesor.store') }}" method="POST">
                     @csrf
 
+                    <h3 class="mb-2">Login User</h3>
                     <!-- Username / NIM -->
                     <div class="mb-4">
                         <label class="block mb-2 text-sm font-bold text-gray-700">Username</label>
-                        <input type="text" name="username" value="{{ old('username') }}"
+                        <input type="text" name="username" autocomplete="off" value="{{ old('username') }}"
                             class="w-full border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 rounded-md shadow-sm transition duration-200"
                             required>
                     </div>
@@ -39,7 +39,7 @@
                     <!-- Password -->
                     <div class="mb-4">
                         <label class="block mb-2 text-sm font-bold text-gray-700">Password</label>
-                        <input type="password" name="password"
+                        <input type="password" name="password" autocomplete="new-password"
                             class="w-full border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 rounded-md shadow-sm transition duration-200"
                             placeholder="••••••••" required>
                     </div>
@@ -52,26 +52,47 @@
                             placeholder="••••••••" required>
                     </div>
 
+                    <hr class="my-3 border-gray-200">
+                    <h3 class="">Profil</h3>
+                    <!-- Nama Lengkap -->
                     <div class="mb-4">
-                        <label class="block mb-2 text-sm font-bold text-gray-700">Daftar Sebagai</label>
-                        <select name="role"
+                        <label class="block mb-2 text-sm font-bold text-gray-700">Nama Lengkap</label>
+                        <input type="text" name="name" value="{{ old('name') }}"
                             class="w-full border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 rounded-md shadow-sm transition duration-200"
                             required>
-                             <option value="" disabled selected>Pilih Role...</option>
-                            @foreach($roles as $role)
-                                @if($role->role != 'Admin')
-                                    <option value="{{ $role->id }}">{{ $role->role }}</option>
-                                @endif
-                            @endforeach
-                        </select>
-                        @error('role')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
                     </div>
+
+                    <!-- Email -->
+                    <div class="mb-4">
+                        <label class="block mb-2 text-sm font-bold text-gray-700">Email</label>
+                        <input type="email" name="email" value="{{ old('email') }}"
+                            class="w-full border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 rounded-md shadow-sm transition duration-200"
+                            placeholder="email@contoh.com">
+                    </div>
+
+                    <!-- Jenis Kelamin -->
+                    <div class="mb-4">
+                        <label class="block mb-2 text-sm font-bold text-gray-700">Jenis Kelamin</label>
+                        <select name="jenis_kelamin"
+                            class="w-full border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 rounded-md shadow-sm transition duration-200">
+                            <option value="">-- Pilih Jenis Kelamin --</option>
+                            <option value="L" {{ old('jenis_kelamin') == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                            <option value="P" {{ old('jenis_kelamin') == 'P' ? 'selected' : '' }}>Perempuan</option>
+                        </select>
+                    </div>
+
+                    <!-- No HP -->
+                    <div class="mb-4">
+                        <label class="block mb-2 text-sm font-bold text-gray-700">No. HP</label>
+                        <input type="text" name="no_hp" value="{{ old('no_hp') }}"
+                            class="w-full border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 rounded-md shadow-sm transition duration-200"
+                            placeholder="081234567890">
+                    </div>
+
 
                     <!-- Action Buttons -->
                     <div class="flex items-center justify-between gap-4">
-                        <a href="{{ route('user.index') }}" class="text-sm text-gray-600 hover:text-gray-900 underline">
+                        <a href="{{ route('asesor.index') }}" class="text-sm text-gray-600 hover:text-gray-900 underline">
                             Batal
                         </a>
                         <!-- Class button disamakan -->

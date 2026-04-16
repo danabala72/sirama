@@ -32,14 +32,23 @@ Route::middleware('auth')->group(function () {
             return view('dashboard');
         })->name('dashboard');
 
-        Route::get('/user', [UserController::class, 'index'])->name('user.index');
-        Route::get('/user/{user}/edit', [UserController::class, 'edit'])->name('user.edit');
-        Route::get('/user/create', [UserController::class, 'create'])->name('user.create');
-        Route::post('/user', [UserController::class, 'store'])->name('user.store');
-        Route::delete('/user/{user}', [UserController::class, 'destroy'])->name('user.destroy');
-        Route::get('/user/template', [UserController::class, 'templateDownload'])->name('user.template');
-        Route::post('/user/import', [UserController::class, 'userImport'])->name('user.import');
-        Route::put('user/{user}/update', [UserController::class, 'update'])->name('user.update');
+        Route::get('/mahasiswa', [UserController::class, 'index'])->name('mahasiswa.index');
+        Route::get('/mahasiswa/{user}/edit', [UserController::class, 'edit'])->name('mahasiswa.edit');
+        Route::get('/mahasiswa/create', [UserController::class, 'create'])->name('mahasiswa.create');
+        Route::post('/mahasiswa', [UserController::class, 'store'])->name('mahasiswa.store');
+        Route::delete('/mahasiswa/{user}', [UserController::class, 'destroy'])->name('mahasiswa.destroy');
+        Route::get('/mahasiswa/template', [UserController::class, 'templateDownload'])->name('mahasiswa.template');
+        Route::post('/mahasiswa/import', [UserController::class, 'userImport'])->name('mahasiswa.import');
+        Route::put('mahasiswa/{user}/update', [UserController::class, 'update'])->name('mahasiswa.update');
+
+        Route::get('/asesor', [UserController::class, 'asesorIndex'])->name('asesor.index');
+        Route::get('/asesor/{user}/edit', [UserController::class, 'asesorEdit'])->name('asesor.edit');
+        Route::get('/asesor/create', [UserController::class, 'asesorCreate'])->name('asesor.create');
+        Route::post('/asesor', [UserController::class, 'asesorStore'])->name('asesor.store');
+        Route::delete('/asesor/{user}', [UserController::class, 'asesorDestroy'])->name('asesor.destroy');
+        Route::get('/asesor/template', [UserController::class, 'asesorTemplateDownload'])->name('asesor.template');
+        Route::post('/asesor/import', [UserController::class, 'asesorImport'])->name('asesor.import');
+        Route::put('asesor/{user}/update', [UserController::class, 'asesorUpdate'])->name('asesor.update');
         
 
 

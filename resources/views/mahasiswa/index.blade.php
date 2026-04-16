@@ -3,7 +3,7 @@
     <div class="container-xl p-2">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="text-2xl font-bold text-gray-800">Daftar User</h2>
+            <h2 class="text-2xl font-bold text-gray-800">Daftar Mahasiswa</h2>
         </div>
 
         <!-- Alert Success -->
@@ -19,7 +19,7 @@
         <div class="d-flex flex-wrap gap-2 mb-3">
 
 
-            <a href="{{ route('user.create') }}" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-primary my-2">
+            <a href="{{ route('mahasiswa.create') }}" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-primary my-2">
                 <!-- Icon Plus yang lebih ramping -->
                 <svg xmlns="http://w3.org" class="w-4 h-4 transition-transform duration-200 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -28,7 +28,7 @@
                 <span class="hidden sm:inline">Tambah User</span>
             </a>
 
-            <a href="{{ route('user.template') }}" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-success my-2">
+            <a href="{{ route('mahasiswa.template') }}" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-success my-2">
                 <svg xmlns="http://w3.org" class="w-4 h-4" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
@@ -59,23 +59,21 @@
                         <tr class="bg-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             <th class="text-nowrap w-1">No</th>
                             <th class="text-nowrap">Username</th>
-                            <th class="text-nowrap">Role</th>
                             <th class="text-nowrap">Nama</th>
                             <th class="text-nowrap">Email</th>
                             <th class="text-nowrap text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($user as $index => $mhs)
+                        @forelse ($mahasiswa as $index => $mhs)
                         <tr class="transition">
                             <td class="text-sm text-muted">{{ $index + 1 }}</td>
                             <td class="text-sm font-medium text-gray-900">{{ $mhs->username }}</td>
-                            <td class="text-sm font-medium text-gray-900">{{ $mhs->role->role }}</td>
                             <td class="text-sm font-medium">{{ $mhs->mahasiswa->name ?? '-' }}</td>
                             <td class="text-sm text-muted">{{ $mhs->mahasiswa->email ?? '-' }}</td>
                             <td class="text-sm text-center">
                                 <div class="d-flex justify-content-center gap-2">
-                                    <a href="{{ route('user.edit', $mhs->id) }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ route('mahasiswa.edit', $mhs->id) }}" class="btn btn-sm btn-outline-primary">
                                         <svg xmlns="http://w3.org" class="icon icon-tabler icon-tabler-edit" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                             <path d="M12 15l8.385 -8.415a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3z" />
@@ -84,7 +82,7 @@
                                         </svg>
                                         Edit
                                     </a>
-                                    <form action="{{ route('user.destroy', $mhs->id) }}" method="POST" onsubmit="return confirm('Hapus user ini?')" class="m-0">
+                                    <form action="{{ route('mahasiswa.destroy', $mhs->id) }}" method="POST" onsubmit="return confirm('Hapus mahasiswa ini?')" class="m-0">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center" style="height: 32px; width: 32px;">
@@ -115,7 +113,7 @@
     <div class="modal modal-blur fade" id="modalImport" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <form action="{{ route('user.import') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('mahasiswa.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title">Import Data User</h5>
@@ -125,7 +123,7 @@
                         <div class="mb-3">
                             <label class="form-label">Pilih File Excel (.xlsx / .csv)</label>
                             <input type="file" name="file" class="form-control" required accept=".xlsx, .csv">
-                            <small class="text-muted">Format: username, password, role (Mahasiswa/Asesor)</small>
+                            <small class="text-muted">Format: username, password</small>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -153,9 +151,9 @@
                 },
                 language: {
                     search: "",
-                    searchPlaceholder: "Cari user...",
-                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ user",
-                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 user",
+                    searchPlaceholder: "Cari mahasiswa...",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ mahasiswa",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 mahasiswa",
                     infoFiltered: "",
                     // Tambahkan ini jika ingin mengubah teks tombol
 
