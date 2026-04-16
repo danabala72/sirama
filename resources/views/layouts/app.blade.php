@@ -136,7 +136,7 @@
         </div>
     </div>
 
-    <script  src="{{ asset('js/jquery-3.7.1.js') }}"></script>
+    <script  src="{{ asset('js/jquery.min.js') }}"></script>
     <script  src="{{ asset('js/tabler.min.js') }}"></script>
     <script  src="{{ asset('js/tom-select.complete.min.js') }}"></script>
     <script  src="{{ asset('js/dataTables.min.js') }}"></script>
