@@ -19,7 +19,6 @@ class UserController extends Controller
         return view('user.index', compact('user'));
 
 
-      
         return view('user.index', compact('user'));
     }
 
@@ -65,7 +64,7 @@ class UserController extends Controller
 
         $user->username = $request->username;
         $user->role_id = $request->role;
-        
+
         // Hanya update password jika diisi
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
