@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.1/dist/tabler-icons.min.css">
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/2.3.7/css/dataTables.bootstrap5.min.css" crossorigin="anonymous">
 
     <style>
         body {
@@ -344,7 +345,7 @@
                                 <i class="ti ti-home-2 me-1"></i>
                                 Dashboard
                             </a>
-                        </li>                         
+                        </li>
                         <li class="nav-item">
                             <a href="{{ route('user.index') }}" class="nav-link {{ request()->routeIs('user') ? 'active' : '' }}">
                                 <i class="ti ti-users me-1"></i>
@@ -360,8 +361,8 @@
                         </li>
                         @foreach(range(2, 6) as $i)
                         <li class="nav-item">
-                            @php                    
-                                $hasMahasiswa = auth()->user()->mahasiswa()->exists();
+                            @php
+                            $hasMahasiswa = auth()->user()->mahasiswa()->exists();
                             @endphp
 
                             <a href="{{ $hasMahasiswa ? route('form.step', 'step=' . $i) : '#' }}"
@@ -403,6 +404,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/2.3.7/js/dataTables.min.js" crossorigin="anonymous"></script>
+
+    <script src="https://cdn.datatables.net/2.3.7/js/dataTables.bootstrap5.min.js" crossorigin="anonymous"></script>
+
     <script>
         (() => {
             const toggleBtn = document.getElementById('sidebar-toggle-btn');
@@ -436,8 +444,81 @@
             window.addEventListener('resize', () => {
                 if (desktopQuery.matches) closeMobile();
             });
+
+            $('.dt-search input').addClass('form-control form-control-sm');
+            $('.dt-length select').addClass('form-select form-select-sm');
         })();
     </script>
+    @stack('scripts')
+    <style>
+        .dt-search {
+            display: flex !important;
+            align-items: center !important;
+            padding-right: 2rem !important;
+        }
+
+        .dt-search input {
+            margin-left: 0.75rem !important;
+            border: 1px solid #dadcde !important;
+            border-radius: 4px !important;
+            padding: 0.4rem 0.75rem !important;
+            outline: none !important;
+            width: 200px !important;
+            /* Lebar kotak search */
+            background-color: #ffffff !important;
+        }
+
+        .dt-search input:focus {
+            border-color: #206bc4 !important;
+            /* Warna biru Tabler */
+            box-shadow: 0 0 0 0.25rem rgba(32, 107, 196, 0.25) !important;
+        }
+
+        .dt-info {
+            padding-left: 1rem !important;
+        }
+
+        /* Atur container header */
+        th.dt-orderable-asc,
+        th.dt-orderable-desc {
+            cursor: pointer !important;
+            position: relative;
+            padding-right: 30px !important;
+            vertical-align: middle !important;
+            /* Pastikan teks di tengah */
+        }
+
+        /* Base style untuk icon sort */
+        th.dt-orderable-asc::after,
+        th.dt-orderable-desc::after {
+            position: absolute !important;
+            top: 50% !important;
+            /* Letakkan di 50% tinggi header */
+            transform: translateY(-50%);
+            /* Geser ke atas setengah ukuran icon agar presisi di tengah */
+            right: 10px;
+            content: "↕";
+            opacity: .3;
+            font-size: .9rem;
+            line-height: 1;
+            /* Menghindari tinggi baris tambahan */
+        }
+
+        /* Saat aktif (Ascending) */
+        th.dt-ordering-asc::after {
+            content: "↑" !important;
+            opacity: 1 !important;
+            color: #206bc4;
+        }
+
+        /* Saat aktif (Descending) */
+        th.dt-ordering-desc::after {
+            content: "↓" !important;
+            opacity: 1 !important;
+            color: #206bc4;
+        }
+    </style>
+
 </body>
 
 </html>

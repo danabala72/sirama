@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->enum('jenis_kelamin', ['L','P'])->nullable();
             $table->string('email')->unique()->nullable();
-            $table->string('no_hp');
+            $table->string('no_hp')->nullable();
             $table->timestamps();
         });
     }

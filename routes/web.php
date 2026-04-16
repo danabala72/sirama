@@ -37,7 +37,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/create', [UserController::class, 'create'])->name('user.create');
         Route::post('/user', [UserController::class, 'store'])->name('user.store');
         Route::delete('/user/{user}', [UserController::class, 'destroy'])->name('user.destroy');
-
+        Route::get('/user/template', [UserController::class, 'templateDownload'])->name('user.template');
+        Route::post('/user/import', [UserController::class, 'userImport'])->name('user.import');
         Route::put('user/{user}/update', [UserController::class, 'update'])->name('user.update');
         
 

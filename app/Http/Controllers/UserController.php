@@ -12,9 +12,12 @@ class UserController extends Controller
 {
     public function index()
     {
-        $user = User::whereHas('role', function($query) {
+        $user = User::whereHas('role', function ($query) {
             $query->where('role', '!=', 'Admin');
-        })->with(['mahasiswa','asesor', 'role'])->paginate(20);
+        })->with(['mahasiswa', 'asesor', 'role'])->get();
+
+        return view('user.index', compact('user'));
+
 
       
         return view('user.index', compact('user'));
@@ -86,4 +89,46 @@ class UserController extends Controller
     }
 
 
+    public function templateDownload()
+    {
+        // Logika sederhana menghasilkan CSV template
+        $headers = ["username", "password", "role"];
+        $callback = function () use ($headers) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $headers);
+            // Contoh baris
+            fputcsv($file, ['mhs_001', 'password123', 'Mahasiswa']);
+            fputcsv($file, ['asesor_01', 'password123', 'Asesor']);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=template_users.csv",
+        ]);
+    }
+
+    public function userImport(Request $request)
+    {
+        $request->validate(['file' => 'required|mimes:xlsx,csv,txt']);
+
+        $file = $request->file('file');
+        $data = array_map('str_getcsv', file($file->getRealPath()));
+        $header = array_shift($data); // Buang baris judul
+
+        foreach ($data as $row) {
+            // Cari ID Role berdasarkan nama (Mahasiswa/Asesor)
+            $role = Role::where('role', 'LIKE', '%' . $row[2] . '%')->first();
+
+            User::updateOrCreate(
+                ['username' => $row[0]],
+                [
+                    'password' => Hash::make($row[1]),
+                    'role_id'  => $role ? $role->id : 2,
+                ]
+            );
+        }
+
+        return back()->with('success', 'Data user berhasil diimport!');
+    }
 }
