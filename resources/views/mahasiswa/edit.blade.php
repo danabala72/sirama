@@ -214,6 +214,26 @@
         .ts-dropdown .option {
             padding: 0.5rem 0.75rem !important;
         }
+
+        .ts-dropdown .option.active {
+            background-color: #f0fdf4 !important;
+            /* Hijau sangat muda (emerald-50) */
+            color: #059669 !important;
+            /* Teks hijau emerald (emerald-600) */
+            cursor: pointer !important;
+        }
+
+        /* Tambahan: Efek hover manual jika class active belum cukup */
+        .ts-dropdown .option:hover {
+            background-color: #f0fdf4 !important;
+            color: #059669 !important;
+        }
+
+        /* Menghilangkan garis tepi biru default pada opsi */
+        .ts-dropdown .option {
+            outline: none !important;
+            border: none !important;
+        }
     </style>
 
 </x-app-layout>
