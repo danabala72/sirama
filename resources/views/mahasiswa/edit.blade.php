@@ -178,4 +178,42 @@
             }
         });
     </script>
+    <style>
+        /* Memastikan border luar muncul seperti input Tabler */
+        .ts-wrapper.single .ts-control,
+        .ts-wrapper.multi .ts-control {
+            border: 1px solid #dce1e7 !important;
+            /* Border standar Tabler */
+            border-radius: 4px !important;
+            min-height: calc(1.5em + 0.75rem + 2px);
+            /* Menyamakan tinggi dengan form-control */
+            padding: 0.4375rem 0.75rem !important;
+        }
+
+        /* Memperbaiki posisi dropdown agar selalu di atas elemen lain */
+        .ts-dropdown {
+            z-index: 9999 !important;
+            /* Nilai tinggi agar tidak tertutup */
+            background: #ffffff !important;
+            border: 1px solid #dce1e7 !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+            border-radius: 4px !important;
+            margin-top: 2px !important;
+        }
+
+        /* Menghapus outline biru default browser */
+        .ts-control:focus,
+        .focus .ts-control {
+            outline: none !important;
+            border-color: #10b981 !important;
+            /* Warna emerald sesuai tema Anda */
+            box-shadow: 0 0 0 0.05rem #2563eb !important;
+        }
+
+        /* Merapikan tampilan opsi di dalam dropdown */
+        .ts-dropdown .option {
+            padding: 0.5rem 0.75rem !important;
+        }
+    </style>
+
 </x-app-layout>
