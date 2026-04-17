@@ -75,15 +75,28 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('mahasiswa.index') }}" class="nav-link {{ request()->routeIs('mahasiswa') ? 'active' : '' }}">
+                            <a href="{{ route('asesor.index') }}" class="nav-link {{ request()->routeIs('asesor.index') ? 'active' : '' }}">
+                                <i class="ti ti-user-shield me-1"></i>
+                                Asesor
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('mahasiswa.index') }}" class="nav-link {{ request()->routeIs('mahasiswa.index') ? 'active' : '' }}">
                                 <i class="ti ti-users me-1"></i>
                                 Mahasiswa
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('asesor.index') }}" class="nav-link {{ request()->routeIs('asesor') ? 'active' : '' }}">
-                                <i class="ti ti-user-shield me-1"></i>
-                                Asesor
+                            <a href="{{ route('jurusan.index') }}" class="nav-link {{ request()->routeIs('jurusan.index') ? 'active' : '' }}">
+                                <i class="ti ti-certificate me-1"></i>
+                                Jurusan
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('mk.index') }}" class="nav-link {{ request()->routeIs('mk.index') ? 'active' : '' }}">
+                                <i class="ti ti-school me-1"></i>
+                                Mata Kuliah
                             </a>
                         </li>
                         @endif
@@ -136,11 +149,11 @@
         </div>
     </div>
 
-    <script  src="{{ asset('js/jquery.min.js') }}"></script>
-    <script  src="{{ asset('js/tabler.min.js') }}"></script>
-    <script  src="{{ asset('js/tom-select.complete.min.js') }}"></script>
-    <script  src="{{ asset('js/dataTables.min.js') }}"></script>
-    <script  src="{{ asset('js/dataTables.bootstrap5.min.js') }}"></script>
+    <script src="{{ asset('js/jquery.min.js') }}"></script>
+    <script src="{{ asset('js/tabler.min.js') }}"></script>
+    <script src="{{ asset('js/tom-select.complete.min.js') }}"></script>
+    <script src="{{ asset('js/dataTables.min.js') }}"></script>
+    <script src="{{ asset('js/dataTables.bootstrap5.min.js') }}"></script>
 
     <script>
         (() => {
@@ -209,45 +222,8 @@
             padding-left: 1rem !important;
         }
 
-        /* Atur container header */
-        th.dt-orderable-asc,
-        th.dt-orderable-desc {
-            cursor: pointer !important;
-            position: relative;
-            padding-right: 30px !important;
-            vertical-align: middle !important;
-            /* Pastikan teks di tengah */
-        }
-
-        /* Base style untuk icon sort */
-        th.dt-orderable-asc::after,
-        th.dt-orderable-desc::after {
-            position: absolute !important;
-            top: 50% !important;
-            /* Letakkan di 50% tinggi header */
-            transform: translateY(-50%);
-            /* Geser ke atas setengah ukuran icon agar presisi di tengah */
-            right: 10px;
-            content: "↕";
-            opacity: .3;
-            font-size: .9rem;
-            line-height: 1;
-            /* Menghindari tinggi baris tambahan */
-        }
-
-        /* Saat aktif (Ascending) */
-        th.dt-ordering-asc::after {
-            content: "↑" !important;
-            opacity: 1 !important;
-            color: #206bc4;
-        }
-
-        /* Saat aktif (Descending) */
-        th.dt-ordering-desc::after {
-            content: "↓" !important;
-            opacity: 1 !important;
-            color: #206bc4;
-        }
+       
+        
     </style>
 
 </body>

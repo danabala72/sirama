@@ -24,8 +24,9 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-
-        return view('mahasiswa.edit', compact('user'));
+        $asesors = Asesor::with('user')->get();
+        $selectedAsesors = $user->mahasiswa ? $user->mahasiswa->asesors->pluck('id')->toArray() : [];
+        return view('mahasiswa.edit', compact('user', 'asesors', 'selectedAsesors'));
     }
 
     public function asesorEdit(User $user)
@@ -102,6 +103,8 @@ class UserController extends Controller
             'username' => 'required|unique:users,username,' . $user->id,
             'password' => 'nullable|string|min:6',
             'password_confirmation' => 'required_with:password|same:password',
+            'asesor_ids' => 'nullable|array',
+            'asesor_ids.*' => 'exists:asesor,id',
 
         ]);
 
@@ -115,6 +118,10 @@ class UserController extends Controller
         }
 
         $user->save();
+
+        if ($user->mahasiswa) {
+            $user->mahasiswa->asesors()->sync($request->asesor_ids ?? []);
+        }
 
         return redirect()->route('mahasiswa.index')->with('success', 'Data user berhasil diperbarui.');
     }
