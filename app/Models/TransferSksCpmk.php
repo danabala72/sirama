@@ -10,6 +10,9 @@ class TransferSksCpmk extends Model
 
     protected $fillable = [
         'transfer_sks_id',
-        'cpmk'
+        'cpmk',
+        'kesenjangan',
+        'hasil',
+        'catatan_asesor'
     ];
 }

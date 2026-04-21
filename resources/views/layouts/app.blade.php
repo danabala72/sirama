@@ -100,6 +100,31 @@
                             </a>
                         </li>
                         @endif
+                        @if(auth()->user()?->role?->role === 'Asesor')
+                        <!-- Judul Kelompok Menu (Opsional) -->
+                        <li class="nav-item">
+                            <div class="nav-link disabled text-muted opacity-50 px-3">
+                                <small class="fw-bold">ASESMEN TRANSFER SKS</small>
+                            </div>
+                        </li>
+
+                        <!-- Menu Asesmen Pendidikan Formal -->
+                        <li class="nav-item">
+                            <a href="{{ route('asesmen.formal') }}" class="nav-link">
+                                <i class="ti ti-book-2 me-1"></i>
+                                Pendidikan Formal
+                            </a>
+                        </li>
+
+                        <!-- Menu Asesmen Non-Formal / Informal -->
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="ti ti-briefcase me-1"></i>
+                                Non-Formal & Informal
+                            </a>
+                        </li>
+
+                        @endif
                         @if(auth()->user()?->role?->role === 'Mahasiswa')
                         <li class="nav-item">
                             <a href="{{ route('form.step', 'step=1') }}" class="nav-link {{ ($step ?? null) == 1 ? 'active' : '' }}">
@@ -221,9 +246,6 @@
         .dt-info {
             padding-left: 1rem !important;
         }
-
-       
-        
     </style>
 
 </body>

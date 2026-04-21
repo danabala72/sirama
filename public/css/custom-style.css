@@ -269,3 +269,11 @@ body {
         display: none;
     }
 }
+
+.accordion-collapse.collapse {
+    visibility: visible !important;
+}
+
+.accordion-collapse.collapse:not(.show) {
+    display: none !important;
+}

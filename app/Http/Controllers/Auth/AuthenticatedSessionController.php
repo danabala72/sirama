@@ -33,6 +33,7 @@ class AuthenticatedSessionController extends Controller
         return match ($role) {
             'Admin' => redirect()->intended('/dashboard'),
             'Mahasiswa' => redirect()->intended('/form?step=1'),
+            'Asesor'    => redirect()->intended('/asesor/dashboard'),
             default => redirect('/'),
         };
     }

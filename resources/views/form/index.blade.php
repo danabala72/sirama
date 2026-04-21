@@ -30,24 +30,6 @@
                         @includeIf('form.partials.form'.$step)
 
                     </div>
-
-                    <div class="tab-pane" id="info-tab">
-                        <h4>Petunjuk Form {{ $step }}</h4>
-
-                        @if($step == 1)
-                        <p>Isi rincian data peserta atau calon peserta.</p>
-                        @elseif($step == 2)
-                        <p>Masukkan mata kuliah yang direkognisi.</p>
-                        @elseif($step == 3)
-                        <p>Masukkan pelatihan dan pengalaman kerja.</p>
-                        @elseif($step == 4)
-                        <p>Isi formulir riwayat hidup.</p>
-                        @elseif($step == 5)
-                        <p>Periksa kembali seluruh data sebelum submit.</p>
-                        @endif
-
-                    </div>
-
                 </div>
             </div>
         </div>

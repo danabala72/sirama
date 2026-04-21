@@ -73,14 +73,29 @@ Route::middleware('auth')->group(function () {
         Route::get('/mk/cpmk/template/{kode_mk}', [MataKuliahController::class, 'templateCpmk'])->name('mk.cpmk.template');
         Route::post('/mk/cpmk/import', [MataKuliahController::class, 'importCpmk'])->name('mk.cpmk.import');
 
-         Route::delete('/cpmk/{cpmk}', [CpMataKuliahController::class, 'destroy'])->name('cpmk.destroy');
-         Route::put('/cpmk/{cpmk}/update', [CpMataKuliahController::class, 'update'])->name('cpmk.update');
-         Route::post('/cpmk', [CpMataKuliahController::class, 'store'])->name('cpmk.store');
+        Route::delete('/cpmk/{cpmk}', [CpMataKuliahController::class, 'destroy'])->name('cpmk.destroy');
+        Route::put('/cpmk/{cpmk}/update', [CpMataKuliahController::class, 'update'])->name('cpmk.update');
+        Route::post('/cpmk', [CpMataKuliahController::class, 'store'])->name('cpmk.store');
 
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     });
+
+
+    Route::middleware(['auth', 'role:Asesor'])->group(function () {
+
+        Route::get('/asesor/dashboard', function () {
+            return view('asesor.dashboard.index');
+        })->name('dashboard');
+
+        Route::prefix('asesmen')->name('asesmen.')->group(function () {
+            Route::get('/formal', [TransferSksController::class, 'asesorIndex'])->name('formal');
+            Route::get('/formal/review/{id}', [TransferSksController::class, 'formalReview'])->name('formal.review');
+            Route::put('/formal/update', [TransferSksController::class, 'formalReviewUpdate'])->name('formal.update');
+        });
+    });
+
 
     Route::middleware(['auth', 'role:Mahasiswa'])->group(function () {
         Route::get('/form', [FormController::class, 'show'])

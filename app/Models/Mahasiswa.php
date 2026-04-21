@@ -33,4 +33,8 @@ class Mahasiswa extends Model
     {
         return $this->belongsToMany(Asesor::class);
     }
+    public function jurusan() 
+    {
+        return $this->belongsTo(Jurusan::class);
+    }
 }
