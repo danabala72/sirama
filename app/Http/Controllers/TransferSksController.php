@@ -6,6 +6,7 @@ use App\Models\Mahasiswa;
 use App\Models\MataKuliahPilihan;
 use App\Models\TransferSks;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class TransferSksController extends Controller
@@ -52,13 +53,24 @@ class TransferSksController extends Controller
 
     public function asesorIndex()
     {
-        $mahasiswas = Mahasiswa::whereHas('mataKuliahPilihan.transferSks.cpmkItems')->with(['mataKuliahPilihan.transferSks' => function ($query) {
-            $query->withCount('cpmkItems');
-        }, 'jurusan'])
+        $user = Auth::user();
+        $asesorId = $user->asesor->id;
+
+        $mahasiswas = Mahasiswa::whereHas('asesors', function ($query) use ($asesorId) {
+            $query->where('asesor_id', $asesorId);
+        })
+            ->whereHas('mataKuliahPilihan.transferSks.cpmkItems')
+            ->with([
+                'mataKuliahPilihan.transferSks' => function ($query) {
+                    $query->withCount('cpmkItems');
+                },
+                'jurusan'
+            ])
             ->get();
 
         return view('asesor.asesmen.formal.index', compact('mahasiswas'));
     }
+
 
     public function formalReview($id)
     {
