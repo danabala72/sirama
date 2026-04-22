@@ -9,8 +9,10 @@ use App\Http\Controllers\MataKuliahController;
 use App\Http\Controllers\MataKuliahPilihanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransferSksController;
+use App\Http\Controllers\TransferSksNonFormalController;
 use App\Http\Controllers\UserController;
 use App\Models\CpMataKuliah;
+use App\Models\TransferSksNonformal;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -91,8 +93,11 @@ Route::middleware('auth')->group(function () {
 
         Route::prefix('asesmen')->name('asesmen.')->group(function () {
             Route::get('/formal', [TransferSksController::class, 'asesorIndex'])->name('formal');
+            Route::get('/nonformal', [TransferSksNonFormalController::class, 'asesorIndex'])->name('nonformal');
             Route::get('/formal/review/{id}', [TransferSksController::class, 'formalReview'])->name('formal.review');
+            Route::get('/nonformal/review/{id}', [TransferSksNonFormalController::class, 'nonFormalReview'])->name('nonformal.review');
             Route::put('/formal/update', [TransferSksController::class, 'formalReviewUpdate'])->name('formal.update');
+            Route::put('/nonformal/update', [TransferSksNonFormalController::class, 'nonFormalReviewUpdate'])->name('nonformal.update');
         });
     });
 

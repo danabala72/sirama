@@ -118,7 +118,7 @@
 
                         <!-- Menu Asesmen Non-Formal / Informal -->
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="{{ route('asesmen.nonformal') }}" class="nav-link">
                                 <i class="ti ti-briefcase me-1"></i>
                                 Non-Formal & Informal
                             </a>

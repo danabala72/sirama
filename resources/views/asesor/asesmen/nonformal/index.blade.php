@@ -2,7 +2,7 @@
     <div class="container-xl p-2">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="text-2xl font-bold text-gray-800">Asesmen Pendidikan Formal</h2>
+            <h2 class="text-2xl font-bold text-gray-800">Asesmen Pendidikan Non Formal</h2>
         </div>
 
         <!-- Alert Success -->
@@ -48,20 +48,19 @@
                                 </div>
                             </td>
                             <td class="text-sm text-center">
-                               @php
+                                @php
                                     $belumDinilai = collect($mhs->mataKuliahPilihan ?? [])->filter(function($mk) {
-                                        // Jika data transfer BELUM ADA sama sekali
-                                        if (!$mk->transferSks) {
+                                        // 1. Jika data transfer belum dibuat SAMA SEKALI
+                                        if (!$mk->transferSksNonFormal) {
                                             return true;
                                         }
 
-                                        // Jika data transfer SUDAH ADA, tapi ada kolom penilaian yang masih kosong
-                                        return is_null($mk->transferSks->kesenjangan) || 
-                                            is_null($mk->transferSks->hasil) || 
-                                            is_null($mk->transferSks->catatan_asesor);
+                                        // 2. Jika data transfer sudah ada, tapi kolomnya masih ada yang NULL
+                                        return is_null($mk->transferSksNonFormal->kesenjangan) || 
+                                            is_null($mk->transferSksNonFormal->nilai) || 
+                                            is_null($mk->transferSksNonFormal->catatan_asesor);
                                     })->count();
                                 @endphp
-
 
                                 @if($belumDinilai > 0)
                                 <span class="badge bg-warning-lt" title="Ada mata kuliah yang belum lengkap penilaiannya">
@@ -74,25 +73,30 @@
                                 @endif
                             </td>
                             <td class="text-sm text-center">
-                                <div class="d-flex justify-content-center gap-2">
-                                    @php
+                            <div class="d-flex justify-content-center gap-2">
+                                @php
                                     $mkPilihan = collect($mhs->mataKuliahPilihan ?? []);
-                                    $hasTransfer = $mkPilihan->contains(fn($mk) => ($mk->transferSks ?? null) !== null);
-                                    @endphp
+                                    
+                                    $hasDataNonFormal = $mkPilihan->contains(function($mk) {
+                                        return $mk->attachment && $mk->attachment->count() > 0;
+                                    });
+                                @endphp
 
-                                    @if($hasTransfer)
-                                    <a href="{{ route('asesmen.formal.review', $mhs->id) }}" class="btn btn-sm btn-outline-primary">
+                                @if($hasDataNonFormal)
+                                    <a href="{{ route('asesmen.nonformal.review', $mhs->id) }}" class="btn btn-sm btn-outline-primary">
                                         <i class="ti ti-checklist me-1"></i>
                                         Mulai Penilaian
                                     </a>
-                                    @else
-                                    <button class="btn btn-sm btn-outline-secondary disabled" title="Mahasiswa belum input data transfer" disabled>
-                                        <i class="ti ti-hourglass-empty me-1"></i>
-                                        Belum Ada Data
+                                @else
+                                    <button class="btn btn-sm btn-outline-secondary disabled" disabled>
+                                        <i class="ti ti-file-off me-1"></i>
+                                        Belum Ada Bukti
                                     </button>
-                                    @endif
-                                </div>
-                            </td>
+                                @endif
+
+                            </div>
+                        </td>
+
                         </tr>
                         @empty
                         <tr>

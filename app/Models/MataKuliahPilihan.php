@@ -34,10 +34,14 @@ class MataKuliahPilihan extends Model
     {
         return $this->belongsTo(MataKuliah::class, 'kode_mk', 'kode_mk');
     }
-    
+
     public function transferSks()
     {
         return $this->hasOne(TransferSks::class, 'mata_kuliah_pilihan_id');
     }
-    
+
+    public function transferSksNonFormal()
+    {
+        return $this->hasOne(TransferSksNonformal::class, 'mata_kuliah_pilihan_id');
+    }
 }
