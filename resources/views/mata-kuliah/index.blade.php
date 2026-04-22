@@ -30,7 +30,7 @@
                             <th class="text-nowrap">Jurusan</th>
                             <th class="text-nowrap">Kode MK</th>
                             <th class="text-nowrap">Nama Mata Kuliah</th>
-
+                            <th class="text-nowrap">Semester</th>
                             <th class="text-nowrap text-center">SKS</th>
                             <th class="text-nowrap text-center">Nilai Min.</th>
                             <th class="text-nowrap text-center">Aksi</th>
@@ -47,7 +47,13 @@
                                 <span class="badge bg-blue-lt">{{ $mk->kode_mk }}</span>
                             </td>
                             <td class="text-sm font-medium text-gray-900">{{ $mk->nama_mk }}</td>
-
+                            <td class="text-sm">
+                                @forelse($mk->semester as $smt)
+                                <span class="badge badge-outline text-purple small">{{ $smt->label }}</span>
+                                @empty
+                                <span class="text-muted small italic">Belum diset</span>
+                                @endforelse
+                            </td>
                             <td class="text-sm text-center">{{ $mk->sks }}</td>
                             <td class="text-sm text-center">
                                 <span class="text-muted">{{ $mk->nilai_minimum ?? '60' }}</span>

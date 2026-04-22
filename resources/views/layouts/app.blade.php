@@ -80,10 +80,16 @@
                                 Asesor
                             </a>
                         </li>
-                        <li class="nav-item">
+                         <li class="nav-item">
                             <a href="{{ route('mahasiswa.index') }}" class="nav-link {{ request()->routeIs('mahasiswa.index') ? 'active' : '' }}">
                                 <i class="ti ti-users me-1"></i>
                                 Mahasiswa
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('semester.index') }}" class="nav-link {{ request()->routeIs('semester.index') ? 'active' : '' }}">
+                                <i class="ti ti-calendar-event me-1"></i>
+                                Semester
                             </a>
                         </li>
                         <li class="nav-item">

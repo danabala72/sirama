@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\MataKuliah;
+use App\Models\Semester;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MataKuliahController extends Controller
 {
     public function index(Request $request)
     {
-        $mks = MataKuliah::with('jurusan')
+        $mks = MataKuliah::with(['jurusan', 'semester'])
             ->when($request->jurusan_id, function ($query, $jurusan_id) {
                 return $query->where('jurusan_id', $jurusan_id);
             })
@@ -19,10 +21,10 @@ class MataKuliahController extends Controller
 
     public function edit(MataKuliah $mk)
     {
+        $semuaSemester = Semester::orderBy('kode', 'asc')->get();
+        $mk = $mk->load(['cps', 'semester']);
 
-        $mk = $mk->load('cps');
-
-        return view('mata-kuliah.edit', compact('mk'));
+        return view('mata-kuliah.edit', compact('mk', 'semuaSemester'));
     }
 
     public function destroy($id)
@@ -38,6 +40,7 @@ class MataKuliahController extends Controller
         $request->validate([
             'kode_mk'       => 'required|string|max:255|unique:mata_kuliah,kode_mk,' . $id,
             'nama_mk'       => 'required|string|max:255',
+            'semester_id'   => 'required|integer',
             'sks'           => 'required|integer|min:1',
             'nilai_minimum' => 'nullable|integer|min:0|max:100',
             'jurusan_id'    => 'required|exists:jurusan,id',
@@ -55,6 +58,16 @@ class MataKuliahController extends Controller
             'sks'           => $request->sks,
             'nilai_minimum' => $request->nilai_minimum ?? 60, // Default 60 jika kosong
         ]);
+        if ($request->semester_id) {
+            // Cari apakah sudah ada relasi di tabel pivot, jika ada update, jika tidak insert
+            DB::table('mata_kuliah_semester')->updateOrInsert(
+                ['mata_kuliah_id' => $mk->id],
+                [
+                    'semester_id' => $request->semester_id, // Set semester baru
+                    'updated_at'  => now()
+                ]
+            );
+        }
 
         // 3. Redirect dengan membawa parameter jurusan_id agar filter tetap aktif
         return redirect()->route('mk.index', ['jurusan_id' => $mk->jurusan_id])

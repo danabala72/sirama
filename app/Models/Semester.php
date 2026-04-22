@@ -16,13 +16,8 @@ class Semester extends Model
         'is_active'
     ];
 
-    public function mataKuliah(): BelongsToMany
+    public function mataKuliah()
     {
-        return $this->belongsToMany(
-            MataKuliah::class,
-            'mata_kuliah_semester',
-            'semester_id',
-            'mata_kuliah_id'
-        );
+        return $this->belongsToMany(MataKuliah::class, 'mata_kuliah_semester');
     }
 }

@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MataKuliah extends Model
@@ -29,14 +28,9 @@ class MataKuliah extends Model
         return $this->hasMany(Attachment::class, 'mata_kuliah_id');
     }
 
-    public function semester(): BelongsToMany
+    public function semester()
     {
-        return $this->belongsToMany(
-            Semester::class,
-            'mata_kuliah_semester',
-            'mata_kuliah_id',
-            'semester_id'
-        )->withTimestamps();
+        return $this->belongsToMany(Semester::class, 'mata_kuliah_semester');
     }
 
     public function cps()

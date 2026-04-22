@@ -82,6 +82,7 @@
                                     <!-- Tambahkan text-nowrap agar judul kolom tidak terpotong (line break) -->
                                     <th class="px-4 py-2 text-left text-xs font-bold text-gray-600 uppercase text-nowrap">Kode</th>
                                     <th class="px-4 py-2 text-left text-xs font-bold text-gray-600 uppercase text-nowrap">Nama MK</th>
+                                    <th class="px-4 py-2 text-center text-xs font-bold text-gray-600 uppercase text-nowrap">Semester</th>
                                     <th class="px-4 py-2 text-center text-xs font-bold text-gray-600 uppercase text-nowrap">SKS</th>
                                     <th class="px-4 py-2 text-center text-xs font-bold text-gray-600 uppercase text-nowrap">Nilai Minimum</th>
                                     <th class="px-4 py-2 text-center text-xs font-bold text-gray-600 uppercase text-nowrap">Aksi</th>
@@ -93,6 +94,11 @@
                                 <tr class="hover:bg-gray-50 transition">
                                     <td class="px-4 py-2 text-sm font-mono text-emerald-700 text-nowrap">{{ $mk->kode_mk }}</td>
                                     <td class="px-4 py-2 text-sm text-gray-700">{{ $mk->nama_mk }}</td>
+                                    <td class="px-4 py-2 text-sm text-gray-700">
+                                        @foreach($mk->semester as $smt)
+                                        <span class="badge badge-outline text-purple">{{ $smt->label }}</span>
+                                        @endforeach
+                                    </td>
                                     <td class="px-4 py-2 text-sm text-center text-gray-600">{{ $mk->sks }}</td>
                                     <td class="px-4 py-2 text-sm text-center text-gray-600">{{ $mk->nilai_minimum ?? '-' }}</td>
                                     <td class="px-4 py-2 text-sm text-center">

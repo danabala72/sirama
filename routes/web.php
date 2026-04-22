@@ -8,6 +8,7 @@ use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\MataKuliahController;
 use App\Http\Controllers\MataKuliahPilihanController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\TransferSksController;
 use App\Http\Controllers\TransferSksNonFormalController;
 use App\Http\Controllers\UserController;
@@ -36,6 +37,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
             return view('dashboard');
         })->name('dashboard');
+
+        Route::resource('semester', SemesterController::class);
+        Route::patch('semester/{id}/set-aktif', [SemesterController::class, 'setAktif'])->name('semester.set-aktif');
+
 
         Route::get('/mahasiswa', [UserController::class, 'index'])->name('mahasiswa.index');
         Route::get('/mahasiswa/{user}/edit', [UserController::class, 'edit'])->name('mahasiswa.edit');

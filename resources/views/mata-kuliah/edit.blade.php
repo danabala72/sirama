@@ -56,6 +56,22 @@
                         @enderror
                     </div>
 
+                    <div class="mb-4">
+                        <label class="block mb-2 text-sm font-bold text-gray-700">Tawarkan pada Semester</label>
+                        <select name="semester_id"
+                            class="w-full border-gray-300 focus:border-emerald-500 focus:ring focus:ring-emerald-200 rounded-md shadow-sm select2"
+                            data-placeholder="Pilih satu atau lebih semester...">
+                            @foreach($semuaSemester as $smt)
+                            <option value="{{ $smt->id }}"
+                                {{ in_array($smt->id, old('semester_id', $mk->semester->pluck('id')->toArray())) ? 'selected' : '' }}>
+                                {{ $smt->label }} {{ $smt->is_active ? '(Aktif)' : '' }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('semester_id')
+                        <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
                     <div class="flex gap-4 mb-6">
                         <!-- Kolom SKS -->
                         <div class="w-full">

@@ -16,7 +16,7 @@ class JurusanController extends Controller
 
     public function edit(Jurusan $jurusan)
     {
-        $jurusan = $jurusan->load('mataKuliah');
+        $jurusan = $jurusan->load('mataKuliah.semester');
         return view('jurusan.edit', compact('jurusan'));
     }
 
