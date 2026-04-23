@@ -24,6 +24,7 @@ Route::get('/', function () {
         return match ($role) {
             'admin' => redirect()->route('dashboard'),
             'Mahasiswa' => redirect('/form?step=1'),
+            'Asesor' => redirect('/asesor/dashboard'),
             default => redirect()->route('dashboard'),
         };
     }
