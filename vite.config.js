@@ -9,6 +9,8 @@ export default defineConfig({
         }),
     ],
     build: {
-        modulePreload: false,
+        modulePreload: {
+            polyfill: false,
+        },
     },
 });
