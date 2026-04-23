@@ -104,6 +104,6 @@
         title="Lanjut ke Formulir 6"
     >
         <i class="ti ti-arrow-right me-1"></i>
-        Ke Formulir 6
+        Ke Form 6
     </a>
 </div>

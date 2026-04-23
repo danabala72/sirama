@@ -1,9 +1,9 @@
 <form action="{{ url('/mata-kuliah') }}" method="GET">
-    <div class="card">
-        <div class="card-header">
+    <div class="">
+        <div class="">
             <h3 class="card-title">Cari Mata Kuliah</h3>
         </div>
-        <div class="card-body">
+        <div class="">
             @if(isset($mataKuliahPilihan) && isset($mataKuliah))
             @php
             $kodeDipilih = $mataKuliahPilihan->pluck('kode_mk');
@@ -26,14 +26,15 @@
                     <div class="input-icon">
                         <select name="semester_id" id="semester_id" class="form-select" required style="max-width:300px">
                             @foreach($semester as $s)
-                            <option value="{{ $s->id }}" {{ request('semester_id') == $s->id ? 'selected' : '' }} }}>
+                            <option value="{{ $s->id }}"
+                                {{ old('semester_id', request('semester_id') ?? ($semester->where('is_active', true)->first()?->id)) == $s->id ? 'selected' : '' }}>
                                 {{ $s->label }} {{ $s->is_active ? '— Aktif' : '' }}
                             </option>
                             @endforeach
                         </select>
                     </div>
                 </div>
-            
+
                 <div class="form-footer mt-4">
                     <div class="col-md-2 d-flex align-items-end">
                         <button type="submit" class="btn btn-primary w-100">
@@ -147,7 +148,7 @@
 @endif
 
 @if(!empty($mataKuliahPilihan))
-<div class="card">
+<div class="card mt-4">
     <div class="card-header">
         <h3 class="card-title">Mata Kuliah Terpilih</h3>
     </div>
@@ -247,15 +248,14 @@
 @endif
 
 <div class="mt-4 d-flex gap-2">
- 
+
 
     <a
         href="{{ route('form.step', 'step=4') }}"
-        class="btn btn-outline-primary"        
-        title="Lanjut ke Formulir 4"
-    >
+        class="btn btn-outline-primary"
+        title="Lanjut ke Formulir 4">
         <i class="ti ti-arrow-right me-1"></i>
-        Ke Formulir 4
+        Ke Form 4
     </a>
 </div>
 
@@ -283,11 +283,11 @@
                         return '<div class="dropdown-menu ts-dropdown"></div>';
                     },
                     option: function(data, escape) {
-                    return `<div>
+                        return `<div>
                         <span class="text-dark">${escape(data.text)}</span>
                         <span class="fw-bold text-primary ms-1">[${escape(data.label)}]</span>
                     </div>`;
-                }
+                    }
                 }
             });
 
