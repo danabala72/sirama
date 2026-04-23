@@ -15,6 +15,7 @@ class Mahasiswa extends Model
         'tempat_lahir',
         'tgl_lahir',
         'jenis_kelamin',
+        'jurusan_id',
         'status_perkawinan',
         'kebangsaan',
         'alamat_rumah',

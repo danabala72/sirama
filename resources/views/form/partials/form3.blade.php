@@ -33,19 +33,7 @@
                         </select>
                     </div>
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label required">Jurusan</label>
-                    <div class="input-icon">
-                        <select name="jurusan_id" id="jurusan_id" class="form-select" required style="max-width:300px">
-                            <option value="">-- Pilih Jurusan --</option>
-                            @foreach($jurusan as $j)
-                            <option value="{{ $j->id }}" {{ request('jurusan_id') == $j->id ? 'selected' : '' }}>{{ $j->nama_jurusan }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
+            
                 <div class="form-footer mt-4">
                     <div class="col-md-2 d-flex align-items-end">
                         <button type="submit" class="btn btn-primary w-100">

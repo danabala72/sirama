@@ -33,7 +33,7 @@ class FormController extends Controller
 
         view()->share('step', $step);
 
-       if ($step == 2) {
+        if ($step == 2) {
             $attachments = Attachment::where('mahasiswa_id', $mahasiswa->id)
                 ->latest()
                 ->get();
@@ -46,7 +46,7 @@ class FormController extends Controller
             $attachments = collect();
         }
 
-        $jurusan = ($step == 3)
+        $jurusan = ($step == 1)
             ? Jurusan::all()
             : collect();
 
@@ -92,6 +92,7 @@ class FormController extends Controller
                     'max:255',
                     Rule::unique('mahasiswa', 'email')->ignore($existingMahasiswa?->id),
                 ],
+                'jurusan_id' => ['required', 'exists:jurusan,id'],
             ],
             [
                 'required' => ':attribute wajib diisi.',
@@ -100,7 +101,8 @@ class FormController extends Controller
                 'max' => ':attribute maksimal :max karakter.',
                 'jenis_kelamin.in' => 'Jenis kelamin harus L atau P.',
                 'status_perkawinan.in' => 'Status perkawinan tidak valid.',
-                'no_hp.regex' => 'Format :attribute tidak valid'
+                'no_hp.regex' => 'Format :attribute tidak valid',
+                'jurusan_id.exists' => 'Jurusan yang dipilih tidak valid.'
             ],
             [
                 'name' => 'Nama lengkap',
@@ -114,6 +116,7 @@ class FormController extends Controller
                 'no_hp' => 'No HP',
                 'alamat_kantor' => 'Alamat kantor',
                 'email' => 'Email',
+                'jurusan_id' => 'Jurusan',
             ]
         );
 
@@ -134,7 +137,7 @@ class FormController extends Controller
         $mahasiswaId = Auth::user()->mahasiswa->id;
 
         $semester = Semester::orderBy('id', 'desc')->get();
-        $jurusanId = $request->jurusan_id;
+        $jurusanId = Auth::user()->mahasiswa->jurusan_id;
         $semesterId = $request->semester_id;
 
         // 2. Query Mata Kuliah berdasarkan Relasi Pivot yang kita buat
