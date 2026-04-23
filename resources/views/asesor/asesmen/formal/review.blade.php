@@ -50,6 +50,21 @@
                                     </li>
                                     @endforeach
                                 </ul>
+                                <div class="mt-3 pt-3 border-top border-green-subtle">
+                                    <div class="row align-items-center g-2">
+                                        <div class="col-auto">
+                                            <span class="text-green fw-bold small uppercase">Nilai Mata Kuliah Asal</span>
+                                        </div>
+                                        <div class="col text-end">
+                                             <span class="badge bg-green text-green-fg px-3 py-1 fs-4">
+                                               Angka:  {{ $mk->nilai_angka ?? '-' }}
+                                            </span>
+                                            <span class="badge bg-green text-green-fg px-3 py-1 fs-4">
+                                              Huruf:  {{ $mk->nilai_huruf ?? '-' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
