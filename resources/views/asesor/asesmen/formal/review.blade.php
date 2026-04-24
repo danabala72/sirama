@@ -84,22 +84,21 @@
                             </div>
                             <div class="row g-3 mb-4">
                                 @foreach ($pilihanMk as $mk)
-                                    {{-- Cukup satu kali foreach MK --}}
+                                    {{-- Loop Mata Kuliah --}}
                                     <div class="card mb-4">
                                         <div class="card-header bg-light">
                                             <span class="text-green fw-bold small uppercase">
-                                                Verifikasi Asesmen Mandiri: {{ $mk->nama_mk ?? 'Mata Kuliah' }}
+                                                Verifikasi Asesmen Mandiri: {{ $mk->nama_mk }} {{-- Nama MK muncul sekali di atas --}}
                                             </span>
                                         </div>
                                         <div class="table-responsive">
                                             <table class="table table-vcenter card-table table-bordered">
                                                 <thead class="text-center bg-light text-nowrap">
                                                     <tr>
-                                                        <th rowspan="2" style="width: 40%;">Capaian Pembelajaran Mata
+                                                        <th rowspan="2" style="width: 45%;">Capaian Pembelajaran Mata
                                                             Kuliah</th>
                                                         <th rowspan="2" style="width: 30%;">Dokumen Pendukung</th>
-                                                        <th colspan="4" style="width: 20%;">Verifikasi Penilaian
-                                                            (V-A-T-M)</th>
+                                                        <th colspan="4" style="width: 25%;">Verifikasi Penilaian</th>
                                                     </tr>
                                                     <tr>
                                                         <th style="width: 1%; white-space: nowrap;">V</th>
@@ -109,7 +108,8 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @forelse($mk->cpLevel ?? [] as $cpmk)
+                                                    @forelse($mk["cpLevel"] ?? [] as $cpmk)
+                                                        {{-- Hanya CPMK yang loop di baris tabel --}}
                                                         <tr>
                                                             <td class="text-wrap">
                                                                 <div class="fw-thin text-muted">
@@ -117,7 +117,6 @@
                                                                 </div>
                                                             </td>
 
-                                                            {{-- Dokumen ditampilkan per baris CPMK agar verifikator mudah melihat --}}
                                                             <td>
                                                                 @forelse($mk->attachment as $file)
                                                                     <div
@@ -142,7 +141,7 @@
 
                                                             @php $hasFile = $mk->attachment->isNotEmpty(); @endphp
 
-                                                            {{-- Checkbox Penilaian --}}
+                                                            {{-- Checkbox Penilaian (V, A, T, M) --}}
                                                             @foreach (['valid', 'asli', 'terkini', 'memadai'] as $attr)
                                                                 <td class="text-center p-1">
                                                                     @if ($hasFile)
@@ -160,7 +159,7 @@
                                                     @empty
                                                         <tr>
                                                             <td colspan="6" class="text-center text-muted">Data CPMK
-                                                                tidak tersedia</td>
+                                                                tidak tersedia untuk mata kuliah ini.</td>
                                                         </tr>
                                                     @endforelse
                                                 </tbody>
@@ -169,8 +168,6 @@
                                     </div>
                                 @endforeach
                             </div>
-
-
                             <!-- Area Input Penilaian -->
                             <div class="border-top pt-4">
                                 <div class="row g-3">
