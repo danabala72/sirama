@@ -84,24 +84,24 @@
                             </div>
                             <div class="row g-3 mb-4">
                                 @foreach ($pilihanMk as $mk)
+                                    {{-- Cukup satu kali foreach MK --}}
                                     <div class="card mb-4">
                                         <div class="card-header bg-light">
                                             <span class="text-green fw-bold small uppercase">
-                                                Verifikasi Asesmen Mandiri
+                                                Verifikasi Asesmen Mandiri: {{ $mk->nama_mk ?? 'Mata Kuliah' }}
                                             </span>
                                         </div>
                                         <div class="table-responsive">
                                             <table class="table table-vcenter card-table table-bordered">
                                                 <thead class="text-center bg-light text-nowrap">
                                                     <tr>
-                                                        {{-- Level Kompetensi mengambil sisa ruang paling besar --}}
-                                                        <th rowspan="2" style="width: 50%;">Capaian Pembelajaran Mata
+                                                        <th rowspan="2" style="width: 40%;">Capaian Pembelajaran Mata
                                                             Kuliah</th>
                                                         <th rowspan="2" style="width: 30%;">Dokumen Pendukung</th>
-                                                        <th colspan="4" style="width: 20%;">Verifikasi Penilaian</th>
+                                                        <th colspan="4" style="width: 20%;">Verifikasi Penilaian
+                                                            (V-A-T-M)</th>
                                                     </tr>
                                                     <tr>
-                                                        {{-- Kolom checkbox dibuat sekecil mungkin --}}
                                                         <th style="width: 1%; white-space: nowrap;">V</th>
                                                         <th style="width: 1%; white-space: nowrap;">A</th>
                                                         <th style="width: 1%; white-space: nowrap;">T</th>
@@ -109,111 +109,67 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach ($pilihanMk as $mk)
-                                                        @forelse($mk->cpLevel ?? [] as $cpmk)
-                                                            <tr>
-                                                                <td class="text-wrap">
-                                                                    <div class="fw-thin text-muted">
-                                                                        {{ $cpmk->cp->indikator_capaian }}
-                                                                    </div>
-                                                                </td>
+                                                    @forelse($mk->cpLevel ?? [] as $cpmk)
+                                                        <tr>
+                                                            <td class="text-wrap">
+                                                                <div class="fw-thin text-muted">
+                                                                    {{ $cpmk->cp->indikator_capaian ?? 'Indikator tidak ditemukan' }}
+                                                                </div>
+                                                            </td>
 
-                                                                <td>
-                                                                    @forelse($mk->attachment as $file)
-                                                                        <div
-                                                                            class="d-flex align-items-center justify-content-between mb-1 border-bottom pb-1">
-                                                                            <div class="text-truncate me-2"
-                                                                                style="max-width: 140px;">
-                                                                                <i
-                                                                                    class="ti ti-file-text text-primary"></i>
-                                                                                <small
-                                                                                    class="text-capitalize">{{ str_replace('_', ' ', $file->label) }}</small>
-                                                                            </div>
-                                                                            <a href="{{ asset('storage/' . $file->file_path) }}"
-                                                                                target="_blank"
-                                                                                class="btn btn-icon btn-sm btn-ghost-primary">
-                                                                                <i class="ti ti-eye"></i>
-                                                                            </a>
+                                                            {{-- Dokumen ditampilkan per baris CPMK agar verifikator mudah melihat --}}
+                                                            <td>
+                                                                @forelse($mk->attachment as $file)
+                                                                    <div
+                                                                        class="d-flex align-items-center justify-content-between mb-1 border-bottom pb-1">
+                                                                        <div class="text-truncate me-2"
+                                                                            style="max-width: 140px;">
+                                                                            <i class="ti ti-file-text text-primary"></i>
+                                                                            <small
+                                                                                class="text-capitalize">{{ str_replace('_', ' ', $file->label) }}</small>
                                                                         </div>
-                                                                    @empty
-                                                                        <small class="text-muted italic">Tidak ada
-                                                                            dokumen</small>
-                                                                    @endforelse
-                                                                </td>
+                                                                        <a href="{{ asset('storage/' . $file->file_path) }}"
+                                                                            target="_blank"
+                                                                            class="btn btn-icon btn-sm btn-ghost-primary">
+                                                                            <i class="ti ti-eye"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                @empty
+                                                                    <small class="text-muted italic">Tidak ada
+                                                                        dokumen</small>
+                                                                @endforelse
+                                                            </td>
 
-                                                                {{-- Checkbox Penilaian (Kecil & Center) --}}
-                                                                @php $hasFile = $mk->attachment->isNotEmpty(); @endphp
+                                                            @php $hasFile = $mk->attachment->isNotEmpty(); @endphp
 
+                                                            {{-- Checkbox Penilaian --}}
+                                                            @foreach (['valid', 'asli', 'terkini', 'memadai'] as $attr)
                                                                 <td class="text-center p-1">
                                                                     @if ($hasFile)
                                                                         <input type="checkbox"
                                                                             class="form-check-input m-0"
-                                                                            name="verif[{{ $cpmk->id }}][valid]"
+                                                                            name="verif[{{ $cpmk->id }}][{{ $attr }}]"
                                                                             value="1"
-                                                                            {{ old("verif.$cpmk->id.valid", $cpmk->valid) ? 'checked' : '' }}>
+                                                                            {{ old("verif.$cpmk->id.$attr", $cpmk->$attr) ? 'checked' : '' }}>
                                                                     @else
                                                                         <small class="text-muted">-</small>
                                                                     @endif
                                                                 </td>
-
-                                                                <td class="text-center p-1">
-                                                                    @if ($hasFile)
-                                                                        <input type="checkbox"
-                                                                            class="form-check-input m-0"
-                                                                            name="verif[{{ $cpmk->id }}][asli]"
-                                                                            value="1"
-                                                                            {{ old("verif.$cpmk->id.asli", $cpmk->asli) ? 'checked' : '' }}>
-                                                                    @else
-                                                                        <small class="text-muted">-</small>
-                                                                    @endif
-                                                                </td>
-
-                                                                <td class="text-center p-1">
-                                                                    @if ($hasFile)
-                                                                        <input type="checkbox"
-                                                                            class="form-check-input m-0"
-                                                                            name="verif[{{ $cpmk->id }}][terkini]"
-                                                                            value="1"
-                                                                            {{ old("verif.$cpmk->id.terkini", $cpmk->terkini) ? 'checked' : '' }}>
-                                                                    @else
-                                                                        <small class="text-muted">-</small>
-                                                                    @endif
-                                                                </td>
-
-                                                                <td class="text-center p-1">
-                                                                    @if ($hasFile)
-                                                                        <input type="checkbox"
-                                                                            class="form-check-input m-0"
-                                                                            name="verif[{{ $cpmk->id }}][cukup]"
-                                                                            value="1"
-                                                                            {{ old("verif.$cpmk->id.cukup", $cpmk->cukup) ? 'checked' : '' }}>
-                                                                    @else
-                                                                        <small class="text-muted">-</small>
-                                                                    @endif
-                                                                </td>
-
-                                                            </tr>
-                                                        @empty
-                                                            {{-- empty state --}}
-                                                        @endforelse
-                                                    @endforeach
+                                                            @endforeach
+                                                        </tr>
+                                                    @empty
+                                                        <tr>
+                                                            <td colspan="6" class="text-center text-muted">Data CPMK
+                                                                tidak tersedia</td>
+                                                        </tr>
+                                                    @endforelse
                                                 </tbody>
                                             </table>
-                                            <div class="my-2 px-2">
-                                                <small class="text-muted fst-italic">
-                                                    <span class="me-3"><strong>Keterangan:</strong></span>
-                                                    <span class="me-2"><strong>V:</strong> Valid,</span>
-                                                    <span class="me-2"><strong>A:</strong> Asli,</span>
-                                                    <span class="me-2"><strong>T:</strong> Terkini,</span>
-                                                    <span><strong>M:</strong> Mencukupi</span>
-                                                </small>
-                                            </div>
-
                                         </div>
-
                                     </div>
                                 @endforeach
                             </div>
+
 
                             <!-- Area Input Penilaian -->
                             <div class="border-top pt-4">
