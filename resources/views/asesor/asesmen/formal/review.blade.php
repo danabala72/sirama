@@ -11,108 +11,246 @@
             @csrf
             @method('PUT')
 
-            @foreach($pilihanMk as $mk)
-            @if($mk->transferSks)
-            <div class="card mb-4 shadow-sm border-0">
-                <div class="card-header bg-blue-lt">
-                    <div>
-                        <div class="text-uppercase fw-bold text-blue small">Mata Kuliah Target</div>
-                        <h3 class="card-title fw-bold text-dark">{{ $mk->nama_mk }} ({{$mk->kode_mk}})</h3>
-                    </div>
-                </div>
-
-                <div class="card-body py-3">
-                    <div class="row g-3 mb-4">
-                        <!-- CPMK TARGET -->
-                        <div class="col-12 col-lg-6">
-                            <div class="p-3 bg-blue-lt border border-blue-subtle rounded-3 h-100">
-                                <label class="form-label fw-bold text-blue small uppercase mb-2">CPMK Mata Kuliah Target</label>
-                                <ul class="list-unstyled mb-0">
-                                    @foreach($mk->mataKuliah->cps ?? [] as $cpTarget)
-                                    <li class="mb-3 d-flex align-items-start small">
-                                        <span class="badge bg-blue text-blue-fg me-2 mt-1 px-2">{{ $loop->iteration }}</span>
-                                        {{ $cpTarget->indikator_capaian }}
-                                    </li>
-                                    @endforeach
-                                </ul>
+            @foreach ($pilihanMk as $mk)
+                @if ($mk->transferSks)
+                    <div class="card mb-4">
+                        <div class="card-header bg-blue-lt">
+                            <div>
+                                <div class="text-uppercase fw-bold text-blue small">Mata Kuliah Target</div>
+                                <h3 class="card-title fw-bold text-dark">{{ $mk->nama_mk }} ({{ $mk->kode_mk }})</h3>
                             </div>
                         </div>
 
-                        <!-- CPMK ASAL -->
-                        <div class="col-12 col-lg-6">
-                            <div class="p-3 bg-green-lt border border-green-subtle rounded-3 h-100">
-                                <label class="form-label fw-bold text-green small uppercase mb-2">CPMK Mata Kuliah Asal</label>
-                                <ul class="list-unstyled mb-0">
-                                    @foreach($mk->transferSks->cpmkItems ?? [] as $cpmkAsal)
-                                    <li class="mb-2 d-flex align-items-start small text-dark">
-                                        <i class="ti ti-check text-green me-2 mt-1"></i>
-                                        {{ $cpmkAsal->cpmk }}
-                                    </li>
-                                    @endforeach
-                                </ul>
-                                <div class="mt-3 pt-3 border-top border-green-subtle">
-                                    <div class="row align-items-center g-2">
-                                        <div class="col-auto">
-                                            <span class="text-green fw-bold small uppercase">Nilai Mata Kuliah Asal</span>
+                        <div class="card-body py-3">
+                            <div class="row g-3 mb-4">
+                                <!-- CPMK TARGET -->
+                                <div class="col-12 col-lg-6">
+                                    <div class="p-3 bg-blue-lt border border-blue-subtle rounded-3 h-100">
+                                        <label class="form-label fw-bold text-blue small uppercase mb-2">CPMK Mata
+                                            Kuliah Target</label>
+                                        <ul class="list-unstyled mb-0">
+                                            @foreach ($mk->mataKuliah->cps ?? [] as $cpTarget)
+                                                <li class="mb-3 d-flex align-items-start small">
+                                                    <span
+                                                        class="badge bg-blue text-blue-fg me-2 mt-1 px-2">{{ $loop->iteration }}</span>
+                                                    {{ $cpTarget->indikator_capaian }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- CPMK ASAL -->
+                                <div class="col-12 col-lg-6">
+                                    <div class="p-3 bg-green-lt border border-green-subtle rounded-3 h-100">
+                                        <label class="form-label fw-bold text-green small uppercase mb-2">CPMK Mata
+                                            Kuliah Asal</label>
+                                        <ul class="list-unstyled mb-0">
+                                            @foreach ($mk->transferSks->cpmkItems ?? [] as $cpmkAsal)
+                                                <li class="mb-2 d-flex align-items-start small text-dark">
+                                                    <i class="ti ti-check text-green me-2 mt-1"></i>
+                                                    {{ $cpmkAsal->cpmk }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                        <div class="mt-3 pt-3 border-top border-green-subtle">
+                                            {{-- Menggunakan d-flex dengan arah kolom pada mobile, dan baris pada desktop --}}
+                                            <div
+                                                class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+
+                                                {{-- Bagian Label: Akan di atas pada mobile --}}
+                                                <div>
+                                                    <span class="text-green fw-bold small uppercase">
+                                                        Nilai Mata Kuliah Asal
+                                                    </span>
+                                                </div>
+
+                                                {{-- Bagian Badge: Akan di bawah pada mobile, rata kanan pada desktop --}}
+                                                <div
+                                                    class="d-flex gap-2 flex-wrap justify-content-start justify-content-md-end">
+                                                    <span class="badge bg-green text-green-fg px-3 py-1 fs-4">
+                                                        Angka: {{ $mk->nilai_angka ?? '-' }}
+                                                    </span>
+                                                    <span class="badge bg-green text-green-fg px-3 py-1 fs-4">
+                                                        Huruf: {{ $mk->nilai_huruf ?? '-' }}
+                                                    </span>
+                                                </div>
+
+                                            </div>
                                         </div>
-                                        <div class="col text-end">
-                                             <span class="badge bg-green text-green-fg px-3 py-1 fs-4">
-                                               Angka:  {{ $mk->nilai_angka ?? '-' }}
-                                            </span>
-                                            <span class="badge bg-green text-green-fg px-3 py-1 fs-4">
-                                              Huruf:  {{ $mk->nilai_huruf ?? '-' }}
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-4">
+                                @foreach ($pilihanMk as $mk)
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-light">
+                                            <span class="text-green fw-bold small uppercase">
+                                                Verifikasi Asesmen Mandiri
                                             </span>
                                         </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-vcenter card-table table-bordered">
+                                                <thead class="text-center bg-light text-nowrap">
+                                                    <tr>
+                                                        {{-- Level Kompetensi mengambil sisa ruang paling besar --}}
+                                                        <th rowspan="2" style="width: 50%;">Capaian Pembelajaran Mata
+                                                            Kuliah</th>
+                                                        <th rowspan="2" style="width: 30%;">Dokumen Pendukung</th>
+                                                        <th colspan="4" style="width: 20%;">Verifikasi Penilaian</th>
+                                                    </tr>
+                                                    <tr>
+                                                        {{-- Kolom checkbox dibuat sekecil mungkin --}}
+                                                        <th style="width: 1%; white-space: nowrap;">V</th>
+                                                        <th style="width: 1%; white-space: nowrap;">A</th>
+                                                        <th style="width: 1%; white-space: nowrap;">T</th>
+                                                        <th style="width: 1%; white-space: nowrap;">M</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($pilihanMk as $mk)
+                                                        @forelse($mk->cpLevel ?? [] as $cpmk)
+                                                            <tr>
+                                                                <td class="text-wrap">
+                                                                    <div class="fw-thin text-muted">
+                                                                        {{ $cpmk->cp->indikator_capaian }}
+                                                                    </div>
+                                                                </td>
+
+                                                                <td>
+                                                                    @forelse($mk->attachment as $file)
+                                                                        <div
+                                                                            class="d-flex align-items-center justify-content-between mb-1 border-bottom pb-1">
+                                                                            <div class="text-truncate me-2"
+                                                                                style="max-width: 140px;">
+                                                                                <i
+                                                                                    class="ti ti-file-text text-primary"></i>
+                                                                                <small
+                                                                                    class="text-capitalize">{{ str_replace('_', ' ', $file->label) }}</small>
+                                                                            </div>
+                                                                            <a href="{{ asset('storage/' . $file->file_path) }}"
+                                                                                target="_blank"
+                                                                                class="btn btn-icon btn-sm btn-ghost-primary">
+                                                                                <i class="ti ti-eye"></i>
+                                                                            </a>
+                                                                        </div>
+                                                                    @empty
+                                                                        <small class="text-muted italic">Tidak ada
+                                                                            dokumen</small>
+                                                                    @endforelse
+                                                                </td>
+
+                                                                {{-- Checkbox Penilaian (Kecil & Center) --}}
+                                                                @php $hasFile = $mk->attachment->isNotEmpty(); @endphp
+
+                                                                <td class="text-center p-1">
+                                                                    @if ($hasFile)
+                                                                        <input type="checkbox"
+                                                                            class="form-check-input m-0"
+                                                                            name="verif[{{ $cpmk->id }}][valid]"
+                                                                            value="1"
+                                                                            {{ old("verif.$cpmk->id.valid", $cpmk->valid) ? 'checked' : '' }}>
+                                                                    @else
+                                                                        <small class="text-muted">-</small>
+                                                                    @endif
+                                                                </td>
+
+                                                                <td class="text-center p-1">
+                                                                    @if ($hasFile)
+                                                                        <input type="checkbox"
+                                                                            class="form-check-input m-0"
+                                                                            name="verif[{{ $cpmk->id }}][asli]"
+                                                                            value="1"
+                                                                            {{ old("verif.$cpmk->id.asli", $cpmk->asli) ? 'checked' : '' }}>
+                                                                    @else
+                                                                        <small class="text-muted">-</small>
+                                                                    @endif
+                                                                </td>
+
+                                                                <td class="text-center p-1">
+                                                                    @if ($hasFile)
+                                                                        <input type="checkbox"
+                                                                            class="form-check-input m-0"
+                                                                            name="verif[{{ $cpmk->id }}][terkini]"
+                                                                            value="1"
+                                                                            {{ old("verif.$cpmk->id.terkini", $cpmk->terkini) ? 'checked' : '' }}>
+                                                                    @else
+                                                                        <small class="text-muted">-</small>
+                                                                    @endif
+                                                                </td>
+
+                                                                <td class="text-center p-1">
+                                                                    @if ($hasFile)
+                                                                        <input type="checkbox"
+                                                                            class="form-check-input m-0"
+                                                                            name="verif[{{ $cpmk->id }}][cukup]"
+                                                                            value="1"
+                                                                            {{ old("verif.$cpmk->id.cukup", $cpmk->cukup) ? 'checked' : '' }}>
+                                                                    @else
+                                                                        <small class="text-muted">-</small>
+                                                                    @endif
+                                                                </td>
+
+                                                            </tr>
+                                                        @empty
+                                                            {{-- empty state --}}
+                                                        @endforelse
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                            <div class="my-2 px-2">
+                                                <small class="text-muted fst-italic">
+                                                    <span class="me-3"><strong>Keterangan:</strong></span>
+                                                    <span class="me-2"><strong>V:</strong> Valid,</span>
+                                                    <span class="me-2"><strong>A:</strong> Asli,</span>
+                                                    <span class="me-2"><strong>T:</strong> Terkini,</span>
+                                                    <span><strong>M:</strong> Mencukupi</span>
+                                                </small>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <!-- Area Input Penilaian -->
+                            <div class="border-top pt-4">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Kesenjangan</label>
+                                        <textarea name="penilaian[{{ $mk->transferSks->id }}][kesenjangan]" rows="2" class="form-control"
+                                            placeholder="Deskripsi kesenjangan...">{{ old('penilaian.' . $mk->transferSks->id . '.kesenjangan', trim($mk->transferSks->kesenjangan ?? '')) }}</textarea>
+                                        @error('penilaian.' . $mk->transferSks->id . '.kesenjangan')
+                                            <div class="text-danger small mt-1">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label fw-bold">Hasil</label>
+                                        <input type="number" name="penilaian[{{ $mk->transferSks->id }}][hasil]"
+                                            class="form-control"
+                                            value="{{ old('penilaian.' . $mk->transferSks->id . '.hasil', $mk->transferSks->hasil) }}"
+                                            min="1" max="100" placeholder="Skor">
+                                        @error('penilaian.' . $mk->transferSks->id . '.hasil')
+                                            <div class="text-danger small mt-1">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-12 col-md-8">
+                                        <label class="form-label fw-bold">Catatan Asesor</label>
+                                        <textarea name="penilaian[{{ $mk->transferSks->id }}][catatan_asesor]" rows="2" class="form-control"
+                                            placeholder="Catatan tambahan...">{{ old('penilaian.' . $mk->transferSks->id . '.catatan_asesor', trim($mk->transferSks->catatan_asesor ?? '')) }}</textarea>
+                                        @error('penilaian.' . $mk->transferSks->id . '.catatan_asesor')
+                                            <div class="text-danger small mt-1">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Area Input Penilaian -->
-                    <div class="border-top pt-4">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label fw-bold">Kesenjangan</label>
-                                <textarea
-                                    name="penilaian[{{ $mk->transferSks->id }}][kesenjangan]"
-                                    rows="2"
-                                    class="form-control"
-                                    placeholder="Deskripsi kesenjangan...">{{ old('penilaian.'.$mk->transferSks->id.'.kesenjangan', trim($mk->transferSks->kesenjangan ?? '')) }}</textarea>
-                                @error('penilaian.'.$mk->transferSks->id.'.kesenjangan')
-                                <div class="text-danger small mt-1">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-12 col-md-4">
-                                <label class="form-label fw-bold">Hasil</label>
-                                <input type="number"
-                                    name="penilaian[{{ $mk->transferSks->id }}][hasil]"
-                                    class="form-control"
-                                    value="{{ old('penilaian.'.$mk->transferSks->id.'.hasil', $mk->transferSks->hasil) }}"
-                                    min="1" max="100"
-                                    placeholder="Skor">
-                                @error('penilaian.'.$mk->transferSks->id.'.hasil')
-                                <div class="text-danger small mt-1">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-12 col-md-8">
-                                <label class="form-label fw-bold">Catatan Asesor</label>
-                                <textarea
-                                    name="penilaian[{{ $mk->transferSks->id }}][catatan_asesor]"
-                                    rows="2"
-                                    class="form-control"
-                                    placeholder="Catatan tambahan...">{{ old('penilaian.'.$mk->transferSks->id.'.catatan_asesor', trim($mk->transferSks->catatan_asesor ?? '')) }}</textarea>
-                                @error('penilaian.'.$mk->transferSks->id.'.catatan_asesor')
-                                <div class="text-danger small mt-1">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            @endif
+                @endif
             @endforeach
 
             <div class="card shadow-sm sticky-bottom py-3 px-4 bg-white border-top">

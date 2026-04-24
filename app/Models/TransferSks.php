@@ -12,7 +12,10 @@ class TransferSks extends Model
      protected $fillable = [
         'mata_kuliah_pilihan_id',
         'kode_mk_asal',
-        'nama_mk_asal',       
+        'nama_mk_asal',
+        'kesenjangan',
+        'hasil',
+        'catatan_asesor'
     ];
 
 
