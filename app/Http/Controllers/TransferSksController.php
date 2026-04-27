@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CpLevelKompetensi;
 use App\Models\Mahasiswa;
 use App\Models\MataKuliahPilihan;
 use App\Models\TransferSks;
+use App\Models\TransferSksCpmk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -76,7 +78,7 @@ class TransferSksController extends Controller
     {
         $mahasiswa = Mahasiswa::select('id', 'name')->findOrFail($id);
 
-        $pilihanMk = MataKuliahPilihan::with(['transferSks.cpmkItems', 'mataKuliah.cps'])
+        $pilihanMk = MataKuliahPilihan::with(['transferSks.cpmkItems', 'mataKuliah.cps', 'attachment', 'cpLevel'])
             ->where('mahasiswa_id', $id)
             ->whereHas('transferSks')
             ->get();
@@ -89,24 +91,25 @@ class TransferSksController extends Controller
 
     public function formalReviewUpdate(Request $request)
     {
+
         $request->validate([
+            // Validasi Penilaian Mata Kuliah
             'penilaian' => 'required|array',
             'penilaian.*.kesenjangan' => 'required|string',
             'penilaian.*.hasil' => 'required|integer|min:1|max:100',
             'penilaian.*.catatan_asesor' => 'required|string',
+
+            // Validasi Verifikasi CPMK (V-A-T-M) - Opsional/Nullable karena checkbox
+            'verif' => 'nullable|array',
         ], [
-            // Pesan Error Kustom (menggunakan wildcard * agar berlaku untuk semua baris)
             'penilaian.*.kesenjangan.required' => 'Kolom Kesenjangan wajib diisi untuk semua mata kuliah.',
             'penilaian.*.hasil.required' => 'Nilai Hasil wajib diisi (1-100).',
-            'penilaian.*.hasil.min' => 'Nilai minimal adalah 1.',
-            'penilaian.*.hasil.max' => 'Nilai maksimal adalah 100.',
             'penilaian.*.catatan_asesor.required' => 'Catatan Asesor wajib diisi.',
         ]);
 
-        // 2. Proses Update Kolektif
         try {
-            // Gunakan Transaction agar jika satu gagal, semua dibatalkan (opsional tapi disarankan)
             DB::transaction(function () use ($request) {
+                // 1. UPDATE DATA MATA KULIAH (TransferSks)
                 foreach ($request->penilaian as $id => $data) {
                     TransferSks::where('id', $id)->update([
                         'kesenjangan'    => $data['kesenjangan'],
@@ -114,12 +117,28 @@ class TransferSksController extends Controller
                         'catatan_asesor' => $data['catatan_asesor'],
                     ]);
                 }
+
+                // 2. UPDATE DATA VERIFIKASI CPMK (TransferSksCpmk)
+                if ($request->has('verif')) {
+                    foreach ($request->verif as $cpmkId => $vData) {
+                        // Checkbox jika tidak dicentang tidak masuk ke Request,
+                        // maka kita set ke false jika tidak ada di array
+                        CpLevelKompetensi::where('id', $cpmkId)->update([
+                            'valid'   => isset($vData['valid']),
+                            'asli'    => isset($vData['asli']),
+                            'terkini' => isset($vData['terkini']),
+                            'cukup'   => isset($vData['cukup']),
+                        ]);
+                    }
+                }
             });
 
             return redirect()->route('asesmen.formal')
-                ->with('success', 'Semua penilaian mata kuliah berhasil disimpan.');
+                ->with('success', 'Penilaian dan verifikasi dokumen berhasil disimpan.');
+
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
         }
     }
+
 }

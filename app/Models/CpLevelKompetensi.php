@@ -12,6 +12,10 @@ class CpLevelKompetensi extends Model
         'mata_kuliah_pilihan_id',
         'cp_mata_kuliah_id',
         'level_kompetensi',
+        'valid',
+        'asli',
+        'terkini',
+        'cukup',
     ];
 
     protected $casts = [
