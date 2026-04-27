@@ -16,6 +16,7 @@
         </div>
         @endif
 
+        @if(Auth::user()->role->role === 'Admin')
         <div class="d-flex flex-wrap gap-2 mb-3">
 
 
@@ -49,7 +50,7 @@
             </button>
 
         </div>
-
+        @endif
 
         <!-- Card Wrapper -->
         <div class="card shadow-sm">
@@ -61,7 +62,9 @@
                             <th class="text-nowrap">Username</th>
                             <th class="text-nowrap">Nama</th>
                             <th class="text-nowrap">Email</th>
+                            @if(Auth::user()->role->role === 'Admin')
                             <th class="text-nowrap text-center">Aksi</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -71,6 +74,7 @@
                             <td class="text-sm font-medium text-gray-900">{{ $ass->username }}</td>
                             <td class="text-sm font-medium">{{ $ass->asesor->name ?? '-' }}</td>
                             <td class="text-sm text-muted">{{ $ass->asesor->email ?? '-' }}</td>
+                            @if(Auth::user()->role->role === 'Admin')
                             <td class="text-sm text-center">
                                 <div class="d-flex justify-content-center gap-2">
                                     <a href="{{ route('asesor.edit', $ass->id) }}" class="btn btn-sm btn-outline-primary">
@@ -98,6 +102,7 @@
                                     </form>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @empty
                         <tr>
@@ -162,7 +167,7 @@
         })();
     </script>
     @endpush
-    
+
 
 
 

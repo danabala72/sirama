@@ -53,11 +53,23 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-    public function mahasiswa() {
+    public function mahasiswa()
+    {
         return $this->hasOne(Mahasiswa::class, 'user_id', 'id');
     }
 
-    public function asesor() {
+    public function asesor()
+    {
         return $this->hasOne(Asesor::class, 'user_id', 'id');
+    }
+
+    public function adminJurusan()
+    {
+        return $this->hasOne(AdminJurusan::class, 'user_id');
+    }
+
+    public function getJurusanIdAttribute()
+    {
+        return $this->adminJurusan?->jurusan_id;
     }
 }

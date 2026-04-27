@@ -15,12 +15,25 @@ class UserController extends Controller
 {
     public function index()
     {
+        $user = Auth::user();
+        $role = $user->role->role;
+        $jurusanId = $user->jurusan_id;
+
         $mahasiswa = User::whereHas('role', function ($query) {
             $query->where('role', '=', ROLES::MAHASISWA);
-        })->with(['mahasiswa', 'asesor', 'role'])->get();
+        })
+            // Filter tambahan untuk Admin Jurusan
+            ->when($role === 'AdminJurusan', function ($query) use ($jurusanId) {
+                return $query->whereHas('mahasiswa', function ($q) use ($jurusanId) {
+                    $q->where('jurusan_id', $jurusanId);
+                });
+            })
+            ->with(['mahasiswa', 'asesor', 'role'])
+            ->get();
 
         return view('mahasiswa.index', compact('mahasiswa'));
     }
+
 
     public function edit(User $user)
     {

@@ -16,6 +16,7 @@
         </div>
         @endif
 
+         @if(Auth::user()->role->role === 'Admin')
         <div class="d-flex flex-wrap gap-2 mb-3">
 
 
@@ -49,6 +50,7 @@
             </button>
 
         </div>
+        @endif
 
 
         <!-- Card Wrapper -->

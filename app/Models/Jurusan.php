@@ -14,8 +14,13 @@ class Jurusan extends Model
         'nama_jurusan'
     ];
 
-    public function mataKuliah():HasMany
+    public function mataKuliah(): HasMany
     {
         return $this->hasMany(MataKuliah::class, 'jurusan_id');
-    } 
+    }
+
+    public function adminJurusan()
+    {
+        return $this->hasOne(AdminJurusan::class, 'jurusan_id');
+    }
 }

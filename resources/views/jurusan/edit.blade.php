@@ -15,6 +15,7 @@
             </div>
             @endif
 
+            @if(Auth::user()->role->role === 'Admin')
             <div class="bg-white overflow-hidden p-2 max-w-xl">
                 <div class="mb-2">
                     <p class="text-sm text-gray-500">Sesuaikan informasi kode dan nama program studi.</p>
@@ -56,6 +57,7 @@
                     </div>
                 </form>
             </div>
+            @endif
             <div class="flex gap-2">
                 <!-- Tombol Trigger Modal -->
                 <button type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-md shadow transition duration-200" data-bs-toggle="modal" data-bs-target="#modalTambahMK">

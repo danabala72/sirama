@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminJurusanController;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\CpLevelController;
 use App\Http\Controllers\CpMataKuliahController;
@@ -22,7 +23,8 @@ Route::get('/', function () {
         $role = Auth::user()->role->role;
 
         return match ($role) {
-            'admin' => redirect()->route('dashboard'),
+            'Admin' => redirect()->route('dashboard'),
+            'AdminJurusan' => redirect()->route('dashboard'),
             'Mahasiswa' => redirect('/form?step=1'),
             'Asesor' => redirect('/asesor/dashboard'),
             default => redirect()->route('dashboard'),
@@ -34,6 +36,14 @@ Route::get('/', function () {
 
 Route::middleware('auth')->group(function () {
     Route::middleware(['role:Admin'])->group(function () {
+        Route::get('admin/jurusan', [AdminJurusanController::class, 'index'])->name('admin_jurusan.index');
+        Route::get('admin/jurusan/create', [AdminJurusanController::class, 'create'])->name('admin_jurusan.create');
+        Route::post('admin/jurusan', [AdminJurusanController::class, 'store'])->name('admin_jurusan.store');
+        Route::get('admin/jurusan/{id}/edit', [AdminJurusanController::class, 'edit'])->name('admin_jurusan.edit');
+        Route::put('admin/jurusan/{id}', [AdminJurusanController::class, 'update'])->name('admin_jurusan.update');
+        Route::delete('admin/jurusan/{id}', [AdminJurusanController::class, 'destroy'])->name('admin_jurusan.destroy');
+    });
+    Route::middleware(['role:Admin,AdminJurusan'])->group(function () {
 
         Route::get('/dashboard', function () {
             return view('dashboard');

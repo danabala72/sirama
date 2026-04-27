@@ -67,11 +67,34 @@
             <aside class="sidebar-rpl" id="sidebar-menu">
                 <div class="p-3">
                     <ul class="nav nav-pills nav-vertical gap-1">
-                        @if(auth()->user()?->role?->role === 'Admin')
+                       
+                        @if(auth()->user()?->role?->role === 'Admin' || auth()->user()?->role?->role === 'AdminJurusan')
                         <li class="nav-item">
                             <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                                 <i class="ti ti-home-2 me-1"></i>
                                 Dashboard
+                            </a>
+                        </li>
+                        
+                         @if(auth()->user()?->role?->role === 'Admin')
+                         <li class="nav-item">
+                            <a href="{{ route('semester.index') }}" class="nav-link {{ request()->routeIs('semester.index') ? 'active' : '' }}">
+                                <i class="ti ti-calendar-event me-1"></i>
+                                Semester
+                            </a>
+                        </li>
+                        @endif                       
+                        <li class="nav-item">
+                            <a href="{{ route('jurusan.index') }}" class="nav-link {{ request()->routeIs('jurusan.index') ? 'active' : '' }}">
+                                <i class="ti ti-certificate me-1"></i>
+                                Jurusan
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('mk.index') }}" class="nav-link {{ request()->routeIs('mk.index') ? 'active' : '' }}">
+                                <i class="ti ti-school me-1"></i>
+                                Mata Kuliah
                             </a>
                         </li>
                         <li class="nav-item">
@@ -86,25 +109,15 @@
                                 Mahasiswa
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{{ route('semester.index') }}" class="nav-link {{ request()->routeIs('semester.index') ? 'active' : '' }}">
-                                <i class="ti ti-calendar-event me-1"></i>
-                                Semester
+                         @if(auth()->user()?->role?->role === 'Admin')
+                         <li class="nav-item">
+                            <a href="{{ route('admin_jurusan.index') }}" class="nav-link {{ request()->routeIs('admin_jurusan.index') ? 'active' : '' }}">
+                                <i class="ti ti-user-shield me-1"></i>
+                                Admin Jurusan
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{{ route('jurusan.index') }}" class="nav-link {{ request()->routeIs('jurusan.index') ? 'active' : '' }}">
-                                <i class="ti ti-certificate me-1"></i>
-                                Jurusan
-                            </a>
-                        </li>
+                        @endif
 
-                        <li class="nav-item">
-                            <a href="{{ route('mk.index') }}" class="nav-link {{ request()->routeIs('mk.index') ? 'active' : '' }}">
-                                <i class="ti ti-school me-1"></i>
-                                Mata Kuliah
-                            </a>
-                        </li>
                         @endif
                         @if(auth()->user()?->role?->role === 'Asesor')
                         <!-- Judul Kelompok Menu (Opsional) -->

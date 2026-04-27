@@ -5,15 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\MataKuliah;
 use App\Models\Semester;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class MataKuliahController extends Controller
 {
     public function index(Request $request)
     {
+        $user = Auth::user();
+        $role = $user->role->role;
+        $jurusanId = $user->jurusan_id;
+
         $mks = MataKuliah::with(['jurusan', 'semester'])
-            ->when($request->jurusan_id, function ($query, $jurusan_id) {
-                return $query->where('jurusan_id', $jurusan_id);
+            ->when($role === 'AdminJurusan', function ($query) use ($jurusanId) {
+                return $query->where('jurusan_id', $jurusanId);
+            })
+            ->when($role === 'Admin' && $request->jurusan_id, function ($query) use ($request) {
+                return $query->where('jurusan_id', $request->jurusan_id);
             })
             ->get();
         return view('mata-kuliah.index', compact('mks'));

@@ -16,6 +16,7 @@
         </div>
         @endif
 
+         @if(Auth::user()->role->role === 'Admin')
         <div class="d-flex flex-wrap gap-2 mb-3">
 
 
@@ -49,6 +50,7 @@
             </button>
 
         </div>
+        @endif
         <!-- Card Wrapper -->
 
         <!-- Card Wrapper -->
@@ -109,6 +111,7 @@
                                         Edit
                                     </a>
 
+                                     @if(Auth::user()->role->role === 'Admin')
                                     <!-- Delete Button -->
                                     <form action="{{ route('jurusan.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus jurusan ini?')" class="m-0">
                                         @csrf
@@ -124,6 +127,7 @@
                                             </svg>
                                         </button>
                                     </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

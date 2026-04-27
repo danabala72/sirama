@@ -5,12 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\Jurusan;
 use App\Models\MataKuliah;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class JurusanController extends Controller
 {
     public function index()
     {
-        $jurusan = Jurusan::with('mataKuliah')->get();
+        $user = Auth::user();
+        $role = $user->role->role;
+        $jurusanId = $user->jurusan_id;
+
+
+        $jurusan = Jurusan::with('mataKuliah')
+            ->when($role === 'AdminJurusan', function ($query) use ($jurusanId) {
+                return $query->where('id', $jurusanId);
+            })
+            ->get();
         return view('jurusan.index', compact('jurusan'));
     }
 
