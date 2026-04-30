@@ -76,7 +76,7 @@
                         <option value="">-- Cari Mata Kuliah --</option>
                         @foreach($mataKuliahTersisa as $mk)
                         <option value="{{ $mk['id'] }}" data-nama="{{ $mk['nama_mk'] }}" data-sks="{{ $mk['sks'] }}">
-                            {{ $mk['kode_mk'] }} - {{ $mk['nama_mk'] }}
+                            {{ $mk['kode_mk'] }} - {{ $mk['nama_mk'] }} [{{$mk['sks']}} SKS]
                         </option>
                         @endforeach
                     </select>
@@ -86,63 +86,6 @@
             </div>
         </form>
 
-
-        <!-- <form action="{{ route('mk-pilihan.store') }}" method="POST">
-            @csrf
-            <div class="row g-3">
-                <div class="col-md-12 col-lg-6">
-                    <label class="form-label fw-bold">Pilih Mata Kuliah</label>
-                    <select id="select-api" name="mata_kuliah_id" class="form-select select2" required>
-                        <option value="">-- Cari Mata Kuliah --</option>
-                        @foreach($mataKuliahTersisa as $mk)
-                        <option value="{{ $mk['id'] }}" data-nama="{{ $mk['nama_mk'] }}" data-sks="{{ $mk['sks'] }}">
-                            {{ $mk['kode_mk'] }} - {{ $mk['nama_mk'] }}
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div id="input-opsi" class="col-md-12" @if(!$errors->any()) style="display:none;" @endif>
-                    <fieldset class="form-fieldset bg-light border-dashed">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label">
-                                    Bukti Pendukung
-                                </label>
-                                <select required name="attachment_ids[]" id="attachment-select" class="form-select" multiple placehoder="Pilih beberapa file">
-                                    @foreach($attachment as $file)
-                                    <option value="{{ $file->id }}">{{ $file->label }} - {{ $file->file_name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label">SKS</label>
-                                <div class="input-icon">
-                                    <span class="input-icon-addon">
-                                        <i class="ti ti-book"></i>
-                                    </span>
-                                    <input type="text" name="sks" id="in-sks" class="form-control text-center bg-azure-lt" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Nilai Huruf</label>
-                                <input type="text" required name="nilai_huruf" class="form-control text-center" placeholder="A">
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Nilai Angka</label>
-                                <input type="number" required name="nilai_angka" class="form-control text-center" placeholder="0">
-                            </div>
-                            <div class="col-md-2 d-flex align-items-end">
-                                <button type="submit" class="btn btn-success w-100">
-                                    <i class="ti ti-device-floppy me-2"></i>
-                                    Simpan
-                                </button>
-                            </div>
-                        </div>
-                    </fieldset>
-                </div>
-            </div>
-        </form> -->
     </div>
 </div>
 @endif
@@ -159,7 +102,7 @@
                 <tr>
                     <th>Kode MK</th>
                     <th>Nama MK</th>
-                    <th>SKS</th>
+                    <th>SKS Asal</th>
                     <th>Bukti Pendukung</th>
                     <th>Nilai Huruf</th>
                     <th>Nilai Angka</th>
@@ -295,7 +238,7 @@
 
         const selectMK = document.getElementById("select-api");
         const inputOpsi = document.getElementById("input-opsi");
-        const sksInput = document.getElementById("in-sks");
+
 
         if (!selectMK) return; // hentikan script jika select tidak ada
 
@@ -308,14 +251,11 @@
             if (this.value !== "") {
 
                 const namaMk = selectedOption.dataset.nama || '';
-                const sks = selectedOption.dataset.sks || '';
+
 
                 const textSplit = selectedOption.text.split(' - ');
                 const kodeMk = textSplit[0]?.trim() ?? '';
 
-                if (sksInput) {
-                    sksInput.value = sks;
-                }
 
                 updateHiddenInput('kode_mk', kodeMk);
                 updateHiddenInput('nama_mk', namaMk);
@@ -328,10 +268,6 @@
 
                 if (inputOpsi) {
                     inputOpsi.style.display = "none";
-                }
-
-                if (sksInput) {
-                    sksInput.value = '';
                 }
 
                 removeHiddenInputs();
@@ -371,8 +307,15 @@
             const attachments = JSON.parse(this.dataset.attachments);
 
             if (attachmentTom) {
-                attachmentTom.setValue(attachments);
+                // Parameter 'true' mencegah trigger event 'change'
+                attachmentTom.setValue(attachments, true);
+
+                // Tambahkan ini untuk menghilangkan fokus otomatis
+                setTimeout(() => {
+                    attachmentTom.blur();
+                }, 10);
             }
+
 
             const id = this.dataset.id
             const huruf = this.dataset.nilai_huruf
@@ -420,7 +363,6 @@
             document.getElementById('input-opsi').style.display = 'block'
 
             // scroll ke form
-            console.log(form.offsetHeight)
             form.scrollIntoView({
                 behavior: 'smooth',
                 block: 'start'

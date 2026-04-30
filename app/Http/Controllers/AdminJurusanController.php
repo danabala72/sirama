@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AdminJurusan;
 use App\Models\Jurusan;
 use App\Models\Role;
+use App\Models\ROLES;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -50,7 +51,7 @@ class AdminJurusanController extends Controller
         try {
             // 2. Gunakan Transaction agar data konsisten di 2 tabel
             DB::transaction(function () use ($request) {
-                $role = Role::where('role', 'AdminJurusan')->first();
+                $role = Role::where('role', ROLES::ADMINJURUSAN)->first();
                 // Simpan ke tabel users
                 $user = User::create([
                     'username' => $request->username,

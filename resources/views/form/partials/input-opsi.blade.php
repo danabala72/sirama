@@ -24,12 +24,9 @@
 
             <!-- SKS -->
             <div class="col-md-2">
-                <label class="form-label">SKS</label>
+                <label class="form-label">SKS Asal</label>
                 <div class="input-icon">
-                    <span class="input-icon-addon">
-                        <i class="ti ti-book"></i>
-                    </span>
-                    <input type="text" name="sks" id="in-sks" class="form-control text-center bg-azure-lt" readonly>
+                    <input type="number" required min="1" max="20" name="sks" id="in-sks" class="form-control text-center" placeholder="Jumlah SKS Asal">
                 </div>
             </div>
 
@@ -61,10 +58,9 @@
                     name="nilai_angka"
                     value="{{ $editMk->nilai_angka ?? '' }}"
                     class="form-control text-center"
-                    placeholder="0"
+                    placeholder="Nilai Mata Kuliah Asal"
                     min="0"
-                    max="100"
-                    >
+                    max="100">
             </div>
 
 

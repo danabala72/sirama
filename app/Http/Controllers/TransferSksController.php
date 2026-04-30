@@ -66,7 +66,7 @@ class TransferSksController extends Controller
                 'mataKuliahPilihan.transferSks' => function ($query) {
                     $query->withCount('cpmkItems');
                 },
-                'jurusan'
+                'user.jurusan'
             ])
             ->get();
 
@@ -127,7 +127,7 @@ class TransferSksController extends Controller
                             'valid'   => isset($vData['valid']),
                             'asli'    => isset($vData['asli']),
                             'terkini' => isset($vData['terkini']),
-                            'cukup'   => isset($vData['cukup']),
+                            'memadai'   => isset($vData['memadai']),
                         ]);
                     }
                 }

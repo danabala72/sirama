@@ -22,4 +22,5 @@ class ROLES
     public const ADMIN = 'Admin';
     public const MAHASISWA = 'Mahasiswa';
     public const  ASESOR =  'Asesor';
+    public const ADMINJURUSAN = 'AdminJurusan';
 }
