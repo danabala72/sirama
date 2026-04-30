@@ -25,21 +25,22 @@ class MataKuliahImport implements ToModel, WithHeadingRow
         }
 
         // 3. Simpan ke Database
-        $mk = MataKuliah::create([
-            'jurusan_id'    => $jurusan->id,
-            'kode_mk'       => $row['kode_mk'],
-            'nama_mk'       => $row['nama_mk'],
-            'sks'           => $row['sks'],
-            'nilai_minimum' => $row['nilai_minimum'],
-            'status'        => 1, // Default aktif
-        ]);
+        $mk = MataKuliah::updateOrCreate(
+            ['kode_mk' => trim($row['kode_mk'])],
+            [
+                'jurusan_id'    => $jurusan->id,
+                'nama_mk'       => $row['nama_mk'],
+                'sks'           => $row['sks'],
+                'nilai_minimum' => $row['nilai_minimum'],
+                'status'        => 1,
+            ]
+        );
 
-        // 4. Jika Anda menggunakan Many-to-Many ke Semester, hubungkan di sini
-        $mk->semester()->attach($semester->id);
+        $mk->semester()->syncWithoutDetaching([$semester->id]);
 
         return $mk;
     }
-    
+
     public function onError(Throwable $e)
     {
         throw $e;
