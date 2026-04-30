@@ -183,7 +183,7 @@
                                     data-placeholder="Pilih satu atau lebih semester...">
                                     @foreach($semuaSemester as $smt)
                                     <option value="{{ $smt->id }}"
-                                        {{ in_array($smt->id, old('semester_id', $mk->semester->pluck('id')->toArray())) ? 'selected' : '' }}>
+                                        {{ in_array($smt->id, old('semester_id', [])) ? 'selected' : '' }}>
                                         {{ $smt->label }} {{ $smt->is_active ? '(Aktif)' : '' }}
                                     </option>
                                     @endforeach
@@ -268,13 +268,22 @@
                 searching: true,
                 paging: true,
                 info: true,
+                lengthChange: true,
                 layout: {
-                    topStart: null,
-                    topEnd: 'search',
+                    topStart: {
+                        pageLength: {
+                            menu: [10, 25, 50, 100, {
+                                label: 'Semua',
+                                value: -1
+                            }]
+                        }
+                    },
+                    topEnd: ['search'],
                     bottomStart: 'info',
                     bottomEnd: 'paging'
                 },
                 language: {
+                    lengthMenu: "_MENU_ item per halaman",
                     search: "",
                     searchPlaceholder: "Cari mata kuliah...",
                     info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ mata kuliah",

@@ -170,14 +170,23 @@
                 searching: true,
                 paging: true,
                 info: true,
+                lengthChange: true,
                 layout: {
-                    topStart: null,
+                    topStart: {
+                        pageLength: {
+                            menu: [10, 25, 50, 100, {
+                                label: 'Semua',
+                                value: -1
+                            }]
+                        }
+                    },
                     topEnd: 'search',
                     // Gunakan string 'info' dan 'paging' (bukan pagination)
                     bottomStart: 'info',
                     bottomEnd: 'paging'
                 },
                 language: {
+                    lengthMenu: "_MENU_ item per halaman",
                     search: "",
                     searchPlaceholder: "Cari mahasiswa...",
                     info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ mahasiswa",

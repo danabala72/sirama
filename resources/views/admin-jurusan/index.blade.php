@@ -216,11 +216,26 @@
             // 1. Inisialisasi DataTable
             new DataTable('#adminJurusanTable', {
                 searching: true,
+                lengthChange: true,
                 layout: {
-                    topStart: null,
+                    topStart: {
+                        pageLength: {
+                            menu: [10, 25, 50, 100, {
+                                label: 'Semua',
+                                value: -1
+                            }]
+                        }
+                    },
                     topEnd: 'search',
                     bottomStart: 'info',
                     bottomEnd: 'paging'
+                },
+                language: {
+                    lengthMenu: "_MENU_ item per halaman",
+                    search: "",
+                    searchPlaceholder: "Cari admin jurusan...",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ admin jurusan",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 admin jurusan",
                 }
             });
 

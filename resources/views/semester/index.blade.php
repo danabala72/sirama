@@ -39,15 +39,15 @@
                             <td class="text-sm font-medium text-gray-900">{{ $semester->label }}</td>
                             <td class="text-sm text-center">
                                 @if($semester->is_active)
-                                    <span class="badge bg-green-lt px-3 py-1">
-                                        <i class="ti ti-circle-check me-1"></i> Aktif
-                                    </span>
+                                <span class="badge bg-green-lt px-3 py-1">
+                                    <i class="ti ti-circle-check me-1"></i> Aktif
+                                </span>
                                 @else
-                                    <form action="{{ route('semester.set-aktif', $semester->id) }}" method="POST" class="m-0">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Set Aktif</button>
-                                    </form>
+                                <form action="{{ route('semester.set-aktif', $semester->id) }}" method="POST" class="m-0">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Set Aktif</button>
+                                </form>
                                 @endif
                             </td>
                             <td class="text-sm text-center">
@@ -141,15 +141,26 @@
                 searching: true,
                 paging: true,
                 info: true,
+                lengthChange: true,
                 layout: {
-                    topStart: null,
+                    topStart: {
+                        pageLength: {
+                            menu: [10, 25, 50, 100, {
+                                label: 'Semua',
+                                value: -1
+                            }]
+                        }
+                    },
                     topEnd: 'search',
                     bottomStart: 'info',
                     bottomEnd: 'paging'
                 },
                 language: {
+                    lengthMenu: "_MENU_ item per halaman",
                     search: "",
                     searchPlaceholder: "Cari semester...",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ semester",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 semester",
                 }
             });
         })();

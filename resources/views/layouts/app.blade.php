@@ -67,7 +67,7 @@
             <aside class="sidebar-rpl" id="sidebar-menu">
                 <div class="p-3">
                     <ul class="nav nav-pills nav-vertical gap-1">
-                       
+
                         @if(auth()->user()?->role?->role === 'Admin' || auth()->user()?->role?->role === 'AdminJurusan')
                         <li class="nav-item">
                             <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
@@ -75,15 +75,15 @@
                                 Dashboard
                             </a>
                         </li>
-                        
-                         @if(auth()->user()?->role?->role === 'Admin')
-                         <li class="nav-item">
+
+                        @if(auth()->user()?->role?->role === 'Admin')
+                        <li class="nav-item">
                             <a href="{{ route('semester.index') }}" class="nav-link {{ request()->routeIs('semester.index') ? 'active' : '' }}">
                                 <i class="ti ti-calendar-event me-1"></i>
                                 Semester
                             </a>
                         </li>
-                        @endif                       
+                        @endif
                         <li class="nav-item">
                             <a href="{{ route('jurusan.index') }}" class="nav-link {{ request()->routeIs('jurusan.index') ? 'active' : '' }}">
                                 <i class="ti ti-certificate me-1"></i>
@@ -103,14 +103,14 @@
                                 Asesor
                             </a>
                         </li>
-                         <li class="nav-item">
+                        <li class="nav-item">
                             <a href="{{ route('mahasiswa.index') }}" class="nav-link {{ request()->routeIs('mahasiswa.index') ? 'active' : '' }}">
                                 <i class="ti ti-users me-1"></i>
                                 Mahasiswa
                             </a>
                         </li>
-                         @if(auth()->user()?->role?->role === 'Admin')
-                         <li class="nav-item">
+                        @if(auth()->user()?->role?->role === 'Admin')
+                        <li class="nav-item">
                             <a href="{{ route('admin_jurusan.index') }}" class="nav-link {{ request()->routeIs('admin_jurusan.index') ? 'active' : '' }}">
                                 <i class="ti ti-user-shield me-1"></i>
                                 Admin Jurusan
@@ -239,33 +239,67 @@
     </script>
     @stack('scripts')
     <style>
-        .dt-search {
+        /* WRAPPER */
+        .row.mt-2.justify-content-between {
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* KIRI & KANAN FLEX */
+        .dt-layout-start,
+        .dt-layout-end {
             display: flex !important;
-            align-items: center !important;
-            padding-right: 2rem !important;
+            align-items: center;
         }
 
+        /* LENGTH */
+        .dt-length {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* SEARCH */
+        .dt-search {
+            display: flex;
+            align-items: center;
+        }
+
+        /* INPUT */
         .dt-search input {
-            margin-left: 0.75rem !important;
-            border: 1px solid #dadcde !important;
-            border-radius: 4px !important;
-            padding: 0.4rem 0.75rem !important;
-            outline: none !important;
-            width: 200px !important;
-            /* Lebar kotak search */
-            background-color: #ffffff !important;
+            min-width: 220px;
+            border-radius: 8px;
+            padding: 6px 10px;
         }
 
-        .dt-search input:focus {
-            border-color: #206bc4 !important;
-            /* Warna biru Tabler */
-            box-shadow: 0 0 0 0.25rem rgba(32, 107, 196, 0.25) !important;
-        }
+        /* MOBILE FIX */
+        @media (max-width: 768px) {
+            .row.mt-2.justify-content-between {
+                flex-direction: column;
+                align-items: stretch;
+            }
 
-        .dt-info {
-            padding-left: 1rem !important;
+            .dt-layout-start,
+            .dt-layout-end {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .dt-search {
+                width: 100%;
+            }
+
+            .dt-search input {
+                width: 100%;
+            }
+        }
+        .dt-length select {
+             border-radius: 8px;
+           margin-left: 6px;
+            height: 30px !important;
         }
     </style>
+
 
 </body>
 
