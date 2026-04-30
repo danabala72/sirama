@@ -30,15 +30,16 @@
                     <!-- Username / NIM -->
                     <div class="mb-4">
                         <label class="block mb-2 text-sm font-bold text-gray-700">Username</label>
-                        <input type="text" name="username" value="{{ old('username') }}"
+                        <input type="text" autocomplete="disabled" name="username" value="{{ old('username') }}"
                             class="w-full border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 rounded-md shadow-sm transition duration-200"
+                            placeholder="Username..."
                             required>
                     </div>
 
                     <!-- Password -->
                     <div class="mb-4">
                         <label class="block mb-2 text-sm font-bold text-gray-700">Password</label>
-                        <input type="password" name="password"
+                        <input type="password" autocomplete="new-password" name="password"
                             class="w-full border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 rounded-md shadow-sm transition duration-200"
                             placeholder="••••••••" required>
                     </div>
@@ -46,7 +47,7 @@
                     <!-- Konfirmasi Password (Opsional tapi disarankan) -->
                     <div class="mb-4">
                         <label class="block mb-2 text-sm font-bold text-gray-700">Konfirmasi Password</label>
-                        <input type="password" name="password_confirmation"
+                        <input type="password" autocomplete="new-password" name="password_confirmation"
                             class="w-full border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 rounded-md shadow-sm transition duration-200"
                             placeholder="••••••••" required>
                     </div>

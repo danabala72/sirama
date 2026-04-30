@@ -12,8 +12,7 @@
     && filled($mahasiswa->kode_pos)
     && filled($mahasiswa->no_hp)
     && filled($mahasiswa->alamat_kantor)
-    && filled($mahasiswa->email)
-    && filled($mahasiswa->jurusan_id);
+    && filled($mahasiswa->email);
     @endphp
     @if(session('success'))
     <div class="alert alert-success">
@@ -31,6 +30,13 @@
         </ul>
     </div>
     @endif
+
+    <div class="mb-3">
+        <label class="form-label">Jurusan</label>
+        <input type="text" class="form-control"
+            value="{{ $user->jurusan->nama_jurusan ?? 'Belum memilih jurusan' }}"
+            disabled>
+    </div>
 
     <div class="mb-3">
         <label class="form-label">Nama Lengkap</label>
@@ -164,22 +170,6 @@
             class="form-control @error('email') is-invalid @enderror"
             value="{{ old('email', $mahasiswa?->email) }}">
         @error('email')
-        <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Jurusan</label>
-        <select
-            name="jurusan_id"
-            class="form-select @error('jurusan_id') is-invalid @enderror">
-            <option value="">-- Pilih Jurusan --</option>
-            @foreach ($jurusan as $item)
-            <option value="{{ $item->id }}" {{ old('jurusan_id', $mahasiswa?->jurusan_id) == $item->id ? 'selected' : '' }}>
-                {{ $item->nama_jurusan }}
-            </option>
-            @endforeach
-        </select>
-        @error('jurusan_id')
         <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>

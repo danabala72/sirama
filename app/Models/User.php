@@ -21,6 +21,7 @@ class User extends Authenticatable
         'id',
         'username',
         'role_id',
+        'jurusan_id',
         'email',
         'password',
     ];
@@ -68,8 +69,13 @@ class User extends Authenticatable
         return $this->hasOne(AdminJurusan::class, 'user_id');
     }
 
-    public function getJurusanIdAttribute()
+    public function getJurusanAdminAttribute()
     {
         return $this->adminJurusan?->jurusan_id;
+    }
+
+    public function jurusan()
+    {
+        return $this->belongsTo(Jurusan::class, 'jurusan_id');
     }
 }

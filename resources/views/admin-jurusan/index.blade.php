@@ -231,7 +231,7 @@
                     $('#formEditAdmin').attr('action', `/admin/jurusan/${id}`);
                     $('#edit_nama').val(data.admin.nama);
                     $('#edit_jk').val(data.admin.jenis_kelamin);
-                    $('#edit_jurusan_id').val(data.admin.jurusan_id);
+                    $('#edit_jurusan_id').val(data.admin.user.jurusan_id);
                     $('#edit_email').val(data.admin.email);
                     $('#edit_no_hp').val(data.admin.no_hp);
                     $('#edit_username').val(data.username);

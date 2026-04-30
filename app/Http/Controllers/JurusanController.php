@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TemplateJurusanExport;
+use App\Imports\JurusanImport;
 use App\Models\Jurusan;
 use App\Models\MataKuliah;
+use App\Models\Semester;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class JurusanController extends Controller
 {
@@ -26,8 +30,9 @@ class JurusanController extends Controller
 
     public function edit(Jurusan $jurusan)
     {
+        $semuaSemester = Semester::orderBy('kode', 'asc')->get();
         $jurusan = $jurusan->load('mataKuliah.semester');
-        return view('jurusan.edit', compact('jurusan'));
+        return view('jurusan.edit', compact('jurusan', 'semuaSemester'));
     }
 
     public function create()
@@ -44,75 +49,22 @@ class JurusanController extends Controller
 
     public function templateDownload()
     {
-        // Header sesuai dengan struktur tabel Jurusan dan Mata Kuliah
-        $headers = [
-            "kode_jurusan",
-            "nama_jurusan",
-            "kode_mk",
-            "nama_mk",
-            "sks",
-            "nilai_minimum"
-        ];
-
-        $callback = function () use ($headers) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $headers);
-
-            // Contoh baris data untuk Teknik Informatika
-            fputcsv($file, ['32', 'Teknik Informatika', 'TI101', 'Algoritma Pemrograman', '3', '60']);
-            fputcsv($file, ['32', 'Teknik Informatika', 'TI102', 'Struktur Data', '3', '65']);
-
-            // Contoh baris data untuk Sistem Informasi
-            fputcsv($file, ['33', 'Sistem Informasi', 'SI201', 'Manajemen Basis Data', '4', '60']);
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=template_jurusan_mk.csv",
-            "Pragma" => "no-cache",
-            "Expires" => "0",
-        ]);
+        $namaFile = 'template_jurusan_' . date('Ymd_His') . '.xlsx';
+        return Excel::download(new TemplateJurusanExport, $namaFile);
     }
 
 
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:csv,txt'
+            'file' => 'required|mimes:xlsx,xls,csv'
         ]);
 
-        $file = fopen($request->file('file')->getRealPath(), 'r');
-        $header = fgetcsv($file); // Ambil header baris pertama
-
         try {
-            while (($row = fgetcsv($file, 1000, ",")) !== FALSE) {
-                // Pastikan baris tidak kosong
-                if (empty($row[0])) continue;
+            Excel::import(new JurusanImport, $request->file('file'));
 
-                // 1. Sync Jurusan (Cocokkan kode_jurusan)
-                $jurusan = Jurusan::updateOrCreate(
-                    ['kode_jurusan' => $row[0]], // Kolom 0: kode_jurusan
-                    ['nama_jurusan' => $row[1]]  // Kolom 1: nama_jurusan
-                );
-
-                // 2. Sync Mata Kuliah (Cocokkan kode_mk)
-                MataKuliah::updateOrCreate(
-                    ['kode_mk' => $row[2]], // Kolom 2: kode_mk
-                    [
-                        'jurusan_id'    => $jurusan->id,
-                        'nama_mk'       => $row[3], // Kolom 3: nama_mk
-                        'sks'           => $row[4], // Kolom 4: sks
-                        'nilai_minimum' => $row[5] ?? 60 // Kolom 5: nilai_minimum
-                    ]
-                );
-            }
-            fclose($file);
-
-            return back()->with('success', 'Import Berhasil: Data Jurusan dan Mata Kuliah telah disinkronkan.');
+            return back()->with('success', 'Berhasil: Data Jurusan telah disinkronkan.');
         } catch (\Exception $e) {
-            fclose($file);
             return back()->withErrors(['error' => 'Gagal import: ' . $e->getMessage()]);
         }
     }

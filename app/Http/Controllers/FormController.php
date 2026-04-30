@@ -18,8 +18,8 @@ class FormController extends Controller
     {
         $step = $request->query('step', 1); // default step = 1
 
-        $mahasiswa = Auth::user()->mahasiswa;
-
+        $user = Auth::user();
+        $mahasiswa = $user->mahasiswa;
         $titles = [
             1 => 'Formulir 1 - Rincian Data Peserta / Calon Peserta',
             2 => 'Formulir 2 - Upload File Pendukung',
@@ -65,7 +65,8 @@ class FormController extends Controller
             'attachments' => $attachments,
             'jurusan' => $jurusan,
             'semester' => $semester,
-            'mataKuliahPilihan' => $mataKuliahPilihan
+            'mataKuliahPilihan' => $mataKuliahPilihan,
+            'user' => $user
         ]);
     }
 
@@ -91,8 +92,7 @@ class FormController extends Controller
                     'email',
                     'max:255',
                     Rule::unique('mahasiswa', 'email')->ignore($existingMahasiswa?->id),
-                ],
-                'jurusan_id' => ['required', 'exists:jurusan,id'],
+                ]
             ],
             [
                 'required' => ':attribute wajib diisi.',
@@ -101,8 +101,7 @@ class FormController extends Controller
                 'max' => ':attribute maksimal :max karakter.',
                 'jenis_kelamin.in' => 'Jenis kelamin harus L atau P.',
                 'status_perkawinan.in' => 'Status perkawinan tidak valid.',
-                'no_hp.regex' => 'Format :attribute tidak valid',
-                'jurusan_id.exists' => 'Jurusan yang dipilih tidak valid.'
+                'no_hp.regex' => 'Format :attribute tidak valid'
             ],
             [
                 'name' => 'Nama lengkap',
@@ -115,8 +114,7 @@ class FormController extends Controller
                 'kode_pos' => 'Kode pos',
                 'no_hp' => 'No HP',
                 'alamat_kantor' => 'Alamat kantor',
-                'email' => 'Email',
-                'jurusan_id' => 'Jurusan',
+                'email' => 'Email'
             ]
         );
 
@@ -137,7 +135,7 @@ class FormController extends Controller
         $mahasiswaId = Auth::user()->mahasiswa->id;
 
         $semester = Semester::orderBy('id', 'desc')->get();
-        $jurusanId = Auth::user()->mahasiswa->jurusan_id;
+        $jurusanId = Auth::user()->mahasiswa->jurusan->id;
         $semesterId = $request->semester_id;
 
         // 2. Query Mata Kuliah berdasarkan Relasi Pivot yang kita buat

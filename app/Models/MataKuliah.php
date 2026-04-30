@@ -15,7 +15,8 @@ class MataKuliah extends Model
         'kode_mk',
         'nama_mk',
         'sks',
-        'nilai_minimum'
+        'nilai_minimum',
+        'status'
     ];
 
     public function jurusan(): BelongsTo

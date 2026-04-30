@@ -14,7 +14,7 @@ class AdminJurusanController extends Controller
 {
     public function index()
     {
-        $adminJurusans = AdminJurusan::with(['user', 'jurusan'])->get();
+        $adminJurusans = AdminJurusan::with(['user', 'user.jurusan'])->get();
         $jurusans = Jurusan::all();
         return view('admin-jurusan.index', compact('adminJurusans', 'jurusans'));
     }
@@ -56,12 +56,12 @@ class AdminJurusanController extends Controller
                     'username' => $request->username,
                     'password' => Hash::make($request->password),
                     'role_id'  => $role->id,
+                    'jurusan_id'    => $request->jurusan_id,
                 ]);
 
                 // Simpan ke tabel admin_jurusan
                 AdminJurusan::create([
-                    'user_id'       => $user->id,
-                    'jurusan_id'    => $request->jurusan_id,
+                    'user_id'       => $user->id,                    
                     'nama'          => $request->nama,
                     'jenis_kelamin' => $request->jenis_kelamin,
                     'email'         => $request->email,
@@ -78,7 +78,7 @@ class AdminJurusanController extends Controller
 
     public function edit($id)
     {
-        $admin = AdminJurusan::with('user')->findOrFail($id);
+        $admin = AdminJurusan::with('user.jurusan')->findOrFail($id);
 
         return response()->json([
             'admin'    => $admin,
@@ -123,14 +123,14 @@ class AdminJurusanController extends Controller
             DB::transaction(function () use ($request, $admin, $user) {
                 // Update data User Login
                 $user->username = $request->username;
+                $user->jurusan_id = $request->jurusan_id;
                 if ($request->filled('password')) {
                     $user->password = Hash::make($request->password);
                 }
                 $user->save();
 
                 // Update data Profil Admin Jurusan
-                $admin->update([
-                    'jurusan_id'    => $request->jurusan_id,
+                $admin->update([                   
                     'nama'          => $request->nama,
                     'jenis_kelamin' => $request->jenis_kelamin,
                     'email'         => $request->email,

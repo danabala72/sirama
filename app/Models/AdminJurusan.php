@@ -10,7 +10,6 @@ class AdminJurusan extends Model
 
     protected $fillable = [
         'user_id',
-        'jurusan_id',
         'nama',
         'jenis_kelamin',
         'email',
@@ -21,6 +20,6 @@ class AdminJurusan extends Model
         return $this->belongsTo(User::class);
     }
     public function jurusan(){
-        return $this->belongsTo(Jurusan::class);
+        return $this->user->jurusan();
     }
 }

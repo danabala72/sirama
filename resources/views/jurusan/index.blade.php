@@ -16,28 +16,17 @@
         </div>
         @endif
 
-         @if(Auth::user()->role->role === 'Admin')
+        @if(Auth::user()->role->role === 'Admin')
         <div class="d-flex flex-wrap gap-2 mb-3">
-
-
-            <a href="{{ route('jurusan.create') }}" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-primary my-2">
-                <!-- Icon Plus yang lebih ramping -->
-                <svg xmlns="http://w3.org" class="w-4 h-4 transition-transform duration-200 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <a href="{{ route('jurusan.create') }}" class="btn btn-outline-info btn-sm inline-flex items-center gap-x-2 my-2">
+                <svg xmlns="http://w3.org" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-
                 <span class="hidden sm:inline">Tambah Jurusan</span>
             </a>
 
-            <a href="{{ route('jurusan.template') }}" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-success my-2">
-                <svg xmlns="http://w3.org" class="w-4 h-4" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
-                    <path d="M7 11l5 5l5 -5" />
-                    <path d="M12 4l0 12" />
-                </svg>
-                <span>Download Template</span>
-            </a>
+
+
             <button type="button" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-success my-2" data-bs-toggle="modal" data-bs-target="#modalImport">
                 <svg xmlns="http://w3.org" class="w-4 h-4" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -111,7 +100,7 @@
                                         Edit
                                     </a>
 
-                                     @if(Auth::user()->role->role === 'Admin')
+                                    @if(Auth::user()->role->role === 'Admin')
                                     <!-- Delete Button -->
                                     <form action="{{ route('jurusan.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus jurusan ini?')" class="m-0">
                                         @csrf
@@ -143,26 +132,42 @@
         <div class="modal modal-blur fade" id="modalImport" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
-                    <!-- Pastikan route diarahkan ke fungsi import jurusan/mk -->
+                    <!-- Route diarahkan ke proses import khusus jurusan -->
                     <form action="{{ route('jurusan.import') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="modal-header">
-                            <h5 class="modal-title">Import Jurusan & Mata Kuliah</h5>
+                            <h5 class="modal-title">Import Data Jurusan</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label class="form-label">Pilih File CSV</label>
-                                <input type="file" name="file" class="form-control" required accept=".csv">
-                                <div class="mt-2 p-2 bg-gray-50 rounded border">
-                                    <p class="text-xs text-muted mb-1 font-bold">Format Kolom CSV:</p>
-                                    <p class="text-xs text-muted">kode_jurusan, nama_jurusan, kode_mk, nama_mk, sks, nilai_minimum</p>
+                                <label class="form-label">Pilih File Excel (.xlsx / .xls)</label>
+                                <input type="file" name="file" class="form-control @error('file') is-invalid @enderror" required accept=".xlsx, .xls">
+                                @error('file') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                                <div class="mt-3 p-2 bg-light rounded border">
+                                    <small class="text-muted d-block mb-1 font-bold text-uppercase">Format Header Excel:</small>
+                                    <code class="text-primary" style="font-size: 0.75rem;">
+                                        kode_jurusan, nama_jurusan
+                                    </code>
                                 </div>
+                            </div>
+                            <div class="text-center">
+                                <!-- Tombol unduh template jurusan -->
+                                <a href="{{ route('jurusan.template') }}" class="btn btn-sm btn-outline-info">
+                                    <svg xmlns="http://w3.org" class="icon icon-tabler icon-tabler-download" width="18" height="18" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                                        <path d="M7 11l5 5l5 -5"></path>
+                                        <path d="M12 4l0 12"></path>
+                                    </svg>
+                                    Unduh Template Jurusan
+                                </a>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-primary">Mulai Sinkronisasi</button>
+                            <button type="submit" class="btn btn-primary">Mulai Import</button>
                         </div>
                     </form>
                 </div>

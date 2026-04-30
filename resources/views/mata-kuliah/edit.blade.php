@@ -110,10 +110,6 @@
                     <button type="button" data-bs-toggle="modal" data-bs-target="#modalTambahCp" class="text-xs btn btn-sm btn-outline-success">
                         + Tambah CPMK
                     </button>
-                    <!-- Tombol Download Template -->
-                    <a href="{{ route('mk.cpmk.template',  $mk->kode_mk) }}" class="text-xs btn btn-sm btn-outline-success">
-                        Template CPMK
-                    </a>
                     <!-- Tombol Trigger Modal Import -->
                     <button type="button" data-bs-toggle="modal" data-bs-target="#modalImportCp" class="text-xs btn btn-sm btn-primary">
                         Import CPMK
@@ -215,6 +211,7 @@
     <div class="modal modal-blur fade" id="modalImportCp" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
+                <!-- Route diarahkan ke fungsi import CPMK dengan ID mata kuliah terkait -->
                 <form action="{{ route('mk.cpmk.import', $mk->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
@@ -223,11 +220,28 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label class="form-label">Pilih File CSV</label>
-                            <input type="file" name="file" class="form-control" required accept=".csv">
-                            <small class="text-muted d-block mt-2">
-                                Format kolom CSV: <strong>kode_mk, indikator_capaian</strong>
-                            </small>
+                            <label class="form-label">Pilih File Excel (.xlsx / .xls)</label>
+                            <input type="file" name="file" class="form-control @error('file') is-invalid @enderror" required accept=".xlsx, .xls">
+                            @error('file') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                            <div class="mt-3 p-2 bg-light rounded border">
+                                <small class="text-muted d-block mb-1 font-bold text-uppercase">Format Header Excel:</small>
+                                <code class="text-primary" style="font-size: 0.75rem;">
+                                    kode_mk, indikator_capaian
+                                </code>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <!-- Tombol unduh template CPMK spesifik untuk kode_mk ini -->
+                            <a href="{{ route('mk.cpmk.template', $mk->kode_mk) }}" class="btn btn-sm btn-outline-info">
+                                <svg xmlns="http://w3.org" class="icon icon-tabler icon-tabler-download" width="18" height="18" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                                    <path d="M7 11l5 5l5 -5"></path>
+                                    <path d="M12 4l0 12"></path>
+                                </svg>
+                                Unduh Template CPMK
+                            </a>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -238,6 +252,7 @@
             </div>
         </div>
     </div>
+
     <!-- Modal Tambah CPMK -->
     <div class="modal modal-blur fade" id="modalTambahCp" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">

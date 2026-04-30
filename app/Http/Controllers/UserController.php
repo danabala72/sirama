@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TemplateAsesorExport;
+use App\Exports\TemplateMahasiswaExport;
+use App\Imports\AsesorImport;
+use App\Imports\MahasiswaImport;
 use App\Models\Asesor;
 use App\Models\Role;
 use App\Models\ROLES;
@@ -10,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -22,18 +27,16 @@ class UserController extends Controller
         $mahasiswa = User::whereHas('role', function ($query) {
             $query->where('role', '=', ROLES::MAHASISWA);
         })
-            // Filter tambahan untuk Admin Jurusan
+            ->whereNotNull('jurusan_id')
+
             ->when($role === 'AdminJurusan', function ($query) use ($jurusanId) {
-                return $query->whereHas('mahasiswa', function ($q) use ($jurusanId) {
-                    $q->where('jurusan_id', $jurusanId);
-                });
+                return $query->where('jurusan_id', $jurusanId);
             })
-            ->with(['mahasiswa', 'asesor', 'role'])
+            ->with(['mahasiswa', 'asesor', 'role', 'jurusan'])
             ->get();
 
         return view('mahasiswa.index', compact('mahasiswa'));
     }
-
 
     public function edit(User $user)
     {
@@ -67,11 +70,13 @@ class UserController extends Controller
         ]);
 
         $roleMhs = Role::where('role', ROLES::MAHASISWA)->first();
+        $jurusanId = Auth::user()->jurusan->id;
 
         User::create([
             'username' => $request->username,
             'password' => Hash::make($request->password),
             'role_id'  => $roleMhs->id ?? null,
+            'jurusan_id' => $jurusanId
         ]);
 
         return redirect()->route('mahasiswa.index')->with('success', 'User baru berhasil dibuat.');
@@ -206,111 +211,56 @@ class UserController extends Controller
 
     public function templateDownload()
     {
-        // Logika sederhana menghasilkan CSV template
-        $headers = ["username", "password"];
-        $callback = function () use ($headers) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $headers);
-            // Contoh baris
-            fputcsv($file, ['mhs_001', 'password123']);
-            fputcsv($file, ['mhs_002', 'password123']);
-            fclose($file);
-        };
+        $jurusanId = Auth::user()->jurusan?->id;
 
-        return response()->stream($callback, 200, [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=template_mahasiswa.csv",
-        ]);
+        $fileName = 'template_import_mahasiswa_' . date('Ymd_His') . '.xlsx';
+
+        return Excel::download(new TemplateMahasiswaExport($jurusanId), $fileName);
     }
 
     public function asesorTemplateDownload()
     {
-        // Logika sederhana menghasilkan CSV template
-        $headers = ["username", "password", "nama_lengkap", "email", "jenis_kelamin", "no_hp"];
-        $callback = function () use ($headers) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $headers);
+        $fileName = 'template_import_asesor_' . date('Ymd_His') . '.xlsx';
 
-            // Contoh baris instruksi/dummy
-            fputcsv($file, ['asesor_001', 'password123', 'Budi Santoso', 'budi@example.com', 'L', "'08123456789"]);
-            fputcsv($file, ['asesor_002', 'password123', 'Siti Aminah', 'siti@example.com', 'P', "'08123456789"]);
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=template_asesor.csv",
-        ]);
+        return Excel::download(new TemplateAsesorExport, $fileName);
     }
+
 
 
     public function userImport(Request $request)
     {
-        $request->validate(['file' => 'required|mimes:xlsx,csv,txt']);
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ], [
+            'file.required' => 'Silakan pilih file terlebih dahulu.',
+            'file.mimes' => 'Format file harus .xlsx, .xls, atau .csv.',
+            'file.max' => 'Ukuran file maksimal adalah 2MB.'
+        ]);
 
-        $file = $request->file('file');
-        $data = array_map('str_getcsv', file($file->getRealPath()));
-        $header = array_shift($data); // Buang baris judul
+        try {
+            // 2. Jalankan proses import
+            Excel::import(new MahasiswaImport, $request->file('file'));
 
-        foreach ($data as $row) {
-
-            $role = Role::where('role', ROLES::MAHASISWA)->first();
-
-            User::updateOrCreate(
-                ['username' => $row[0]],
-                [
-                    'password' => Hash::make($row[1]),
-                    'role_id'  => $role->id,
-                ]
-            );
+            // 3. Beri feedback sukses
+            return back()->with('success', 'Data Mahasiswa berhasil diimport dan disinkronkan!');
+        } catch (\Exception $e) {
+            // 4. Tangani jika ada error (format salah, data duplikat, dll)
+            return back()->withErrors(['file' => 'Gagal mengimport data: ' . $e->getMessage()]);
         }
-
-        return back()->with('success', 'Data user berhasil diimport!');
     }
 
     public function asesorImport(Request $request)
     {
-        $request->validate(['file' => 'required|mimes:xlsx,csv,txt']);
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
 
-        $file = $request->file('file');
-        $data = array_map('str_getcsv', file($file->getRealPath()));
-        $header = array_shift($data);
-
-        // Ambil role sekali saja di luar loop untuk efisiensi
-        $role = Role::where('role', ROLES::ASESOR)->first();
-
-        DB::transaction(function () use ($data, $role) {
-            foreach ($data as $row) {
-                // Mapping kolom (sesuai template sebelumnya)
-                // 0:username, 1:password, 2:nama_lengkap, 3:email, 4:jenis_kelamin, 5:no_hp
-
-                // 1. Update atau Buat User
-                $user = User::updateOrCreate(
-                    ['username' => $row[0]],
-                    [
-                        'password' => Hash::make($row[1]),
-                        'role_id'  => $role->id,
-                    ]
-                );
-
-                // 2. Bersihkan no_hp dari tanda petik (') hasil manipulasi Excel
-                $no_hp = isset($row[5]) ? str_replace("'", "", $row[5]) : null;
-
-                // 3. Update atau Buat Asesor yang nge-link ke user_id
-                Asesor::updateOrCreate(
-                    ['user_id' => $user->id],
-                    [
-                        'name'          => $row[2],
-                        'email'         => $row[3],
-                        'jenis_kelamin' => $row[4],
-                        'no_hp'         => $no_hp,
-                    ]
-                );
-            }
-        });
-
-        return back()->with('success', 'Data user dan asesor berhasil diimport!');
+        try {
+            Excel::import(new AsesorImport, $request->file('file'));
+            return back()->with('success', 'Data user dan asesor berhasil diimport!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Gagal import: ' . $e->getMessage()]);
+        }
     }
 
 

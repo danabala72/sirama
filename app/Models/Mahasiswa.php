@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Mahasiswa extends Model
 {
-    protected $table= 'mahasiswa';
+    protected $table = 'mahasiswa';
 
     protected $fillable = [
         'user_id',
@@ -15,7 +15,6 @@ class Mahasiswa extends Model
         'tempat_lahir',
         'tgl_lahir',
         'jenis_kelamin',
-        'jurusan_id',
         'status_perkawinan',
         'kebangsaan',
         'alamat_rumah',
@@ -34,8 +33,12 @@ class Mahasiswa extends Model
     {
         return $this->belongsToMany(Asesor::class);
     }
-    public function jurusan() 
+    public function user()
     {
-        return $this->belongsTo(Jurusan::class);
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    public function getJurusanAttribute()
+    {
+        return $this->user->jurusan;
     }
 }

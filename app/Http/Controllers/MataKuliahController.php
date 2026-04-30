@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TemplateCpmkExport;
+use App\Exports\TemplateMKExport;
+use App\Imports\CpmkImport;
+use App\Imports\MataKuliahImport;
+use App\Models\Jurusan;
 use App\Models\MataKuliah;
 use App\Models\Semester;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MataKuliahController extends Controller
 {
@@ -15,6 +21,8 @@ class MataKuliahController extends Controller
         $user = Auth::user();
         $role = $user->role->role;
         $jurusanId = $user->jurusan_id;
+        $semuaSemester = Semester::all();
+        $semuaJurusan = Jurusan::all();
 
         $mks = MataKuliah::with(['jurusan', 'semester'])
             ->when($role === 'AdminJurusan', function ($query) use ($jurusanId) {
@@ -24,7 +32,7 @@ class MataKuliahController extends Controller
                 return $query->where('jurusan_id', $request->jurusan_id);
             })
             ->get();
-        return view('mata-kuliah.index', compact('mks'));
+        return view('mata-kuliah.index', compact('mks', 'semuaSemester', 'semuaJurusan'));
     }
 
     public function edit(MataKuliah $mk)
@@ -84,53 +92,24 @@ class MataKuliahController extends Controller
 
     public function templateCpmk($kode_mk)
     {
-        $headers = ["kode_mk", "indikator_capaian"];
-        $callback = function () use ($headers, $kode_mk) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $headers);
-            fputcsv($file, [$kode_mk, 'Deskripsi capaian pembelajaran mata kuliah']);
+        $fileName = 'template_cpmk_' . strtolower($kode_mk) . '-' . date('Ymd_His') . '.xlsx';
 
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=template_cpmk.csv",
-            "Pragma" => "no-cache",
-            "Expires" => "0",
-        ]);
+        return Excel::download(new TemplateCpmkExport($kode_mk), $fileName);
     }
 
     public function importCpmk(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:csv,txt'
+            'file' => 'required|mimes:xlsx,xls,csv'
         ]);
 
-        $file = fopen($request->file('file')->getRealPath(), 'r');
-        fgetcsv($file); // Skip header [kode_mk, indikator_capaian]
+        try {
+            Excel::import(new CpmkImport, $request->file('file'));
 
-        $successCount = 0;
-
-        while (($row = fgetcsv($file, 1000, ",")) !== FALSE) {
-            // row[0] = kode_mk, row[1] = indikator_capaian
-            if (!empty($row[0]) && !empty($row[1])) {
-
-                // 1. Cari Mata Kuliah berdasarkan kode_mk
-                $mk = MataKuliah::where('kode_mk', trim($row[0]))->first();
-
-                if ($mk) {
-                    // 2. Sync (Gunakan updateOrCreate agar tidak duplikat jika diimport ulang)
-                    $mk->cps()->updateOrCreate([
-                        'indikator_capaian' => trim($row[1])
-                    ]);
-                    $successCount++;
-                }
-            }
+            return back()->with('success', "Proses sinkronisasi indikator CPMK berhasil diselesaikan.");
+        } catch (\Exception $e) {
+            return back()->withErrors(['file' => 'Gagal sinkronisasi: ' . $e->getMessage()]);
         }
-        fclose($file);
-
-        return back()->with('success', "Berhasil sinkronisasi $successCount indikator CPMK.");
     }
 
     public function store(Request $request)
@@ -140,10 +119,11 @@ class MataKuliahController extends Controller
             'nama_mk' => 'required|string',
             'jurusan_id' => 'required|exists:jurusan,id',
             'sks' => 'required|integer|min:1',
-            'nilai_minimum' => 'nullable|integer'
+            'nilai_minimum' => 'nullable|integer',
+            'semester_id' => 'required|integer|exists:semester,id'
         ]);
 
-        MataKuliah::create([
+        $mk = MataKuliah::create([
             'jurusan_id' => $request->jurusan_id,
             'kode_mk' => strtoupper($request->kode_mk),
             'nama_mk' => $request->nama_mk,
@@ -151,8 +131,50 @@ class MataKuliahController extends Controller
             'nilai_minimum' => $request->nilai_minimum ?? 60,
         ]);
 
+        if ($request->semester_id) {
+            DB::table('mata_kuliah_semester')->updateOrInsert(
+                ['mata_kuliah_id' => $mk->id],
+                [
+                    'semester_id' => $request->semester_id,
+                    'updated_at'  => now()
+                ]
+            );
+        }
+
+
         // Kembali ke halaman edit jurusan asal
         return redirect()->route('jurusan.edit', $request->jurusan_id)
             ->with('success', 'Mata kuliah berhasil ditambahkan!');
+    }
+
+    public function toggleStatus($id)
+    {
+        $mk = MataKuliah::findOrFail($id);
+        $mk->status = !$mk->status;
+        $mk->save();
+
+        return back()->with('success', 'Status mata kuliah berhasil diperbarui!');
+    }
+
+    public function templateDownload()
+    {
+        $jurusanId = Auth::user()->jurusan?->id;
+        $fileName = 'template_import_mk_' . date('Ymd_His') . '.xlsx';
+        return Excel::download(new TemplateMKExport($jurusanId), $fileName);
+    }
+
+    public function import(Request $request)
+    {
+        // Validasi file
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        try {
+            Excel::import(new MataKuliahImport, $request->file('file'));
+            return back()->with('success', 'Data Mata Kuliah berhasil diimport!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengimport data: ' . $e->getMessage());
+        }
     }
 }

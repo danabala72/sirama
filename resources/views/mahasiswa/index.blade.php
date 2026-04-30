@@ -16,28 +16,34 @@
         </div>
         @endif
 
-         @if(Auth::user()->role->role === 'Admin')
+        @if($errors->any())
+        <div class="alert alert-danger alert-dismissible" role="alert">
+            <div class="d-flex">
+                <div>
+                    <h4 class="alert-title">Terjadi Kesalahan!</h4>
+                    <div class="text-secondary">
+                        <ul class="mb-0">
+                            @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+        </div>
+        @endif
+
         <div class="d-flex flex-wrap gap-2 mb-3">
-
-
-            <a href="{{ route('mahasiswa.create') }}" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-primary my-2">
-                <!-- Icon Plus yang lebih ramping -->
-                <svg xmlns="http://w3.org" class="w-4 h-4 transition-transform duration-200 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <a href="{{ route('mahasiswa.create') }}" class="btn btn-outline-info btn-sm inline-flex items-center gap-x-2 my-2">
+                <!-- Icon Plus Ramping -->
+                <svg xmlns="http://w3.org" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-
-                <span class="hidden sm:inline">Tambah User</span>
+                <span class="hidden sm:inline">Tambah Mahasiswa</span>
             </a>
 
-            <a href="{{ route('mahasiswa.template') }}" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-success my-2">
-                <svg xmlns="http://w3.org" class="w-4 h-4" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
-                    <path d="M7 11l5 5l5 -5" />
-                    <path d="M12 4l0 12" />
-                </svg>
-                <span>Download Template</span>
-            </a>
+
             <button type="button" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-success my-2" data-bs-toggle="modal" data-bs-target="#modalImport">
                 <svg xmlns="http://w3.org" class="w-4 h-4" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -46,11 +52,10 @@
                     <path d="M2 19h7" />
                     <path d="M7 16l3 3l-3 3" />
                 </svg>
-                Import User
+                Import Mahasiswa
             </button>
 
         </div>
-        @endif
 
 
         <!-- Card Wrapper -->
@@ -62,6 +67,7 @@
                             <th class="text-nowrap w-1">No</th>
                             <th class="text-nowrap">Username</th>
                             <th class="text-nowrap">Nama</th>
+                            <th class="text-nowrap">Jurusan</th>
                             <th class="text-nowrap">Email</th>
                             <th class="text-nowrap text-center">Aksi</th>
                         </tr>
@@ -72,6 +78,7 @@
                             <td class="text-sm text-muted">{{ $index + 1 }}</td>
                             <td class="text-sm font-medium text-gray-900">{{ $mhs->username }}</td>
                             <td class="text-sm font-medium">{{ $mhs->mahasiswa->name ?? '-' }}</td>
+                            <td class="text-sm font-medium">{{ $mhs->mahasiswa->jurusan->nama_jurusan ?? '-' }}</td>
                             <td class="text-sm text-muted">{{ $mhs->mahasiswa->email ?? '-' }}</td>
                             <td class="text-sm text-center">
                                 <div class="d-flex justify-content-center gap-2">
@@ -118,14 +125,33 @@
                 <form action="{{ route('mahasiswa.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title">Import Data User</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <h5 class="modal-title">Import Data Mahasiswa</h5>
+                        <!-- Perbaikan: data-bs-dismiss="modal" -->
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label class="form-label">Pilih File Excel (.xlsx / .csv)</label>
-                            <input type="file" name="file" class="form-control" required accept=".xlsx, .csv">
-                            <small class="text-muted">Format: username, password</small>
+                            <label class="form-label">Pilih File Excel (.xlsx / .xls)</label>
+                            <input type="file" name="file" class="form-control @error('file') is-invalid @enderror" required accept=".xlsx, .xls">
+                            @error('file') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                            <div class="mt-3 p-2 bg-light rounded border">
+                                <small class="text-muted d-block mb-1 font-bold text-uppercase">Format Header Excel:</small>
+                                <code class="text-primary" style="font-size: 0.75rem;">
+                                    kode_jurusan, username, password, nama_lengkap, email, jenis_kelamin, tempat_lahir, tgl_lahir, no_hp
+                                </code>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <a href="{{ route('mahasiswa.template') }}" class="btn btn-sm btn-outline-info">
+                                <svg xmlns="http://w3.org" class="icon icon-tabler icon-tabler-download" width="18" height="18" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                                    <path d="M7 11l5 5l5 -5"></path>
+                                    <path d="M12 4l0 12"></path>
+                                </svg>
+                                Unduh Template Mahasiswa
+                            </a>
                         </div>
                     </div>
                     <div class="modal-footer">

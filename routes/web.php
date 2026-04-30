@@ -90,6 +90,10 @@ Route::middleware('auth')->group(function () {
         Route::put('/mk/{mk}/update', [MataKuliahController::class, 'update'])->name('mk.update');
         Route::get('/mk/cpmk/template/{kode_mk}', [MataKuliahController::class, 'templateCpmk'])->name('mk.cpmk.template');
         Route::post('/mk/cpmk/import', [MataKuliahController::class, 'importCpmk'])->name('mk.cpmk.import');
+        Route::patch('/mk/{id}/status', [MataKuliahController::class, 'toggleStatus'])->name('mk.toggle-status');
+        Route::get('/mk/template', [MataKuliahController::class, 'templateDownload'])->name('mk.template');
+        Route::post('/mk/import', [MataKuliahController::class, 'import'])->name('mk.import');
+
 
         Route::delete('/cpmk/{cpmk}', [CpMataKuliahController::class, 'destroy'])->name('cpmk.destroy');
         Route::put('/cpmk/{cpmk}/update', [CpMataKuliahController::class, 'update'])->name('cpmk.update');
