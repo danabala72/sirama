@@ -18,6 +18,8 @@ class Semester extends Model
 
     public function mataKuliah()
     {
-        return $this->belongsToMany(MataKuliah::class, 'mata_kuliah_semester');
+        return $this->belongsToMany(MataKuliah::class, 'mata_kuliah_semester')
+            ->withPivot('id')
+            ->withTimestamps();
     }
 }

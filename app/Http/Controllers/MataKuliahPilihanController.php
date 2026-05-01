@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MataKuliahPilihan;
+use App\Models\MataKuliahSemester;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +25,7 @@ class MataKuliahPilihanController extends Controller
             'nilai_huruf.max'       => 'Nilai huruf tidak boleh lebih dari 5 karakter.',
             'attachment_ids.array'  => 'Format lampiran tidak valid.',
             'attachment_ids.*.exists' => 'Salah satu file bukti tidak ditemukan di database.',
+            'mata_kuliah_semester_id.required' => 'Mata kuliah harus diisi'
         ];
 
         $validated = $request->validate([
@@ -41,6 +43,7 @@ class MataKuliahPilihanController extends Controller
             'nilai_angka'    => 'nullable|integer|min:0|max:100',
             'attachment_ids' => 'nullable|array',
             'attachment_ids.*' => 'exists:attachment,id',
+            'mata_kuliah_semester_id' => 'required'
         ], $messages);
 
         try {
@@ -48,6 +51,7 @@ class MataKuliahPilihanController extends Controller
 
             $mkp = MataKuliahPilihan::create([
                 'mahasiswa_id' => $mhs,
+                'mata_kuliah_semester_id' => $validated['mata_kuliah_semester_id'],
                 'kode_mk'      => $validated['kode_mk'],
                 'nama_mk'      => $validated['nama_mk'],
                 'sks'          => $validated['sks'],
@@ -89,28 +93,35 @@ class MataKuliahPilihanController extends Controller
     {
         // 1. Validasi Data
         $request->validate([
-            'mata_kuliah_id' => 'required',
-            'sks'            => 'required|numeric',
-            'nilai_huruf'    => 'required',
-            'nilai_angka'    => 'required|numeric',
+            // Pastikan yang divalidasi adalah ID Pivot (Mata Kuliah Semester)
+            'mata_kuliah_semester_id' => 'required|exists:mata_kuliah_semester,id',
+            'sks'                     => 'required|numeric',
+            'nilai_huruf'             => 'required',
+            'nilai_angka'             => 'required|numeric',
         ]);
 
         // 2. Cari dan Update Data
         $mkPilihan = MataKuliahPilihan::findOrFail($id);
+
+        // Ambil data master MK melalui pivot ID yang baru dikirim
+        $mkSemester = MataKuliahSemester::with('mataKuliah')->find($request->mata_kuliah_semester_id);
+        $masterMk = $mkSemester->mataKuliah;
+
         $mkPilihan->update([
-            'mata_kuliah_id' => $request->mata_kuliah_id,
-            'sks'            => $request->sks,
-            'nilai_huruf'    => $request->nilai_huruf,
-            'nilai_angka'    => $request->nilai_angka,
+            'mata_kuliah_semester_id' => $mkSemester->id,
+         
+            'kode_mk'                 => $masterMk->kode_mk,
+            'nama_mk'                 => $masterMk->nama_mk,
+            'sks'                     => $request->sks, // Jika SKS boleh diedit manual oleh user
+            'nilai_huruf'             => strtoupper($request->nilai_huruf),
+            'nilai_angka'             => $request->nilai_angka,
         ]);
 
-        // 3. Update Attachment jika ada (Opsional sesuai data Anda)
+        // 3. Update Attachment
         if ($request->has('attachment_ids')) {
             $mkPilihan->attachment()->sync($request->attachment_ids);
         }
 
-        // 4. SOLUSI UTAMA: Gunakan Redirect, BUKAN return view()
-        // Ini akan memicu method index() dijalankan ulang sehingga semua variabel ($mataKuliah dll) terisi kembali.
         return redirect()->back()
             ->with('success', 'Data mata kuliah berhasil diperbarui');
     }

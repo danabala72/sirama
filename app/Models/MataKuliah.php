@@ -31,11 +31,20 @@ class MataKuliah extends Model
 
     public function semester()
     {
-        return $this->belongsToMany(Semester::class, 'mata_kuliah_semester');
+        return $this->belongsToMany(Semester::class, 'mata_kuliah_semester')           
+            ->withPivot('id')
+            ->withTimestamps();
     }
 
     public function cps()
     {
-        return $this->hasMany(CpMataKuliah::class);
+        return $this->hasManyThrough(
+            CpMataKuliah::class,
+            MataKuliahSemester::class,
+            'mata_kuliah_id',
+            'mata_kuliah_semester_id',
+            'id',
+            'id'
+        );
     }
 }

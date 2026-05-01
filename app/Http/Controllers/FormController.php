@@ -132,34 +132,34 @@ class FormController extends Controller
 
     public function getMataKuliah(Request $request)
     {
-        $mahasiswaId = Auth::user()->mahasiswa->id;
-
-        $semester = Semester::orderBy('id', 'desc')->get();
-        $jurusanId = Auth::user()->mahasiswa->jurusan->id;
+        $mahasiswa = Auth::user()->mahasiswa;
+        $jurusanId = $mahasiswa->jurusan->id;
         $semesterId = $request->semester_id;
 
-        // 2. Query Mata Kuliah berdasarkan Relasi Pivot yang kita buat
-        $mataKuliah = MataKuliah::where('jurusan_id', $jurusanId)
+        $semester = Semester::orderBy('id', 'desc')->get();
+
+
+        $mataKuliah = MataKuliah::where('jurusan_id', $jurusanId) // Filter ini yang tadi bikin kosong
             ->whereHas('semester', function ($q) use ($semesterId) {
                 $q->where('semester_id', $semesterId);
             })
+            ->with(['semester' => function ($q) use ($semesterId) {
+                $q->where('semester_id', $semesterId);
+            }])
             ->get();
 
-        // 3. Kirim data ke view berikutnya
-
-        $mataKuliahPilihan = Auth::user()
-            ->mahasiswa
-            ->mataKuliahPilihan()
-            ->with('attachment')
+        $mataKuliahPilihan = $mahasiswa->mataKuliahPilihan()
+            ->with(['attachment', 'mkSemester'])
             ->get();
         return view('form.index', [
             'step'       => 3,
             'title'      => 'Formulir 3 - Pengisian Mata Kuliah',
             'mataKuliah' => $mataKuliah,
-            'attachment' => Attachment::where('mahasiswa_id', $mahasiswaId)->get(),
+            'attachment' => Attachment::where('mahasiswa_id', $mahasiswa->id)->get(),
             'semester'   => $semester,
             'jurusan'    => Jurusan::all(),
-            'mataKuliahPilihan' => $mataKuliahPilihan
+            'mataKuliahPilihan' => $mataKuliahPilihan,
+            'selected_semester' => $semesterId
         ]);
     }
 }

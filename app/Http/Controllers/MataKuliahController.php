@@ -8,6 +8,7 @@ use App\Imports\CpmkImport;
 use App\Imports\MataKuliahImport;
 use App\Models\Jurusan;
 use App\Models\MataKuliah;
+use App\Models\MataKuliahSemester;
 use App\Models\Semester;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,10 +38,22 @@ class MataKuliahController extends Controller
 
     public function edit(MataKuliah $mk)
     {
-        $semuaSemester = Semester::orderBy('kode', 'asc')->get();
-        $mk = $mk->load(['cps', 'semester']);
+        // 1. Cari semester yang sedang aktif (is_active = 1)
+        $semesterAktif = Semester::where('is_active', 1)->first();
 
-        return view('mata-kuliah.edit', compact('mk', 'semuaSemester'));
+        if (!$semesterAktif) {
+            return back()->with('error', 'Tidak ada semester yang sedang aktif. Silakan aktifkan satu semester di menu Semester.');
+        }
+
+        // 2. Gunakan firstOrCreate agar jika data jembatannya tidak ada, langsung dibuat
+        $mkSemester = MataKuliahSemester::firstOrCreate([
+            'mata_kuliah_id' => $mk->id,
+            'semester_id'    => $semesterAktif->id
+        ]);
+
+        $semuaSemester = Semester::orderBy('kode', 'asc')->get();
+
+        return view('mata-kuliah.edit', compact('mk', 'semuaSemester', 'mkSemester'));
     }
 
     public function destroy($id)

@@ -222,7 +222,7 @@
                         <div class="mb-3">
                             <label class="form-label">Pilih File Excel (.xlsx / .xls)</label>
                             <input type="file" name="file" class="form-control @error('file') is-invalid @enderror" required accept=".xlsx, .xls">
-                            @error('file') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            @error('file') <div id="error-import-trigger" class="invalid-feedback">{{ $message }}</div> @enderror
 
                             <div class="mt-3 p-2 bg-light rounded border">
                                 <small class="text-muted d-block mb-1 font-bold text-uppercase">Format Header Excel:</small>
@@ -257,12 +257,20 @@
     <div class="modal modal-blur fade" id="modalTambahCp" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
+                @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
                 <!-- Ganti route ke fungsi store CPMK Anda -->
                 <form action="{{ route('cpmk.store') }}" method="POST">
                     @csrf
                     <!-- Input Hidden untuk mengunci ke Mata Kuliah ini -->
-                    <input type="hidden" name="mata_kuliah_id" value="{{ $mk->id }}">
-
+                    <input type="hidden" name="mata_kuliah_semester_id" value="{{ $mkSemester->id}}">
                     <div class="modal-header">
                         <h5 class="modal-title">Tambah Indikator Capaian</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -283,6 +291,19 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Cari apakah ada elemen error di dalam form import
+            const errorElement = document.getElementById('error-import-trigger');
+            const modalElement = document.getElementById('modalImportCp');
+
+            // 2. Jika elemen error ditemukan, tampilkan modalnya
+            if (errorElement && modalElement) {
+                const modalImport = new bootstrap.Modal(modalElement);
+                modalImport.show();
+            }
+        });
+    </script>
 
 
 </x-app-layout>

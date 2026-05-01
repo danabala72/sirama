@@ -68,14 +68,14 @@
         <form id="form-mk" action="{{ route('mk-pilihan.store') }}" method="POST">
             @csrf
             <input type="hidden" name="_method" id="form-method" value="POST">
-            <input type="hidden" name="mata_kuliah_id" id="hidden-mk-id" value="">
+            <input type="hidden" name="mata_kuliah_semester_id" id="hidden-mk-semester-id" value="">
             <div class="row g-3">
                 <div class="col-md-12 col-lg-6" id="select-mk-wrapper">
                     <label class="form-label fw-bold">Pilih Mata Kuliah</label>
                     <select id="select-api" name="mata_kuliah_id_select" class="form-select select2" required>
                         <option value="">-- Cari Mata Kuliah --</option>
                         @foreach($mataKuliahTersisa as $mk)
-                        <option value="{{ $mk['id'] }}" data-nama="{{ $mk['nama_mk'] }}" data-sks="{{ $mk['sks'] }}">
+                        <option value="{{ $mk->semester->first()->pivot->id }}" data-nama="{{ $mk['nama_mk'] }}" data-sks="{{ $mk['sks'] }}">
                             {{ $mk['kode_mk'] }} - {{ $mk['nama_mk'] }} [{{$mk['sks']}} SKS]
                         </option>
                         @endforeach
@@ -154,6 +154,7 @@
                             <button type="button"
                                 class="btn btn-warning btn-sm btn-edit"
                                 data-id="{{ $mk->id }}"
+                                data-mk_semester_id="{{ $mk->mata_kuliah_semester_id }}" 
                                 data-nilai_huruf="{{ $mk->nilai_huruf }}"
                                 data-nilai_angka="{{ $mk->nilai_angka }}"
                                 data-attachments='@json($mk->attachment->pluck("id"))'
@@ -244,18 +245,16 @@
 
 
         selectMK.addEventListener("change", function() {
-
             const selectedOption = this.options[this.selectedIndex];
             if (!selectedOption) return;
 
             if (this.value !== "") {
-
                 const namaMk = selectedOption.dataset.nama || '';
-
-
                 const textSplit = selectedOption.text.split(' - ');
                 const kodeMk = textSplit[0]?.trim() ?? '';
 
+                // 1. Tambahkan baris ini untuk menyimpan ID Pivot (Semester MK)
+                updateHiddenInput('mata_kuliah_semester_id', this.value);
 
                 updateHiddenInput('kode_mk', kodeMk);
                 updateHiddenInput('nama_mk', namaMk);
@@ -263,40 +262,34 @@
                 if (inputOpsi) {
                     inputOpsi.style.display = "block";
                 }
-
             } else {
-
                 if (inputOpsi) {
                     inputOpsi.style.display = "none";
                 }
-
                 removeHiddenInputs();
             }
         });
 
-
         function updateHiddenInput(name, value) {
             let input = document.querySelector(`input[name="${name}"]`);
-
             if (!input) {
                 input = document.createElement('input');
                 input.type = 'hidden';
                 input.name = name;
-
-                if (selectMK.parentNode) {
-                    selectMK.parentNode.appendChild(input);
-                }
+                // Gunakan form sebagai parent agar lebih aman saat submit
+                document.getElementById('form-mk').appendChild(input);
             }
-
             input.value = value;
         }
 
         function removeHiddenInputs() {
-            ['kode_mk', 'nama_mk'].forEach(name => {
+            // 2. Tambahkan 'mata_kuliah_semester_id' ke daftar yang harus dihapus jika batal pilih
+            ['kode_mk', 'nama_mk', 'mata_kuliah_semester_id'].forEach(name => {
                 const input = document.querySelector(`input[name="${name}"]`);
                 if (input) input.remove();
             });
         }
+
 
     });
 
@@ -321,7 +314,7 @@
             const huruf = this.dataset.nilai_huruf
             const angka = this.dataset.nilai_angka
             const sks = this.dataset.sks
-
+            const mata_kuliah_semester_id = this.dataset.mk_semester_id
             const form = document.getElementById('form-mk')
 
             // ubah action ke update
@@ -339,9 +332,15 @@
             }
 
             const hiddenMk = document.getElementById('hidden-mk-id');
+            const mkSemesterId = document.getElementById('hidden-mk-semester-id')
+
 
             if (hiddenMk) {
                 hiddenMk.value = id;
+            }
+
+            if(mkSemesterId){
+                mkSemesterId.value = mata_kuliah_semester_id
             }
 
             const select = document.getElementById('select-api');
