@@ -165,6 +165,12 @@
 
                         @endforeach
                         @endif
+                         <li class="nav-item">
+                            <a href="{{ route('profile.edit') }}" class="nav-link {{ request()->routeIs('profile.edit') ? 'active' : '' }}">
+                                <i class="ti ti-user-cog me-1"></i>
+                                Profil
+                            </a>
+                        </li>                        
                     </ul>
                 </div>
             </aside>
