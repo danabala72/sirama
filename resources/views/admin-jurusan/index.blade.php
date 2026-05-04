@@ -1,61 +1,64 @@
 <x-app-layout>
-    <div class="container-xl p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-800">Daftar Admin Jurusan</h2>
-            <!-- Tombol ini mencari ID #modalTambahAdmin -->
-            <button type="button" class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahAdmin">
-                <i class="fas fa-plus me-1"></i> Tambah Admin Jurusan
-            </button>
+    <div class="container-xl p-2">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="text-2xl font-bold text-gray-800">Daftar Mahasiswa</h2>
         </div>
 
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-                <div class="table-responsive">
-                    <table id="adminJurusanTable" class="table table-hover align-middle w-100">
-                        <thead class="bg-light">
-                            <tr>
-                                <th style="width: 5%">No</th>
-                                <th>Nama</th>
-                                <th>Jurusan</th>
-                                <th>Username</th>
-                                <th>No. HP</th>
-                                <th class="text-center" style="width: 15%">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($adminJurusans as $admin)
-                            <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td class="font-semibold text-gray-700">{{ $admin->nama }}</td>
-                                <td>
-                                    <span class="badge bg-info-subtle text-info border border-info-subtle px-3">
-                                        {{ $admin->jurusan->nama_jurusan }}
-                                    </span>
-                                </td>
-                                <td>{{ $admin->user->username }}</td>
-                                <td>{{ $admin->no_hp ?? '-' }}</td>
-                                <td class="text-center">
-                                    <div class="d-flex justify-content-center gap-2">
-                                        <button type="button" class="btn btn-sm btn-outline-warning d-flex align-items-center edit-btn" data-id="{{ $admin->id }}">
-                                            <i class="ti ti-edit fs-5"></i>
-                                        </button>
+        <button type="button" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-info my-2" data-bs-toggle="modal" data-bs-target="#modalTambahAdmin">
+            <svg xmlns="http://w3.org" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span class="hidden sm:inline">Tambah Admin Jurusan</span>
+        </button>
+    </div>
 
-                                        <form action="{{ route('admin_jurusan.destroy', $admin->id) }}" method="POST" onsubmit="return confirm('Hapus admin ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger d-flex align-items-center">
-                                                <i class="ti ti-trash fs-5"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table id="adminJurusanTable" class="table table-hover align-middle w-100">
+                <thead class="bg-light">
+                    <tr>
+                        <th style="width: 5%">No</th>
+                        <th>Nama</th>
+                        <th>Jurusan</th>
+                        <th>Username</th>
+                        <th>No. HP</th>
+                        <th class="text-center" style="width: 15%">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($adminJurusans as $admin)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td class="font-semibold text-gray-700">{{ $admin->nama }}</td>
+                        <td>
+                            <span class="badge bg-info-subtle text-info border border-info-subtle px-3">
+                                {{ $admin->jurusan->nama_jurusan }}
+                            </span>
+                        </td>
+                        <td>{{ $admin->user->username }}</td>
+                        <td>{{ $admin->no_hp ?? '-' }}</td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-warning d-flex align-items-center edit-btn" data-id="{{ $admin->id }}">
+                                    <i class="ti ti-edit fs-5"></i>
+                                </button>
+
+                                <form action="{{ route('admin_jurusan.destroy', $admin->id) }}" method="POST" onsubmit="return confirm('Hapus admin ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger d-flex align-items-center">
+                                        <i class="ti ti-trash fs-5"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
+    </div>
     </div>
 
     <!-- 1. MODAL TAMBAH (CREATE) -->

@@ -3,9 +3,6 @@
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="text-2xl font-bold text-gray-800">Manajemen Semester</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-tambah">
-                <i class="ti ti-plus me-1"></i> Tambah Semester
-            </button>
         </div>
 
         @if(session('success'))
@@ -16,6 +13,16 @@
             <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
         </div>
         @endif
+
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <button type="button" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-info my-2" data-bs-toggle="modal" data-bs-target="#modal-tambah">
+                <svg xmlns="http://w3.org" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Tambah Semester
+            </button>
+
+        </div>
 
         <div class="card shadow-sm">
             <div class="table-responsive">
