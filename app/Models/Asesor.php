@@ -13,6 +13,7 @@ class Asesor extends Model
         'jenis_kelamin',
         'no_hp',
         'email',
+        'signature'
     ];
 
     public function mahasiswa()

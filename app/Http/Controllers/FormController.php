@@ -139,7 +139,7 @@ class FormController extends Controller
         $semester = Semester::orderBy('id', 'desc')->get();
 
 
-        $mataKuliah = MataKuliah::where('jurusan_id', $jurusanId) // Filter ini yang tadi bikin kosong
+        $mataKuliah = MataKuliah::where('status', 1)->where('jurusan_id', $jurusanId) // Filter ini yang tadi bikin kosong
             ->whereHas('semester', function ($q) use ($semesterId) {
                 $q->where('semester_id', $semesterId);
             })

@@ -98,11 +98,18 @@ Route::middleware('auth')->group(function () {
         Route::delete('/cpmk/{cpmk}', [CpMataKuliahController::class, 'destroy'])->name('cpmk.destroy');
         Route::put('/cpmk/{cpmk}/update', [CpMataKuliahController::class, 'update'])->name('cpmk.update');
         Route::post('/cpmk', [CpMataKuliahController::class, 'store'])->name('cpmk.store');
+    });
 
+    Route::middleware(['auth'])->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+        Route::middleware(['role:Asesor'])->group(function() {
+            Route::post('/profile/signature', [ProfileController::class, 'signature'])->name('profile.signature.update');
+        });
     });
+
+
 
 
     Route::middleware(['auth', 'role:Asesor'])->group(function () {

@@ -22,7 +22,7 @@ class TransferSksNonFormalController extends Controller
             ->with([
                 'mataKuliahPilihan.transferSksNonFormal',
                 'mataKuliahPilihan.attachment',
-                'jurusan'
+                'user.jurusan'
             ])
             ->get();
 
@@ -32,7 +32,7 @@ class TransferSksNonFormalController extends Controller
     public function nonFormalReview($id)
     {
         $mhs = Mahasiswa::with([
-            'jurusan',
+            'user.jurusan',
             'mataKuliahPilihan.mataKuliah.cps',
             'mataKuliahPilihan.transferSksNonFormal',
             'mataKuliahPilihan.attachment' => function ($query) {
