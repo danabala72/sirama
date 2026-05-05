@@ -93,7 +93,7 @@
                                             <!-- Menghilangkan class dropdown-toggle agar tidak ada panah -->
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-start shadow-sm">
-                                            <a class="dropdown-item" href="{{ route('mahasiswa.laporan.form1', $mhs->id)}}">
+                                            <a class="dropdown-item" href="{{ route('mahasiswa.laporan.form1', $mhs->mahasiswa->id)}}">
                                                 <i class="ti ti-download me-2"></i>
                                                 Detail Calon Mahasiswa
                                             </a>                                            

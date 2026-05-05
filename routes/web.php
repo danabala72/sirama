@@ -62,7 +62,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/mahasiswa/import', [UserController::class, 'userImport'])->name('mahasiswa.import');
         Route::put('mahasiswa/{user}/update', [UserController::class, 'update'])->name('mahasiswa.update');
 
-        Route::get('/mahasiswa/{user}/laporan/form1', [UserController::class, 'laporanForm1'])->name('mahasiswa.laporan.form1');
+        Route::get('/mahasiswa/{id}/laporan/form1', [UserController::class, 'laporanForm1'])->name('mahasiswa.laporan.form1');
 
         Route::get('/asesor', [UserController::class, 'asesorIndex'])->name('asesor.index');
         Route::get('/asesor/{user}/edit', [UserController::class, 'asesorEdit'])->name('asesor.edit');
