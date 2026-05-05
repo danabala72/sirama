@@ -7,14 +7,18 @@ use App\Exports\TemplateMahasiswaExport;
 use App\Imports\AsesorImport;
 use App\Imports\MahasiswaImport;
 use App\Models\Asesor;
+use App\Models\Mahasiswa;
 use App\Models\Role;
 use App\Models\ROLES;
 use App\Models\User;
+use BcMath\Number;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpWord\TemplateProcessor;
 
 class UserController extends Controller
 {
@@ -271,5 +275,45 @@ class UserController extends Controller
         })->with(['mahasiswa', 'asesor', 'role'])->get();
 
         return view('asesor.index', compact('asesor'));
+    }
+
+    public function laporanForm1($id)
+    {
+        $mhs = Mahasiswa::findOrFail($id);
+        $templatePath = storage_path('app/public/template/FORM 1 (Rincian Data Peserta  Calon peserta).docx');
+        if (!file_exists($templatePath)) {
+            return redirect()->back()->with('error', 'File template tidak ditemukan.');
+        }
+
+        $templateProcessor = new TemplateProcessor($templatePath);
+
+        $templateProcessor->setValues([
+            'name'          => $mhs->name,
+            'ttl'           => $mhs->tempat_lahir . ', ' . Carbon::parse($mhs->tgl_lahir)->translatedFormat('d F Y'),
+            'jenis_kelamin' => $mhs->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan',
+            'status'        => $mhs->status_perkawinan,
+            'kebangsaan'    => $mhs->kebangsaan,
+            'alamat_rumah'  => $mhs->alamat_rumah,
+            'kode_pos'      => $mhs->kode_pos,
+            'no_hp'         => $mhs->no_hp,
+            'alamat_kantor' => $mhs->alamat_kantor,
+            'email'         => $mhs->email,
+
+            // Data Pendidikan Terakhir
+            'nama_sekolah'  => $mhs->nama_sekolah ?? '-',
+            'alamat_sekolah' => $mhs->alamat_sekolah ?? '-',
+            'tahun_lulus_sekolah' => $mhs->tahun_lulus_sekolah ?? '-',
+            'nama_pt'       => $mhs->nama_pt ?? '-',
+            'prodi_pt'      => $mhs->prodi_pt ?? '-',
+            'program_pt'    => $mhs->program_pt ?? '-',
+            'tahun_lulus_pt' => $mhs->tahun_lulus_pt ?? '-',
+        ]);
+        $fileName = "FORM 1 (Rincian Data Peserta  Calon peserta)-" . str_replace(' ', '_', $mhs->name) . ".docx";
+
+        // Download langsung tanpa simpan di server secara permanen
+        $tempFile = tempnam(sys_get_temp_dir(), 'word');
+        $templateProcessor->saveAs($tempFile);
+
+        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
     }
 }

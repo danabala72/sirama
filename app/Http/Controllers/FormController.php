@@ -55,7 +55,7 @@ class FormController extends Controller
             : collect();
 
         $mataKuliahPilihan = ($step == 5 || $step == 6)
-            ? MataKuliahPilihan::with('mataKuliah.cps', 'cpLevel', 'transferSks.cpmkItems')->where('mahasiswa_id', $mahasiswa->id)->get()
+            ? MataKuliahPilihan::wherehas('cpLevel')->with('mataKuliah.cps', 'cpLevel', 'transferSks.cpmkItems')->where('mahasiswa_id', $mahasiswa->id)->get()
             : collect();
 
         return view('form.index', [
@@ -92,13 +92,23 @@ class FormController extends Controller
                     'email',
                     'max:255',
                     Rule::unique('mahasiswa', 'email')->ignore($existingMahasiswa?->id),
-                ]
+                ],
+                // Tambahan Kolom Pendidikan (Nullable)
+                'nama_sekolah' => ['nullable', 'string', 'max:255'],
+                'alamat_sekolah' => ['nullable', 'string', 'max:255'],
+                'tahun_lulus_sekolah' => ['nullable', 'numeric', 'digits:4'],
+                'nama_pt' => ['nullable', 'string', 'max:255'],
+                'prodi_pt' => ['nullable', 'string', 'max:255'],
+                'program_pt' => ['nullable', 'string', 'max:255'],
+                'tahun_lulus_pt' => ['nullable', 'numeric', 'digits:4'],
             ],
             [
                 'required' => ':attribute wajib diisi.',
                 'email.email' => 'Format email tidak valid.',
                 'email.unique' => 'Email sudah terdaftar.',
                 'max' => ':attribute maksimal :max karakter.',
+                'digits' => ':attribute harus :digits digit.',
+                'numeric' => ':attribute harus berupa angka.',
                 'jenis_kelamin.in' => 'Jenis kelamin harus L atau P.',
                 'status_perkawinan.in' => 'Status perkawinan tidak valid.',
                 'no_hp.regex' => 'Format :attribute tidak valid'
@@ -114,12 +124,22 @@ class FormController extends Controller
                 'kode_pos' => 'Kode pos',
                 'no_hp' => 'No HP',
                 'alamat_kantor' => 'Alamat kantor',
-                'email' => 'Email'
+                'email' => 'Email',
+                // Custom Attribute Pendidikan
+                'nama_sekolah' => 'Nama sekolah',
+                'alamat_sekolah' => 'Alamat sekolah',
+                'tahun_lulus_sekolah' => 'Tahun lulus sekolah',
+                'nama_pt' => 'Nama perguruan tinggi',
+                'prodi_pt' => 'Program studi PT',
+                'program_pt' => 'Program pendidikan',
+                'tahun_lulus_pt' => 'Tahun lulus PT',
             ]
         );
 
         $validated['user_id'] = $user->id;
 
+        // updateOrCreate akan otomatis memasukkan kolom baru 
+        // selama sudah terdaftar di $fillable model Mahasiswa
         Mahasiswa::updateOrCreate(
             ['user_id' => $user->id],
             $validated

@@ -2,7 +2,7 @@
     <div class="container-xl p-2">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="text-2xl font-bold text-gray-800">Daftar Mahasiswa</h2>
+            <h2 class="text-2xl font-bold text-gray-800">Daftar Admin Jurusan</h2>
         </div>
 
         <button type="button" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-info my-2" data-bs-toggle="modal" data-bs-target="#modalTambahAdmin">

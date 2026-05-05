@@ -174,6 +174,72 @@
         @enderror
     </div>
 
+     <div class="hr-text hr-text-left text-primary">Data Pendidikan Menengah</div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Nama Sekolah</label>
+                <input type="text" name="nama_sekolah" class="form-control @error('nama_sekolah') is-invalid @enderror" 
+                       value="{{ old('nama_sekolah', $mahasiswa?->nama_sekolah) }}" placeholder="Nama SMA/SMK/MA">
+                @error('nama_sekolah')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label class="form-label">Alamat Sekolah</label>
+                <input type="text" name="alamat_sekolah" class="form-control @error('alamat_sekolah') is-invalid @enderror" 
+                       value="{{ old('alamat_sekolah', $mahasiswa?->alamat_sekolah) }}">
+                @error('alamat_sekolah')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="mb-3">
+                <label class="form-label">Tahun Lulus</label>
+                <input type="number" name="tahun_lulus_sekolah" class="form-control @error('tahun_lulus_sekolah') is-invalid @enderror" 
+                       value="{{ old('tahun_lulus_sekolah', $mahasiswa?->tahun_lulus_sekolah) }}" placeholder="YYYY">
+                @error('tahun_lulus_sekolah')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+        </div>
+    </div>
+
+    <div class="hr-text hr-text-left text-primary">Data Perguruan Tinggi (Jika Ada)</div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Nama Perguruan Tinggi</label>
+                <input type="text" name="nama_pt" class="form-control @error('nama_pt') is-invalid @enderror" 
+                       value="{{ old('nama_pt', $mahasiswa?->nama_pt) }}">
+                @error('nama_pt')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Jurusan / Program Studi</label>
+                <input type="text" name="prodi_pt" class="form-control @error('prodi_pt') is-invalid @enderror" 
+                       value="{{ old('prodi_pt', $mahasiswa?->prodi_pt) }}">
+                @error('prodi_pt')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Program (D3/S1/Lainnya)</label>
+                <input type="text" name="program_pt" class="form-control @error('program_pt') is-invalid @enderror" 
+                       value="{{ old('program_pt', $mahasiswa?->program_pt) }}" placeholder="Contoh: D3 Akuntansi">
+                @error('program_pt')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Tahun Lulus</label>
+                <input type="number" name="tahun_lulus_pt" class="form-control @error('tahun_lulus_pt') is-invalid @enderror" 
+                       value="{{ old('tahun_lulus_pt', $mahasiswa?->tahun_lulus_pt) }}" placeholder="YYYY">
+                @error('tahun_lulus_pt')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+        </div>
+    </div>
+
     <div class="mt-4 d-flex gap-2">
         <button id="btn-simpan-step1" type="submit" class="btn btn-primary">
             <i class="ti ti-device-floppy me-1 fs-2" data-icon-default></i>

@@ -82,6 +82,24 @@
                             <td class="text-sm text-muted">{{ $mhs->mahasiswa->email ?? '-' }}</td>
                             <td class="text-sm text-center">
                                 <div class="d-flex justify-content-center gap-2">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-success d-flex align-items-center"
+                                            type="button"
+
+                                            data-bs-toggle="dropdown"
+                                            style="height: 32px; padding: 0 8px; border-color: #dee2e6;">
+                                            <i class="ti ti-file me-2"></i>
+                                            <span style="font-size: 13px;">Formulir</span>
+                                            <!-- Menghilangkan class dropdown-toggle agar tidak ada panah -->
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-start shadow-sm">
+                                            <a class="dropdown-item" href="{{ route('mahasiswa.laporan.form1', $mhs->id)}}">
+                                                <i class="ti ti-download me-2"></i>
+                                                Detail Calon Mahasiswa
+                                            </a>                                            
+                                        </div>
+                                    </div>
+
                                     <a href="{{ route('mahasiswa.edit', $mhs->id) }}" class="btn btn-sm btn-outline-primary">
                                         <svg xmlns="http://w3.org" class="icon icon-tabler icon-tabler-edit" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -137,9 +155,10 @@
 
                             <div class="mt-3 p-2 bg-light rounded border">
                                 <small class="text-muted d-block mb-1 font-bold text-uppercase">Format Header Excel:</small>
-                                <code class="text-primary" style="font-size: 0.75rem;">
-                                    kode_jurusan, username, password, nama_lengkap, email, jenis_kelamin, tempat_lahir, tgl_lahir, no_hp
+                                <code class="text-primary" style="font-size: 0.75rem; word-break: break-all;">
+                                    kode_jurusan, username, password, nama_lengkap, email, jenis_kelamin, tempat_lahir, tgl_lahir, no_hp, nama_sekolah, alamat_sekolah, tahun_lulus_sekolah, nama_perguruan_tinggi, prodi_pt, program_pt, tahun_lulus_pt
                                 </code>
+
                             </div>
                         </div>
                         <div class="text-center">

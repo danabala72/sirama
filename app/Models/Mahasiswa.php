@@ -22,6 +22,13 @@ class Mahasiswa extends Model
         'no_hp',
         'alamat_kantor',
         'email',
+        'nama_sekolah',
+        'alamat_sekolah',
+        'tahun_lulus_sekolah',
+        'nama_pt',
+        'prodi_pt',
+        'program_pt',
+        'tahun_lulus_pt'
     ];
 
     public function mataKuliahPilihan(): HasMany
