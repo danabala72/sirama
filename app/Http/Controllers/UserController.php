@@ -311,7 +311,7 @@ class UserController extends Controller
         $fileName = "FORM 1 (Rincian Data Peserta  Calon peserta)-" . str_replace(' ', '_', $mhs->name) . ".docx";
 
         // Download langsung tanpa simpan di server secara permanen
-        $tempFile = tempnam(sys_get_temp_dir(), 'word');
+        $tempFile = storage_path('framework/cache/temp_word_' . time() . '.docx');
         $templateProcessor->saveAs($tempFile);
 
         return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
