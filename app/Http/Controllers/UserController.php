@@ -28,17 +28,22 @@ class UserController extends Controller
         $role = $user->role->role;
         $jurusanId = $user->jurusan_id;
 
-        $mahasiswa = User::whereHas('role', function ($query) {
-            $query->where('role', '=', ROLES::MAHASISWA);
-        })
+        $mahasiswa = User::query()
+            ->whereHas('role', function ($q) {
+                $q->where('role', ROLES::MAHASISWA);
+            })
+
+            // 🔥 semua role wajib punya jurusan
             ->whereNotNull('jurusan_id')
 
-            ->when($role === 'AdminJurusan', function ($query) use ($jurusanId) {
-                return $query->where('jurusan_id', $jurusanId);
+            // 🔥 filter tambahan hanya untuk AdminJurusan
+            ->when($role === 'AdminJurusan', function ($q) use ($jurusanId) {
+                $q->where('jurusan_id', $jurusanId);
             })
+
             ->with(['mahasiswa', 'asesor', 'role', 'jurusan'])
             ->get();
-
+            
         return view('mahasiswa.index', compact('mahasiswa'));
     }
 
@@ -315,5 +320,15 @@ class UserController extends Controller
         $templateProcessor->saveAs($tempFile);
 
         return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+    }
+
+    public function unlock($id)
+    {
+        $mahasiswa = Mahasiswa::findOrFail($id);
+        $mahasiswa->update([
+            'is_editable' => true
+        ]);
+
+        return back()->with('success', 'Data berhasil dibuka kembali (unlock).');
     }
 }

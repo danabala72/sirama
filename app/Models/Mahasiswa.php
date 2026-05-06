@@ -28,7 +28,8 @@ class Mahasiswa extends Model
         'nama_pt',
         'prodi_pt',
         'program_pt',
-        'tahun_lulus_pt'
+        'tahun_lulus_pt',
+        'is_editable'
     ];
 
     public function mataKuliahPilihan(): HasMany
@@ -47,5 +48,9 @@ class Mahasiswa extends Model
     public function getJurusanAttribute()
     {
         return $this->user->jurusan;
+    }
+    public function scopeLocked($query)
+    {
+        return $query->where('is_editable', 0);
     }
 }

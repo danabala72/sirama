@@ -43,7 +43,7 @@
                                 <!-- Textarea -->
                                 <textarea name="data[{{ $mk->id }}][item_cpmk][]"
                                     class="form-control"
-                                    
+
                                     placeholder="Capaian Pembelajaran">{{ $cpmk->cpmk ?? '' }}</textarea>
 
                                 <!-- Tombol Kecil (btn-sm) dengan Jarak (ms-2) -->
@@ -110,12 +110,74 @@
         </div>
 
         <!-- Tombol Simpan di luar loop -->
-        <div class="text-right mt-3">
-            <button type="submit" class="btn btn-primary ">Simpan</button>
+        <div class="d-flex justify-content-end gap-2 mt-3">
+
+            <button type="submit" name="action" value="save" class="btn btn-primary">
+                Simpan
+            </button>
+
+            <button type="button" class="btn btn-danger"
+                data-bs-toggle="modal"
+                data-bs-target="#modalFinalisasi">
+                Konfirmasi Data
+            </button>
+
         </div>
     </form>
 </div>
+<div class="modal fade" id="modalFinalisasi" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow-lg border-0">
 
+            <!-- HEADER ICON -->
+            <div class="text-center pt-4">
+                <div class="text-danger d-inline-flex align-items-center justify-content-center"
+                    style="width:70px;height:70px;">
+                    <i class="ti ti-exclamation-circle" style="font-size: 48px;"></i>
+                </div>
+            </div>
+
+            <div class="modal-body text-center px-4">
+                <h5 class="fw-bold mt-3">Konfirmasi Data</h5>
+
+                <p class="mt-3 text-muted">
+                    Mohon periksa kembali seluruh data pada <b>Form 1 hingga Form 6</b>.
+                </p>
+
+                <p class="text-danger fw-semibold">
+                    Setelah finalisasi, data akan dikunci dan tidak dapat diubah kembali.
+                </p>
+
+                <p class="small text-muted">
+                    Jika terdapat kesalahan, silakan hubungi admin untuk proses perbaikan.
+                </p>
+
+                <!-- CHECKBOX -->
+                <div class="form-check mt-4 text-start">
+                    <input class="form-check-input" type="checkbox" id="confirmCheck">
+                    <label class="form-check-label" for="confirmCheck">
+                        Saya sudah memastikan data yang diinput sudah benar
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 d-flex justify-content-between px-4 pb-4">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">
+                    Batal
+                </button>
+
+                <form method="POST" action="{{ route('form.mahasiswa.finalize') }}">
+                    @csrf
+                    
+                    <button type="submit" id="btnFinal" class="btn btn-danger rounded-pill px-4" disabled>
+                        Ya, Finalisasi
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
 <script>
     function addCpmkField(id) {
         const container = document.getElementById(`cpmk-container-${id}`);
@@ -154,4 +216,26 @@
         wrapper.appendChild(removeBtn);
         container.appendChild(wrapper);
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkbox = document.getElementById('confirmCheck');
+        const btn = document.getElementById('btnFinal');
+
+        checkbox.addEventListener('change', function() {
+            btn.disabled = !this.checked;
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const modal = document.getElementById('modalFinalisasi');
+        const checkbox = document.getElementById('confirmCheck');
+        const btn = document.getElementById('btnFinal');
+
+        modal.addEventListener('hidden.bs.modal', function() {
+            checkbox.checked = false;
+            btn.disabled = true;
+        });
+
+    });
 </script>

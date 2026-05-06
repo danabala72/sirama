@@ -182,4 +182,18 @@ class FormController extends Controller
             'selected_semester' => $semesterId
         ]);
     }
+    public function finalize()
+    {
+        $mahasiswa = Auth::user()->mahasiswa;
+
+        if (!$mahasiswa) {
+            abort(403);
+        }
+
+        Mahasiswa::where('id', $mahasiswa->id)
+            ->update(['is_editable' => false]);
+
+        return redirect()->route('form.step', ['step' => 1])
+            ->with('success', 'Data berhasil dikunci');
+    }
 }

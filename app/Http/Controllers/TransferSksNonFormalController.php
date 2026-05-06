@@ -15,9 +15,11 @@ class TransferSksNonFormalController extends Controller
         $user = Auth::user();
         $asesorId = $user->asesor->id;
 
-        $mahasiswas = Mahasiswa::whereHas('asesors', function ($query) use ($asesorId) {
-            $query->where('asesor_id', $asesorId);
-        })
+        $mahasiswas = Mahasiswa::query()
+            ->locked()
+            ->whereHas('asesors', function ($query) use ($asesorId) {
+                $query->where('asesor_id', $asesorId);
+            })
             ->whereHas('mataKuliahPilihan')
             ->with([
                 'mataKuliahPilihan.transferSksNonFormal',

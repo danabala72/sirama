@@ -82,6 +82,22 @@
                             <td class="text-sm text-muted">{{ $mhs->mahasiswa->email ?? '-' }}</td>
                             <td class="text-sm text-center">
                                 <div class="d-flex justify-content-center gap-2">
+                                    @if($mhs->mahasiswa && !$mhs->mahasiswa?->is_editable)
+                                    <form action="{{ route('mahasiswa.unlock', $mhs->mahasiswa->id) }}" method="POST"
+                                        onsubmit="return confirm('Buka kunci data mahasiswa ini?')" class="m-0">
+
+                                        @csrf
+
+                                        <button type="submit"
+                                            class="btn btn-sm btn-outline-warning d-flex align-items-center justify-content-center"
+                                            style="height: 32px; width: 32px;">
+
+                                            <i class="ti ti-lock-open fs-5"></i>
+
+                                        </button>
+
+                                    </form>
+                                    @endif
                                     @if($mhs->mahasiswa)
                                     <div class="dropdown">
                                         <button class="btn btn-sm btn-outline-success d-flex align-items-center"

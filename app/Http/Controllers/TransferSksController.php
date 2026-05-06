@@ -57,10 +57,12 @@ class TransferSksController extends Controller
     {
         $user = Auth::user();
         $asesorId = $user->asesor->id;
-
-        $mahasiswas = Mahasiswa::whereHas('asesors', function ($query) use ($asesorId) {
-            $query->where('asesor_id', $asesorId);
-        })
+        
+        $mahasiswas = Mahasiswa::query()
+            ->locked()
+            ->whereHas('asesors', function ($query) use ($asesorId) {
+                $query->where('asesor_id', $asesorId);
+            })
             ->whereHas('mataKuliahPilihan.transferSks.cpmkItems')
             ->with([
                 'mataKuliahPilihan.transferSks' => function ($query) {
@@ -135,10 +137,8 @@ class TransferSksController extends Controller
 
             return redirect()->route('asesmen.formal')
                 ->with('success', 'Penilaian dan verifikasi dokumen berhasil disimpan.');
-
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
         }
     }
-
 }

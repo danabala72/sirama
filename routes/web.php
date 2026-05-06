@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/mahasiswa/{user}/edit', [UserController::class, 'edit'])->name('mahasiswa.edit');
         Route::get('/mahasiswa/create', [UserController::class, 'create'])->name('mahasiswa.create');
         Route::post('/mahasiswa', [UserController::class, 'store'])->name('mahasiswa.store');
+        Route::post('/mahasiswa/{id}/unlock', [UserController::class, 'unlock'])->name('mahasiswa.unlock');
         Route::delete('/mahasiswa/{user}', [UserController::class, 'destroy'])->name('mahasiswa.destroy');
         Route::get('/mahasiswa/template', [UserController::class, 'templateDownload'])->name('mahasiswa.template');
         Route::post('/mahasiswa/import', [UserController::class, 'userImport'])->name('mahasiswa.import');
@@ -140,6 +141,9 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/mata-kuliah', [FormController::class, 'getMataKuliah'])
             ->name('form.mata-kuliah');
+
+        Route::post('/form/mahasiswa/finalize', [FormController::class, 'finalize'])
+            ->name('form.mahasiswa.finalize');
 
         Route::post('/attachment/store', [AttachmentController::class, 'store'])->name('attachment.store');
         Route::post('/attachment/store/cv', [AttachmentController::class, 'storeCv'])->name('attachment.store.cv');
