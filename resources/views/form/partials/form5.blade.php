@@ -13,78 +13,87 @@
         <div class="accordion-item">
 
             @php
-                $cps = $mk->mataKuliah->cps ?? [];
-                $hasChecked = collect($mk->cpLevel ?? [])->contains('level_kompetensi', 1);
-                $isDanger = count($cps) === 0 || !$hasChecked;
-            @endphp
+            $cps = $mk->mataKuliah->cps ?? [];
+            $totalCp = count($cps);
 
-            <!-- HEADER -->
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed {{ $isDanger ? 'text-danger' : '' }}"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapse{{ $mk->id }}">
+            $checkedCount = collect($mk->cpLevel ?? [])
+            ->where('level_kompetensi', 1)
+            ->count();
 
-                    {{$index + 1}}. {{ $mk->nama_mk }} @if($isDanger)
+            $isDanger = $totalCp === 0 || $checkedCount === 0;
+            $isSuccess = $totalCp > 0 && $checkedCount === $totalCp;
+            $isWarning = $checkedCount > 0 && $checkedCount < $totalCp;
+                @endphp
+
+                <!-- HEADER -->
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed  {{ $isDanger ? 'text-danger' : ($isWarning ? 'text-warning' : 'text-success') }}"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapse{{ $mk->id }}">
+
+                        {{$index + 1}}. {{ $mk->nama_mk }}
+                        @if($isDanger)
                         <i class="ti ti-alert-triangle ms-2"></i>
-                    @else
+                        @elseif($isWarning)
+                        <i class="ti ti-alert-circle ms-2"></i>
+                        @else
                         <i class="ti ti-check ms-2 text-success"></i>
-                    @endif
+                        @endif
+                    </button>
+                </h2>
 
-                </button>
-            </h2>
+                <!-- BODY -->
+                <div id="collapse{{ $mk->id }}"
+                    class="accordion-collapse collapse"
+                    data-bs-parent="#accordionMK">
 
-            <!-- BODY -->
-            <div id="collapse{{ $mk->id }}"
-                class="accordion-collapse collapse"
-                data-bs-parent="#accordionMK">
+                    <div class="accordion-body">
 
-                <div class="accordion-body">
-
-                    @php
-                    $levels = [];
-                    foreach($mk->cpLevel ?? [] as $l){
+                        @php
+                        $levels = [];
+                        foreach($mk->cpLevel ?? [] as $l){
                         $levels[$l->cp_mata_kuliah_id] = $l->level_kompetensi;
-                    }
-                    @endphp
+                        }
+                        @endphp
 
-                    @forelse($mk->mataKuliah->cps ?? [] as $i => $cp)
+                        @forelse($mk->mataKuliah->cps ?? [] as $i => $cp)
 
-                    <div class="row align-items-center my-3 border-bottom pb-2">
+                        <div class="row align-items-center my-3 border-bottom pb-2">
 
-                        <!-- CP -->
-                        <div class="col-md-8">
-                            <div class="fw-medium">
-                                {{ $i + 1 }}. {{ $cp->indikator_capaian }}
+                            <!-- CP -->
+                            <div class="col-md-8">
+                                <div class="fw-medium">
+                                    {{ $i + 1 }}. {{ $cp->indikator_capaian }}
+                                </div>
                             </div>
+
+                            <!-- SWITCH -->
+                            <div class="col-md-4">
+                                <label class="form-check form-switch">
+
+                                    <input class="form-check-input"
+                                        type="checkbox"
+                                        name="cp[{{ $mk->id }}][{{ $cp->id }}]"
+                                        value="1"
+                                        {{ isset($levels[$cp->id]) && $levels[$cp->id] ? 'checked' : '' }}>
+
+                                    <span class="form-check-label">Tercapai</span>
+                                </label>
+                            </div>
+
                         </div>
 
-                        <!-- SWITCH -->
-                        <div class="col-md-4">
-                            <label class="form-check form-switch">
+                        @empty
 
-                                <input class="form-check-input"
-                                    type="checkbox"
-                                    name="cp[{{ $mk->id }}][{{ $cp->id }}]"
-                                    value="1"
-                                    {{ isset($levels[$cp->id]) && $levels[$cp->id] ? 'checked' : '' }}>
-
-                                <span class="form-check-label">Tercapai</span>
-                            </label>
+                        <div class="text-sm text-center py-3 text-danger">
+                            <i>Tidak ada indikator capaian untuk mata kuliah ini</i>
                         </div>
 
+                        @endforelse
+
                     </div>
-
-                    @empty
-
-                    <div class="text-sm text-center py-3 text-danger">
-                        <i>Tidak ada indikator capaian untuk mata kuliah ini</i>
-                    </div>
-
-                    @endforelse
-
                 </div>
-            </div>
 
         </div>
         @endforeach
@@ -97,12 +106,11 @@
 </form>
 
 <div class="mt-4 d-flex gap-2">
- 
+
     <a
         href="{{ route('form.step', 'step=6') }}"
-        class="btn btn-outline-primary"        
-        title="Lanjut ke Formulir 6"
-    >
+        class="btn btn-outline-primary"
+        title="Lanjut ke Formulir 6">
         <i class="ti ti-arrow-right me-1"></i>
         Ke Form 6
     </a>
