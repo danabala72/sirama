@@ -82,6 +82,7 @@
                             <td class="text-sm text-muted">{{ $mhs->mahasiswa->email ?? '-' }}</td>
                             <td class="text-sm text-center">
                                 <div class="d-flex justify-content-center gap-2">
+                                    @if($mhs->mahasiswa)
                                     <div class="dropdown">
                                         <button class="btn btn-sm btn-outline-success d-flex align-items-center"
                                             type="button"
@@ -96,10 +97,10 @@
                                             <a class="dropdown-item" href="{{ route('mahasiswa.laporan.form1', $mhs->mahasiswa->id)}}">
                                                 <i class="ti ti-download me-2"></i>
                                                 Detail Calon Mahasiswa
-                                            </a>                                            
+                                            </a>
                                         </div>
                                     </div>
-
+                                    @endif
                                     <a href="{{ route('mahasiswa.edit', $mhs->id) }}" class="btn btn-sm btn-outline-primary">
                                         <svg xmlns="http://w3.org" class="icon icon-tabler icon-tabler-edit" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
