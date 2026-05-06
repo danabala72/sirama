@@ -50,6 +50,23 @@
 
                     <div class="accordion-body">
 
+                        @if(!empty($mk->mataKuliah->cps) && count($mk->mataKuliah->cps) > 0)
+                        <div class="row align-items-center mb-4">
+
+                            <!-- kiri (kosong, biar sejajar dengan text CP) -->
+                            <div class="col-md-8"></div>
+
+                            <!-- kanan (toggle all) -->
+                            <div class="col-md-4 d-flex justify-content-start">
+                                <label class="form-check m-0">
+                                    <input class="form-check-input btn-toggle-all" type="checkbox">
+                                    <span class="form-check-label">Pilih Semua</span>
+                                </label>
+                            </div>
+
+                        </div>
+                        @endif
+
                         @php
                         $levels = [];
                         foreach($mk->cpLevel ?? [] as $l){
@@ -59,7 +76,7 @@
 
                         @forelse($mk->mataKuliah->cps ?? [] as $i => $cp)
 
-                        <div class="row align-items-center my-3 border-bottom pb-2">
+                        <div class="row align-items-center my-3 pb-2 {{ !$loop->last ? 'border-bottom' : '' }}">
 
                             <!-- CP -->
                             <div class="col-md-8">
@@ -72,7 +89,7 @@
                             <div class="col-md-4">
                                 <label class="form-check form-switch">
 
-                                    <input class="form-check-input"
+                                    <input class="form-check-input cp-item"
                                         type="checkbox"
                                         name="cp[{{ $mk->id }}][{{ $cp->id }}]"
                                         value="1"
@@ -115,3 +132,46 @@
         Ke Form 6
     </a>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    document.querySelectorAll('.accordion-body').forEach(container => {
+
+        const toggleAll = container.querySelector('.btn-toggle-all');
+        const items = container.querySelectorAll('.cp-item');
+
+        if (!toggleAll || items.length === 0) return;
+
+        const updateState = () => {
+            const total = items.length;
+            const checked = Array.from(items).filter(i => i.checked).length;
+
+            if (checked === 0) {
+                toggleAll.checked = false;
+                toggleAll.indeterminate = false;
+            } else if (checked === total) {
+                toggleAll.checked = true;
+                toggleAll.indeterminate = false;
+            } else {
+                toggleAll.checked = false;
+                toggleAll.indeterminate = true;
+            }
+        };
+
+        // klik "Pilih Semua"
+        toggleAll.addEventListener('change', function () {
+            items.forEach(i => i.checked = this.checked);
+            updateState();
+        });
+
+        // klik item satuan
+        items.forEach(item => {
+            item.addEventListener('change', updateState);
+        });
+
+        updateState(); // init
+    });
+
+});
+</script>
