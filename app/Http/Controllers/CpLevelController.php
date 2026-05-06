@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CpLevelKompetensi;
 use App\Models\MataKuliahPilihan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CpLevelController extends Controller
 {
@@ -12,8 +13,9 @@ class CpLevelController extends Controller
     {
         $cpData = $request->input('cp', []);
 
-        // ambil semua MK (bukan hanya yang dikirim)
-        $mataKuliah = MataKuliahPilihan::with('mataKuliah.cps')->get();
+        $mataKuliah = MataKuliahPilihan::with('mataKuliah.cps')
+            ->where('mahasiswa_id', Auth::user()->mahasiswa->id)
+            ->get();
 
         foreach ($mataKuliah as $mk) {
 
