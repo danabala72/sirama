@@ -15,6 +15,11 @@
     <link rel="stylesheet" href="{{ asset('css/tom-select.bootstrap5.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap5.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
 
 </head>
 
@@ -24,8 +29,8 @@
         <div class="rpl-header-inner">
             <div class="rpl-brand-panel">
                 <a href="{{ route('dashboard') }}" class="rpl-brand-link">
-                    <span >
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo">
+                    <span>
+                        <img src="{{  asset('storage/images/logo.png') }}" alt="Logo">
                     </span>
 
                     <span>
