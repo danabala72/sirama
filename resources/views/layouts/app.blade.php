@@ -15,7 +15,7 @@
     @endphp
 
     <link rel="stylesheet" href="{{ asset('css/tabler.min.css') }}?v={{ $version }}">
-    <!-- <link rel="stylesheet" href="{{ asset('css/tabler-icons.min.css') }}?v={{ $version }}"> -->
+    <link rel="stylesheet" href="{{ asset('css/tabler-icons.min.css') }}?v={{ $version }}">
     <!-- <link rel="stylesheet" href="{{ asset('css/tom-select.bootstrap5.min.css') }}?v={{ $version }}">
     <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap5.min.css') }}?v={{ $version }}">
     <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}?v={{ $version }}"> -->
