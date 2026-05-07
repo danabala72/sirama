@@ -86,13 +86,7 @@
                                 <div class="mb-2">
                                     <button type="submit" class="btn w-100 text-white" style="background:#2f5cad;border-color:#2f5cad;">Login</button>
                                 </div>
-
-                                @if (Route::has('register'))
-                                <div class="text-center text-muted" style="font-size:11px;">
-                                    Belum punya akun?
-                                    <a href="{{ route('register') }}" class="text-decoration-none" style="color:#214b97;">Registrasi disini</a>
-                                </div>
-                                @endif
+                               
                             </form>
                         </div>
 

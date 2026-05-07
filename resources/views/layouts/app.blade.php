@@ -24,9 +24,10 @@
         <div class="rpl-header-inner">
             <div class="rpl-brand-panel">
                 <a href="{{ route('dashboard') }}" class="rpl-brand-link">
-                    <span class="rpl-brand-logo">
-                        <i class="ti ti-shield-checkered"></i>
+                    <span >
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo">
                     </span>
+
                     <span>
                         <span class="rpl-brand-title">Sistem Rekrutmen Mahasiswa RPL</span>
                         <span class="rpl-brand-sub">Politeknik Negeri Bali</span>
@@ -165,12 +166,12 @@
 
                         @endforeach
                         @endif
-                         <li class="nav-item">
+                        <li class="nav-item">
                             <a href="{{ route('profile.edit') }}" class="nav-link {{ request()->routeIs('profile.edit') ? 'active' : '' }}">
                                 <i class="ti ti-user-cog me-1"></i>
                                 Profil
                             </a>
-                        </li>                        
+                        </li>
                     </ul>
                 </div>
             </aside>
@@ -299,9 +300,10 @@
                 width: 100%;
             }
         }
+
         .dt-length select {
-             border-radius: 8px;
-           margin-left: 6px;
+            border-radius: 8px;
+            margin-left: 6px;
             height: 30px !important;
         }
     </style>
