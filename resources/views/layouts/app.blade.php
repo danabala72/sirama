@@ -10,12 +10,16 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <link rel="stylesheet" href="{{ asset('css/tabler.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/tabler-icons.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/tom-select.bootstrap5.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap5.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}">
-    
+    @php
+    $version = time();
+    @endphp
+
+    <link rel="stylesheet" href="{{ asset('css/tabler.min.css') }}?v={{ $version }}">
+    <link rel="stylesheet" href="{{ asset('css/tabler-icons.min.css') }}?v={{ $version }}">
+    <link rel="stylesheet" href="{{ asset('css/tom-select.bootstrap5.min.css') }}?v={{ $version }}">
+    <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap5.min.css') }}?v={{ $version }}">
+    <link rel="stylesheet" href="{{ asset('css/custom-style.css') }}?v={{ $version }}">
+
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -205,11 +209,11 @@
         </div>
     </div>
 
-    <script src="{{ asset('js/jquery.min.js') }}"></script>
-    <script src="{{ asset('js/tabler.min.js') }}"></script>
-    <script src="{{ asset('js/tom-select.complete.min.js') }}"></script>
-    <script src="{{ asset('js/dataTables.min.js') }}"></script>
-    <script src="{{ asset('js/dataTables.bootstrap5.min.js') }}"></script>
+    <script src="{{ asset('js/jquery.min.js') }}?v={{ $version }}"></script>
+    <script src="{{ asset('js/tabler.min.js') }}?v={{ $version }}"></script>
+    <script src="{{ asset('js/tom-select.complete.min.js') }}?v={{ $version }}"></script>
+    <script src="{{ asset('js/dataTables.min.js') }}?v={{ $version }}"></script>
+    <script src="{{ asset('js/dataTables.bootstrap5.min.js') }}?v={{ $version }}"></script>
 
     <script>
         (() => {
