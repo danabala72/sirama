@@ -11,7 +11,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @php
-    $version = time();
+    $version = '1.0.3';
     @endphp
 
     <link rel="stylesheet" href="{{ asset('css/tabler.min.css') }}?v={{ $version }}">
