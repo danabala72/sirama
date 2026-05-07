@@ -138,7 +138,7 @@ class FormController extends Controller
 
         $validated['user_id'] = $user->id;
 
-        // updateOrCreate akan otomatis memasukkan kolom baru 
+        // updateOrCreate akan otomatis memasukkan kolom baru
         // selama sudah terdaftar di $fillable model Mahasiswa
         Mahasiswa::updateOrCreate(
             ['user_id' => $user->id],
@@ -153,7 +153,13 @@ class FormController extends Controller
     public function getMataKuliah(Request $request)
     {
         $mahasiswa = Auth::user()->mahasiswa;
-        $jurusanId = $mahasiswa->jurusan->id;
+        $jurusan = Auth::user()->jurusan;
+
+        if (!$jurusan) {
+            return redirect()->back()->with('error', 'Jurusan tidak ditemukan pada akun Anda.');
+        }
+
+        $jurusanId = $jurusan->id;
         $semesterId = $request->semester_id;
 
         $semester = Semester::orderBy('id', 'desc')->get();
@@ -175,6 +181,7 @@ class FormController extends Controller
             'step'       => 3,
             'title'      => 'Formulir 3 - Pengisian Mata Kuliah',
             'mataKuliah' => $mataKuliah,
+            'mahasiswa'  => $mahasiswa,
             'attachment' => Attachment::where('mahasiswa_id', $mahasiswa->id)->get(),
             'semester'   => $semester,
             'jurusan'    => Jurusan::all(),
