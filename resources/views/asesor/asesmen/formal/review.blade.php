@@ -10,7 +10,7 @@
             </p>
         </div>
 
-        <form action="{{ route('asesmen.formal.update') }}" method="POST">
+        <form action="{{ route('asesmen.update') }}" method="POST">
             @csrf
             @method('PUT')
 
@@ -250,7 +250,7 @@
             {{-- ===================== FOOTER ===================== --}}
             <div class="card shadow-sm sticky-bottom py-3 px-4 bg-white border-top">
                 <div class="d-flex justify-content-between align-items-center">
-                    <a href="{{ route('asesmen.formal') }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('asesmen.index') }}" class="btn btn-outline-secondary">
                         <i class="ti ti-arrow-left me-1"></i> Kembali
                     </a>
                     <button type="submit" class="btn btn-primary">

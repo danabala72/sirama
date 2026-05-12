@@ -32,7 +32,7 @@
     <header class="rpl-header">
         <div class="rpl-header-inner">
             <div class="rpl-brand-panel">
-                <a href="{{ route('dashboard') }}" class="rpl-brand-link">
+                <a href="{{ route('home') }}" class="rpl-brand-link">
                     <span>
                         <img src="{{  asset('storage/images/logo.png') }}" alt="Logo">
                     </span>
@@ -46,7 +46,7 @@
 
             <div class="rpl-action-panel">
                 <div class="rpl-tools">
-                    <a href="{{ route('dashboard') }}" class="rpl-tool-btn" aria-label="Dashboard">
+                    <a href="{{ route('home') }}" class="rpl-tool-btn" aria-label="Dashboard">
                         <i class="ti ti-home"></i>
                     </a>
                     <button id="sidebar-toggle-btn" class="rpl-tool-btn" type="button" aria-controls="sidebar-menu" aria-expanded="false" aria-label="Toggle Sidebar">
@@ -80,7 +80,7 @@
 
                         @if(auth()->user()?->role?->role === 'Admin' || auth()->user()?->role?->role === 'AdminJurusan')
                         <li class="nav-item">
-                            <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                            <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                                 <i class="ti ti-home-2 me-1"></i>
                                 Dashboard
                             </a>
@@ -131,28 +131,15 @@
                         @endif
                         @if(auth()->user()?->role?->role === 'Asesor')
                         <!-- Judul Kelompok Menu (Opsional) -->
-                        <li class="nav-item">
-                            <div class="nav-link disabled text-muted opacity-50 px-3">
-                                <small class="fw-bold">ASESMEN TRANSFER SKS</small>
-                            </div>
-                        </li>
+                       
 
                         <!-- Menu Asesmen Pendidikan Formal -->
                         <li class="nav-item">
-                            <a href="{{ route('asesmen.formal') }}" class="nav-link">
+                            <a href="{{ route('asesmen.index') }}" class="nav-link">
                                 <i class="ti ti-book-2 me-1"></i>
-                                Pendidikan Formal
+                                Asesmen Transfer SKS
                             </a>
-                        </li>
-
-                        <!-- Menu Asesmen Non-Formal / Informal -->
-                        <li class="nav-item">
-                            <a href="{{ route('asesmen.nonformal') }}" class="nav-link">
-                                <i class="ti ti-briefcase me-1"></i>
-                                Non-Formal & Informal
-                            </a>
-                        </li>
-
+                        </li>                
                         @endif
                         @if(auth()->user()?->role?->role === 'Mahasiswa')
                         <li class="nav-item">

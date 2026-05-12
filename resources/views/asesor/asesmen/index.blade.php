@@ -2,7 +2,7 @@
     <div class="container-xl p-2">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="text-2xl font-bold text-gray-800">Asesmen Pendidikan Formal</h2>
+            <h2 class="text-2xl font-bold text-gray-800">Asesmen Pendidikan Formal & Informal</h2>
         </div>
 
         <!-- Alert Success -->
@@ -48,18 +48,18 @@
                                 </div>
                             </td>
                             <td class="text-sm text-center">
-                               @php
-                                    $belumDinilai = collect($mhs->mataKuliahPilihan ?? [])->filter(function($mk) {
-                                        // Jika data transfer BELUM ADA sama sekali
-                                        if (!$mk->transferSks) {
-                                            return true;
-                                        }
+                                @php
+                                $belumDinilai = collect($mhs->mataKuliahPilihan ?? [])->filter(function($mk) {
 
-                                        // Jika data transfer SUDAH ADA, tapi ada kolom penilaian yang masih kosong
-                                        return is_null($mk->transferSks->kesenjangan) || 
-                                            is_null($mk->transferSks->hasil) || 
-                                            is_null($mk->transferSks->catatan_asesor);
-                                    })->count();
+                                if (!$mk->transferSks) {
+                                return true;
+                                }
+
+                                return is_null($mk->transferSks->kesenjangan) ||
+                                is_null($mk->transferSks->hasil) ||
+                                is_null($mk->transferSks->catatan_asesor);
+
+                                })->count();
                                 @endphp
 
 

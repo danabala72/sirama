@@ -23,16 +23,15 @@ Route::get('/', function () {
         $role = Auth::user()->role->role;
 
         return match ($role) {
-            'Admin' => redirect()->route('dashboard'),
-            'AdminJurusan' => redirect()->route('dashboard'),
-            'Mahasiswa' => redirect('/form?step=1'),
-            'Asesor' => redirect('/asesor/dashboard'),
-            default => redirect()->route('dashboard'),
+            'Admin', 'AdminJurusan' => redirect()->route('admin.dashboard'),
+            'Mahasiswa'             => redirect()->route('form.step', 'step=1'),
+            'Asesor'                => redirect()->route('asesor.dashboard'),
+            default                 => redirect('/login'),
         };
     }
 
     return redirect('/login');
-});
+})->name('home');
 
 Route::middleware('auth')->group(function () {
     Route::middleware(['role:Admin'])->group(function () {
@@ -47,7 +46,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/dashboard', function () {
             return view('dashboard');
-        })->name('dashboard');
+        })->name('admin.dashboard');
 
         Route::resource('semester', SemesterController::class);
         Route::patch('semester/{id}/set-aktif', [SemesterController::class, 'setAktif'])->name('semester.set-aktif');
@@ -119,14 +118,14 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/asesor/dashboard', function () {
             return view('asesor.dashboard.index');
-        })->name('dashboard');
+        })->name('asesor.dashboard');
 
         Route::prefix('asesmen')->name('asesmen.')->group(function () {
-            Route::get('/formal', [TransferSksController::class, 'asesorIndex'])->name('formal');
+            Route::get('/', [TransferSksController::class, 'asesorIndex'])->name('index');
             Route::get('/nonformal', [TransferSksNonFormalController::class, 'asesorIndex'])->name('nonformal');
-            Route::get('/formal/review/{id}', [TransferSksController::class, 'formalReview'])->name('formal.review');
+            Route::get('/review/{id}', [TransferSksController::class, 'formalReview'])->name('review');
             Route::get('/nonformal/review/{id}', [TransferSksNonFormalController::class, 'nonFormalReview'])->name('nonformal.review');
-            Route::put('/formal/update', [TransferSksController::class, 'formalReviewUpdate'])->name('formal.update');
+            Route::put('/update', [TransferSksController::class, 'reviewUpdate'])->name('update');
             Route::put('/nonformal/update', [TransferSksNonFormalController::class, 'nonFormalReviewUpdate'])->name('nonformal.update');
         });
     });

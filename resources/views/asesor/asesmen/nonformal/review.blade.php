@@ -11,7 +11,6 @@
             @method('PUT')
 
             @foreach($pilihanMk as $mk)
-            {{-- Pastikan baris transfer non-formal ada, jika belum ada bisa dibuatkan otomatis di Controller --}}
             @if($mk->transferSksNonFormal)
             <div class="card mb-4 shadow-sm border-0">
                 <div class="card-header bg-purple-lt">
