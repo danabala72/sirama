@@ -55,7 +55,11 @@ class FormController extends Controller
             : collect();
 
         $mataKuliahPilihan = ($step == 5 || $step == 6)
-            ? MataKuliahPilihan::with('mataKuliah.cps', 'cpLevel', 'transferSks.cpmkItems')->where('mahasiswa_id', $mahasiswa->id)->get()
+            ? MataKuliahPilihan::query()
+            ->whereHas('mataKuliah.cps')
+            ->with(['mataKuliah.cps', 'cpLevels', 'transferSks.cpmkItems'])
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->get()
             : collect();
 
         return view('form.index', [

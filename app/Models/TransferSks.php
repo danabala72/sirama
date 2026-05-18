@@ -3,19 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class TransferSks extends Model
 {
     //
     protected $table = 'transfer_sks';
 
-     protected $fillable = [
+    protected $fillable = [
         'mata_kuliah_pilihan_id',
         'kode_mk_asal',
-        'nama_mk_asal',
-        'kesenjangan',
-        'hasil',
-        'catatan_asesor'
+        'nama_mk_asal'
     ];
 
 
@@ -29,4 +27,13 @@ class TransferSks extends Model
         return $this->hasMany(TransferSksCpmk::class, 'transfer_sks_id');
     }
 
+    public function penilaian()
+    {
+        return $this->hasMany(PenilaianTransferSks::class, 'transfer_sks_id');
+    }
+
+    public function penilaianAsesorLogin()
+    {
+        return $this->hasOne(PenilaianTransferSks::class, 'transfer_sks_id');
+    }
 }

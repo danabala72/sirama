@@ -16,7 +16,7 @@
             $cps = $mk->mataKuliah->cps ?? [];
             $totalCp = count($cps);
 
-            $checkedCount = collect($mk->cpLevel ?? [])
+            $checkedCount = collect($mk->cpLevels ?? [])
             ->where('level_kompetensi', 1)
             ->count();
 
@@ -69,7 +69,7 @@
 
                         @php
                         $levels = [];
-                        foreach($mk->cpLevel ?? [] as $l){
+                        foreach($mk->cpLevels ?? [] as $l){
                         $levels[$l->cp_mata_kuliah_id] = $l->level_kompetensi;
                         }
                         @endphp

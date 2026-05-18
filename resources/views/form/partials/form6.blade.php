@@ -2,6 +2,7 @@
 <div class="alert alert-success">
     {{ session('success') }}
 </div>
+<div id="status-checker" data-success="true" style="display: none;"></div>
 @endif
 
 <div>
@@ -114,12 +115,6 @@
 
             <button type="submit" name="action" value="save" class="btn btn-primary">
                 Simpan
-            </button>
-
-            <button type="button" class="btn btn-danger"
-                data-bs-toggle="modal"
-                data-bs-target="#modalFinalisasi">
-                Konfirmasi Data
             </button>
 
         </div>
@@ -236,6 +231,15 @@
             checkbox.checked = false;
             btn.disabled = true;
         });
+
+         const checker = document.getElementById('status-checker');
+        if (checker && checker.getAttribute('data-success') === 'true') {
+            const modalElement = document.getElementById('modalFinalisasi');
+            if (modalElement) {
+                const modalFinalisasi = new bootstrap.Modal(modalElement);
+                modalFinalisasi.show();
+            }
+        }
 
     });
 </script>

@@ -49,27 +49,35 @@
                             </td>
                             <td class="text-sm text-center">
                                 @php
-                                $belumDinilai = collect($mhs->mataKuliahPilihan ?? [])->filter(function($mk) {
+                                $mkList = collect($mhs->mataKuliahPilihan ?? []);
 
-                                if (!$mk->transferSks) {
-                                return true;
-                                }
+                                $belumDinilai = $mkList->filter(function ($mk) {
 
-                                return is_null($mk->transferSks->kesenjangan) ||
-                                is_null($mk->transferSks->hasil) ||
-                                is_null($mk->transferSks->catatan_asesor);
+                                $transferSks = $mk->transferSks;
+
+                                if (!$transferSks) return true;
+
+                                $asesorId = auth()->user()->asesor->id;
+
+                                $penilaian = $transferSks->penilaian
+                                ->where('asesor_id', $asesorId)
+                                ->first();
+
+                                return !$penilaian ||
+                                is_null($penilaian->kesenjangan) ||
+                                is_null($penilaian->hasil) ||
+                                is_null($penilaian->catatan_asesor);
 
                                 })->count();
                                 @endphp
 
-
                                 @if($belumDinilai > 0)
-                                <span class="badge bg-warning-lt" title="Ada mata kuliah yang belum lengkap penilaiannya">
-                                    {{ $belumDinilai }} / {{ count($mhs->mataKuliahPilihan ?? []) }} MK Belum Lengkap
+                                <span class="badge bg-warning-lt">
+                                    {{ $belumDinilai }} / {{ count($mkList) }} Penilaian Belum Lengkap
                                 </span>
                                 @else
-                                <span class="badge bg-green-lt">
-                                    <i class="ti ti-check me-1"></i> Semua Dinilai
+                                <span class="badge bg-success-lt">
+                                    Lengkap
                                 </span>
                                 @endif
                             </td>

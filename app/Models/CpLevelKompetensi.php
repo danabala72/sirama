@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class CpLevelKompetensi extends Model
 {
@@ -11,16 +12,17 @@ class CpLevelKompetensi extends Model
     protected $fillable = [
         'mata_kuliah_pilihan_id',
         'cp_mata_kuliah_id',
-        'level_kompetensi',
-        'valid',
-        'asli',
-        'terkini',
-        'cukup',
+        'level_kompetensi'      
     ];
 
     protected $casts = [
         'level_kompetensi' => 'boolean',
     ];
+
+    public function penilaian()
+    {
+        return $this->hasMany(PenilaianCpKompetensi::class, 'cp_level_kompetensi_id');
+    }
 
     public function cp()
     {
@@ -30,5 +32,11 @@ class CpLevelKompetensi extends Model
     public function mataKuliahPilihan()
     {
         return $this->belongsTo(MataKuliahPilihan::class);
+    }
+
+    public function penilaianAsesorLogin()
+    {
+        return $this->hasOne(PenilaianCpKompetensi::class, 'cp_level_kompetensi_id')
+            ->where('asesor_id', Auth::user()->asesor->id ?? 0);
     }
 }

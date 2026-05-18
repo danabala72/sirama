@@ -33,9 +33,9 @@ class MataKuliahPilihan extends Model
         return $this->belongsTo(Mahasiswa::class, 'mahasiswa_id');
     }
 
-    public function cpLevel()
+    public function cpLevels()
     {
-        return $this->hasMany(CpLevelKompetensi::class);
+        return $this->hasMany(CpLevelKompetensi::class, 'mata_kuliah_pilihan_id');
     }
 
     public function mataKuliah()

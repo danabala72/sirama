@@ -56,7 +56,7 @@
                                     CPMK Mata Kuliah Target
                                 </label>
                                 <ul class="list-unstyled mb-0">
-                                    @foreach ($mk->cpLevel ?? [] as $cpLevel)
+                                    @foreach ($mk->cpLevels ?? [] as $cpLevel)
                                     <li class="mb-3 d-flex align-items-start small">
                                         <span class="badge bg-blue text-blue-fg me-2 mt-1 px-2">
                                             {{ $loop->iteration }}
@@ -151,7 +151,7 @@
                                 <tbody>
 
                                     @php
-                                    $cpLevels = $mk->cpLevel ?? [];
+                                    $cpLevels = $mk->cpLevels ?? [];
                                     $rowspan = count($cpLevels);
 
                                     $hasFormal = $formalFiles->isNotEmpty();
@@ -255,18 +255,27 @@
                                         @endif
 
                                         {{-- CHECKBOX --}}
-                                        @foreach (['valid','asli','terkini','memadai'] as $attr)
-
+                                        @foreach (['valid', 'asli', 'terkini', 'memadai'] as $attr)
                                         <td class="text-center">
 
                                             @if($hasFile)
+                                            @php
+                                            // 1. Ambil objek relasi penilaian milik asesor yang sedang login
+                                            $penilaianAsesor = $cpmk->penilaianAsesorLogin;
+                                            $dbValue = $penilaianAsesor ? $penilaianAsesor->$attr : 0;
+                                            @endphp
+                                            <input
+                                                type="hidden"
+                                                name="verif[{{ $cpmk->id }}][{{ $attr }}]"
+                                                value="0">
+
 
                                             <input
                                                 type="checkbox"
                                                 class="form-check-input check-target-{{ $cpmk->id }}"
                                                 name="verif[{{ $cpmk->id }}][{{ $attr }}]"
                                                 value="1"
-                                                {{ old("verif.$cpmk->id.$attr", $cpmk->$attr) ? 'checked' : '' }}>
+                                                {{ old("verif.$cpmk->id.$attr", $dbValue) == 1 ? 'checked' : '' }}>
 
                                             @else
 
@@ -275,7 +284,6 @@
                                             @endif
 
                                         </td>
-
                                         @endforeach
 
                                         {{-- CHECK ALL --}}
@@ -316,8 +324,15 @@
                             <div class="row g-3">
 
                                 {{-- FORMAL --}}
-                                <div class="col-12">
+                                @php
+                                $transferSks = $mk->transferSks;
+                                $transferSksId = $transferSks?->id;
 
+                                $penilaian = $transferSks?->penilaian->first(); // sudah difilter di controller
+                                @endphp
+
+                                @if($transferSksId)
+                                <div class="col-12">
                                     <div class="p-3 rounded bg-green-lt border border-green-subtle">
 
                                         <div class="fw-bold text-green mb-3 uppercase">
@@ -326,70 +341,69 @@
 
                                         <div class="row g-3">
 
+                                            {{-- KESENJANGAN --}}
                                             <div class="col-12">
-                                                <label class="form-label fw-bold">
-                                                    Analisis Kesenjangan
-                                                </label>
+                                                <label class="form-label fw-bold">Analisis Kesenjangan</label>
 
                                                 <textarea
-                                                    name="penilaian[{{ $mk->transferSks->id }}][kesenjangan]"
+                                                    name="penilaian[{{ $transferSksId }}][kesenjangan]"
                                                     rows="2"
-                                                    class="form-control @error('penilaian.'.$mk->transferSks->id.'.kesenjangan') is-invalid @enderror"
-                                                    placeholder="Evaluasi kesenjangan...">{{ old('penilaian.'.$mk->transferSks->id.'.kesenjangan', $mk->transferSks->kesenjangan) }}</textarea>
+                                                    class="form-control @error('penilaian.'.$transferSksId.'.kesenjangan') is-invalid @enderror"
+                                                    placeholder="Evaluasi kesenjangan...">{{ old('penilaian.'.$transferSksId.'.kesenjangan', $penilaian?->kesenjangan) }}</textarea>
 
-                                                @error('penilaian.'.$mk->transferSks->id.'.kesenjangan')
-                                                <div class="text-danger small mt-1">
-                                                    {{ $message }}
-                                                </div>
+                                                @error('penilaian.'.$transferSksId.'.kesenjangan')
+                                                <div class="text-danger small mt-1">{{ $message }}</div>
                                                 @enderror
                                             </div>
 
+                                            {{-- HASIL --}}
                                             <div class="col-12 col-md-4">
-                                                <label class="form-label fw-bold">
-                                                    Hasil Rekognisi (Skor/SKS)
-                                                </label>
+                                                <label class="form-label fw-bold">Hasil Rekognisi (Skor/SKS)</label>
 
                                                 <input
                                                     type="number"
-                                                    name="penilaian[{{ $mk->transferSks->id }}][hasil]"
-                                                    class="form-control @error('penilaian.'.$mk->transferSks->id.'.hasil') is-invalid @enderror"
-                                                    value="{{ old('penilaian.'.$mk->transferSks->id.'.hasil', $mk->transferSks->hasil) }}"
+                                                    name="penilaian[{{ $transferSksId }}][hasil]"
+                                                    class="form-control @error('penilaian.'.$transferSksId.'.hasil') is-invalid @enderror"
+                                                    value="{{ old('penilaian.'.$transferSksId.'.hasil', $penilaian?->hasil) }}"
                                                     placeholder="0-100">
 
-                                                @error('penilaian.'.$mk->transferSks->id.'.hasil')
-                                                <div class="text-danger small mt-1">
-                                                    {{ $message }}
-                                                </div>
+                                                @error('penilaian.'.$transferSksId.'.hasil')
+                                                <div class="text-danger small mt-1">{{ $message }}</div>
                                                 @enderror
                                             </div>
 
+                                            {{-- CATATAN --}}
                                             <div class="col-12 col-md-8">
-                                                <label class="form-label fw-bold">
-                                                    Catatan Verifikasi Asesor
-                                                </label>
+                                                <label class="form-label fw-bold">Catatan Verifikasi Asesor</label>
 
                                                 <textarea
-                                                    name="penilaian[{{ $mk->transferSks->id }}][catatan_asesor]"
+                                                    name="penilaian[{{ $transferSksId }}][catatan_asesor]"
                                                     rows="2"
-                                                    class="form-control @error('penilaian.'.$mk->transferSks->id.'.catatan_asesor') is-invalid @enderror"
-                                                    placeholder="Catatan validasi atau rekomendasi asesor...">{{ old('penilaian.'.$mk->transferSks->id.'.catatan_asesor', $mk->transferSks->catatan_asesor) }}</textarea>
+                                                    class="form-control @error('penilaian.'.$transferSksId.'.catatan_asesor') is-invalid @enderror"
+                                                    placeholder="Catatan validasi atau rekomendasi asesor...">{{ old('penilaian.'.$transferSksId.'.catatan_asesor', $penilaian?->catatan_asesor) }}</textarea>
 
-                                                @error('penilaian.'.$mk->transferSks->id.'.catatan_asesor')
-                                                <div class="text-danger small mt-1">
-                                                    {{ $message }}
-                                                </div>
+                                                @error('penilaian.'.$transferSksId.'.catatan_asesor')
+                                                <div class="text-danger small mt-1">{{ $message }}</div>
                                                 @enderror
                                             </div>
 
                                         </div>
-
                                     </div>
-
                                 </div>
+                                @endif
+
 
                                 {{-- NON FORMAL --}}
-                                <div class="col-12">
+                                @php
+                                $nonFormal = $mk->transferSksNonFormal;
 
+                                $penilaianNF = $nonFormal
+                                ? $nonFormal->penilaian->first()
+                                : null;
+                                @endphp
+
+                                @if($nonFormal)
+                                <div class="col-12">
                                     <div class="p-3 rounded bg-purple-lt border border-purple-subtle">
 
                                         <div class="fw-bold text-purple mb-3 uppercase">
@@ -397,46 +411,55 @@
                                         </div>
 
                                         <div class="row g-3">
+
+                                            {{-- KESENJANGAN --}}
                                             <div class="col-12">
                                                 <label class="form-label fw-bold">Analisis Kesenjangan</label>
+
                                                 <textarea
-                                                    name="penilaian_nonformal[{{ $mk->transferSksNonFormal->id }}][kesenjangan]"
+                                                    name="penilaian_nonformal[{{ $nonFormal->id }}][kesenjangan]"
                                                     rows="2"
-                                                    class="form-control @error('penilaian_nonformal.'.$mk->transferSksNonFormal->id.'.kesenjangan') is-invalid @enderror"
-                                                    placeholder="Evaluasi kesenjangan...">{{ old('penilaian_nonformal.'.$mk->transferSksNonFormal->id.'.kesenjangan', $mk->transferSksNonFormal->kesenjangan) }}</textarea>
-                                                @error('penilaian_nonformal.'.$mk->transferSksNonFormal->id.'.kesenjangan')
+                                                    class="form-control @error('penilaian_nonformal.'.$nonFormal->id.'.kesenjangan') is-invalid @enderror">{{ old('penilaian_nonformal.'.$nonFormal->id.'.kesenjangan', $penilaianNF?->kesenjangan) }}</textarea>
+
+                                                @error('penilaian_nonformal.'.$nonFormal->id.'.kesenjangan')
                                                 <div class="text-danger small mt-1">{{ $message }}</div>
                                                 @enderror
                                             </div>
 
+                                            {{-- NILAI --}}
                                             <div class="col-12 col-md-4">
                                                 <label class="form-label fw-bold">Hasil Rekognisi (Skor/SKS)</label>
-                                                <input type="number"
-                                                    name="penilaian_nonformal[{{ $mk->transferSksNonFormal->id }}][nilai]"
-                                                    class="form-control @error('penilaian_nonformal.'.$mk->transferSksNonFormal->id.'.nilai') is-invalid @enderror"
-                                                    value="{{ old('penilaian_nonformal.'.$mk->transferSksNonFormal->id.'.nilai', $mk->transferSksNonFormal->nilai) }}"
+
+                                                <input
+                                                    type="number"
+                                                    name="penilaian_nonformal[{{ $nonFormal->id }}][nilai]"
+                                                    class="form-control @error('penilaian_nonformal.'.$nonFormal->id.'.nilai') is-invalid @enderror"
+                                                    value="{{ old('penilaian_nonformal.'.$nonFormal->id.'.nilai', $penilaianNF?->nilai) }}"
                                                     placeholder="0-100">
-                                                @error('penilaian_nonformal.'.$mk->transferSksNonFormal->id.'.nilai')
+
+                                                @error('penilaian_nonformal.'.$nonFormal->id.'.nilai')
                                                 <div class="text-danger small mt-1">{{ $message }}</div>
                                                 @enderror
                                             </div>
 
+                                            {{-- CATATAN --}}
                                             <div class="col-12 col-md-8">
                                                 <label class="form-label fw-bold">Catatan Verifikasi Asesor</label>
+
                                                 <textarea
-                                                    name="penilaian_nonformal[{{ $mk->transferSksNonFormal->id }}][catatan_asesor]"
+                                                    name="penilaian_nonformal[{{ $nonFormal->id }}][catatan_asesor]"
                                                     rows="2"
-                                                    class="form-control @error('penilaian_nonformal.'.$mk->transferSksNonFormal->id.'.catatan_asesor') is-invalid @enderror"
-                                                    placeholder="Catatan validasi atau rekomendasi asesor...">{{ old('penilaian_nonformal.'.$mk->transferSksNonFormal->id.'.catatan_asesor', $mk->transferSksNonFormal->catatan_asesor) }}</textarea>
-                                                @error('penilaian_nonformal.'.$mk->transferSksNonFormal->id.'.catatan_asesor')
+                                                    class="form-control @error('penilaian_nonformal.'.$nonFormal->id.'.catatan_asesor') is-invalid @enderror">{{ old('penilaian_nonformal.'.$nonFormal->id.'.catatan_asesor', $penilaianNF?->catatan_asesor) }}</textarea>
+
+                                                @error('penilaian_nonformal.'.$nonFormal->id.'.catatan_asesor')
                                                 <div class="text-danger small mt-1">{{ $message }}</div>
                                                 @enderror
                                             </div>
+
                                         </div>
-
                                     </div>
-
                                 </div>
+                                @endif
 
                             </div>
 

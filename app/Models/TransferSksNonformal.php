@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class TransferSksNonformal extends Model
 {
@@ -10,10 +11,12 @@ class TransferSksNonformal extends Model
 
     protected $fillable = [
         'mata_kuliah_pilihan_id',
-        'kesenjangan',
-        'nilai',
-        'catatan_asesor'
     ];
+
+    public function penilaian()
+    {
+        return $this->hasMany(PenilaianTransferNonformal::class, 'transfer_nonformal_id');
+    }
 
     public function mataKuliahPilihan()
     {
