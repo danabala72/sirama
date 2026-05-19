@@ -3,8 +3,116 @@
 
         <div class="mb-3">
             <h2 class="text-2xl font-bold text-gray-800">
-                Review Asesmen: {{ $namaMahasiswa }}
+                Review Asesmen
             </h2>
+            <div class="card mb-4 shadow-sm">
+
+                <div class="card-header bg-light">
+                    <div class="fw-bold text-uppercase small">
+                        Informasi Mahasiswa
+                    </div>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row g-3">
+
+                        {{-- IDENTITAS --}}
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded bg-white">
+
+                                <div class="fw-bold mb-2">Identitas</div>
+
+                                <div class="small mb-1">
+                                    <span class="text-muted">Nama:</span>
+                                    <span class="fw-semibold">{{ $mahasiswa->name ?? '' }}</span>
+                                </div>
+
+                                <div class="small mb-1">
+                                    <span class="text-muted">Jenis Kelamin:</span>
+                                    <span class="fw-semibold">
+                                       {{ $mahasiswa->jenis_kelamin ? ($mahasiswa->jenis_kelamin === 'L' ? 'Laki-Laki' : 'Perempuan') : '' }}
+                                    </span>
+                                </div>
+
+                                <div class="small mb-1">
+                                    <span class="text-muted">TTL:</span>
+                                    <span class="fw-semibold">
+                                        {{ $mahasiswa->tempat_lahir ?? '' }},
+                                        {{ $mahasiswa->tgl_lahir ?? '' }}
+                                    </span>
+                                </div>
+
+                                <div class="small">
+                                    <span class="text-muted">Status:</span>
+                                    <span class="fw-semibold">{{ $mahasiswa->status_perkawinan ?? '' }}</span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        {{-- KONTAK --}}
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded bg-white">
+
+                                <div class="fw-bold mb-2">Kontak</div>
+
+                                <div class="small mb-1">
+                                    <span class="text-muted">Email:</span>
+                                    <span class="fw-semibold">{{ $mahasiswa->email ?? '' }}</span>
+                                </div>
+
+                                <div class="small mb-1">
+                                    <span class="text-muted">No HP:</span>
+                                    <span class="fw-semibold">{{ $mahasiswa->no_hp ?? '' }}</span>
+                                </div>
+
+                                <div class="small">
+                                    <span class="text-muted">Alamat:</span><br>
+                                    <span class="fw-semibold">{{ $mahasiswa->alamat_rumah ?? '' }}</span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        {{-- PENDIDIKAN --}}
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-white">
+
+                                <div class="fw-bold mb-2">Riwayat Pendidikan</div>
+
+                                <div class="row g-2 small">
+
+                                    <div class="col-md-6">
+                                        <span class="text-muted">SMA:</span>
+                                        <span class="fw-semibold">{{ $mahasiswa->nama_sekolah ?? '' }}</span>
+
+                                        <div class="text-muted">
+                                            {{ $mahasiswa->alamat_sekolah ?? '' }}
+                                            {{ $mahasiswa->tahun_lulus_sekolah ? '(' . $mahasiswa->tahun_lulus_sekolah . ')' : '' }}
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <span class="text-muted">Perguruan Tinggi:</span>
+                                        <span class="fw-semibold">{{ $mahasiswa->nama_pt ?? '' }}</span>
+
+                                        <div class="text-muted">
+                                            {{ $mahasiswa->prodi_pt ?? '' }}
+                                            {{ $mahasiswa->program_pt ? ' - ' . $mahasiswa->program_pt : '' }}
+                                            {{ $mahasiswa->tahun_lulus_pt ? '(' . $mahasiswa->tahun_lulus_pt . ')' : '' }}
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
             <p class="text-muted small">
                 Silakan berikan penilaian pada setiap Capaian Pembelajaran (CPMK).
             </p>
@@ -114,10 +222,25 @@
                     {{-- ===================== TABLE CPMK ===================== --}}
                     <div class="card mb-4">
 
-                        <div class="card-header bg-light">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+
                             <span class="fw-bold small uppercase">
                                 Verifikasi CPMK & Dokumen Pendukung
                             </span>
+
+                            <div class="form-check mb-0">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input check-all-mk"
+                                    data-mk="{{ $mk->id }}"
+                                    id="check-all-{{ $mk->id }}">
+
+                                <label class="form-check-label fw-bold ms-1"
+                                    for="check-all-{{ $mk->id }}">
+                                    Isi Semua
+                                </label>
+                            </div>
+
                         </div>
 
                         <div class="table-responsive px-3 pb-3">
@@ -144,7 +267,6 @@
                                         <th>A</th>
                                         <th>T</th>
                                         <th>M</th>
-                                        <th class="bg-blue-lt">Isi Semua</th>
                                     </tr>
                                 </thead>
 
@@ -272,9 +394,11 @@
 
                                             <input
                                                 type="checkbox"
-                                                class="form-check-input check-target-{{ $cpmk->id }}"
+                                                class="form-check-input check-target"
                                                 name="verif[{{ $cpmk->id }}][{{ $attr }}]"
                                                 value="1"
+                                                data-mk="{{ $mk->id }}"
+                                                data-cpmk="{{ $cpmk->id }}"
                                                 {{ old("verif.$cpmk->id.$attr", $dbValue) == 1 ? 'checked' : '' }}>
 
                                             @else
@@ -285,20 +409,6 @@
 
                                         </td>
                                         @endforeach
-
-                                        {{-- CHECK ALL --}}
-                                        <td class="text-center bg-light">
-
-                                            @if($hasFile)
-
-                                            <input
-                                                type="checkbox"
-                                                class="form-check-input check-row"
-                                                data-id="{{ $cpmk->id }}">
-
-                                            @endif
-
-                                        </td>
 
                                     </tr>
 
@@ -496,88 +606,39 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
-            function initCheckAll() {
+            function syncMaster(mkId) {
+                const master = document.querySelector(`.check-all-mk[data-mk="${mkId}"]`);
+                if (!master) return;
 
-                // FORMAL
-                document.querySelectorAll('.check-row').forEach(master => {
-                    const id = master.dataset.id;
-                    const allItems = document.querySelectorAll(`.check-target-${id}`);
-                    const checkedItems = document.querySelectorAll(`.check-target-${id}:checked`);
+                const all = document.querySelectorAll(`.check-target[data-mk="${mkId}"]`);
+                const checked = document.querySelectorAll(`.check-target[data-mk="${mkId}"]:checked`);
 
-                    if (allItems.length > 0 && allItems.length === checkedItems.length) {
-                        master.checked = true;
-                    }
-                });
-
-                // NON FORMAL
-                document.querySelectorAll('.check-row-nf').forEach(master => {
-                    const id = master.dataset.id;
-                    const allItems = document.querySelectorAll(`.check-target-nf-${id}`);
-                    const checkedItems = document.querySelectorAll(`.check-target-nf-${id}:checked`);
-
-                    if (allItems.length > 0 && allItems.length === checkedItems.length) {
-                        master.checked = true;
-                    }
-                });
+                master.checked = (all.length > 0 && all.length === checked.length);
             }
 
-            initCheckAll();
+            // MASTER -> CHILD
+            document.querySelectorAll('.check-all-mk').forEach(master => {
+                master.addEventListener('change', function() {
 
-            // ================= FORMAL =================
-            document.querySelectorAll('.check-row').forEach(rowBtn => {
-                rowBtn.addEventListener('change', function() {
-                    const id = this.dataset.id;
-                    const targets = document.querySelectorAll(`.check-target-${id}`);
-                    targets.forEach(item => {
-                        item.checked = this.checked;
-                    });
+                    const mkId = this.dataset.mk;
+                    const targets = document.querySelectorAll(`.check-target[data-mk="${mkId}"]`);
+
+                    targets.forEach(cb => cb.checked = this.checked);
                 });
             });
 
-            // ================= NON FORMAL =================
-            document.querySelectorAll('.check-row-nf').forEach(rowBtn => {
-                rowBtn.addEventListener('change', function() {
-                    const id = this.dataset.id;
-                    const targets = document.querySelectorAll(`.check-target-nf-${id}`);
-                    targets.forEach(item => {
-                        item.checked = this.checked;
-                    });
-                });
-            });
-
-            // ================= AUTO SYNC =================
+            // CHILD -> MASTER
             document.addEventListener('change', function(e) {
 
-                // FORMAL
-                if (e.target.classList.contains('form-check-input') && e.target.className.includes('check-target-')) {
-                    const match = e.target.className.match(/check-target-(\d+)/);
-                    if (match) {
-                        const id = match[1];
-                        const master = document.querySelector(`.check-row[data-id="${id}"]`);
+                if (!e.target.classList.contains('check-target')) return;
 
-                        if (master) {
-                            const allItems = document.querySelectorAll(`.check-target-${id}`);
-                            const checkedItems = document.querySelectorAll(`.check-target-${id}:checked`);
-                            master.checked = (allItems.length === checkedItems.length);
-                        }
-                    }
-                }
+                const mkId = e.target.dataset.mk;
+                syncMaster(mkId);
+            });
 
-                // NON FORMAL
-                if (e.target.classList.contains('form-check-input') && e.target.className.includes('check-target-nf-')) {
-                    const match = e.target.className.match(/check-target-nf-(\d+)/);
-                    if (match) {
-                        const id = match[1];
-                        const master = document.querySelector(`.check-row-nf[data-id="${id}"]`);
-
-                        if (master) {
-                            const allItems = document.querySelectorAll(`.check-target-nf-${id}`);
-                            const checkedItems = document.querySelectorAll(`.check-target-nf-${id}:checked`);
-                            master.checked = (allItems.length === checkedItems.length);
-                        }
-                    }
-                }
-
+            // INIT
+            document.querySelectorAll('.check-all-mk').forEach(master => {
+                syncMaster(master.dataset.mk);
             });
 
         });

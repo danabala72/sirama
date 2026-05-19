@@ -142,7 +142,7 @@ class TransferSksController extends Controller
 
     public function formalReview($id)
     {
-        $mahasiswa = Mahasiswa::select('id', 'name')->findOrFail($id);
+        $mahasiswa = Mahasiswa::findOrFail($id);
 
         $asesorId = Auth::user()->asesor->id;
 
@@ -167,7 +167,7 @@ class TransferSksController extends Controller
             ->get();
 
         return view('asesor.asesmen.review', [
-            'namaMahasiswa' => $mahasiswa->name,
+            'mahasiswa'     => $mahasiswa,
             'pilihanMk'     => $pilihanMk,
             'asesorId'      => $asesorId,
         ]);
