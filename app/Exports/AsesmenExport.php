@@ -32,14 +32,14 @@ class AsesmenExport implements WithEvents, WithStyles, WithDrawings
         $drawing = new Drawing();
         $drawing->setName('Logo Instansi');
         $drawing->setDescription('Logo pada Form Rekapitulasi');
-        $drawing->setPath(storage_path('app/public/images/logo-2.png')); 
-        $drawing->setHeight(65); 
-        
+        $drawing->setPath(storage_path('app/public/images/logo-2.png'));
+        $drawing->setHeight(65);
+
         // LOGO DISET DI BARIS 7 (CENTER DI KOLOM F)
         $drawing->setCoordinates('F7');
-        $drawing->setOffsetX(10); 
-        $drawing->setOffsetY(10);  
-        
+        $drawing->setOffsetX(10);
+        $drawing->setOffsetY(10);
+
         return $drawing;
     }
 
@@ -63,12 +63,12 @@ class AsesmenExport implements WithEvents, WithStyles, WithDrawings
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
                 // Menghitung batas baris akhir secara dinamis berdasarkan total data $rows
                 $totalRows = 10 + count($this->rows);
-                
+
                 // Kunci default font Calibri 8 untuk seluruh cell aktif
                 $sheet->getStyle("A1:K{$totalRows}")->getFont()->setName('Calibri')->setSize(8);
 
@@ -77,7 +77,7 @@ class AsesmenExport implements WithEvents, WithStyles, WithDrawings
                 $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
                 $sheet->getPageSetup()->setFitToPage(true);
                 $sheet->getPageSetup()->setFitToWidth(1);
-                $sheet->getPageSetup()->setFitToHeight(0); 
+                $sheet->getPageSetup()->setFitToHeight(0);
 
                 // --- 1. HEADER UTAMA ---
                 $sheet->mergeCells('A1:K1');
@@ -86,11 +86,11 @@ class AsesmenExport implements WithEvents, WithStyles, WithDrawings
                     'font' => ['bold' => true],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
                 ]);
-                
+
                 $sheet->getRowDimension(1)->setRowHeight(24);
 
-                $jenjangSebelumnya = $this->mahasiswa['nama_pt'] 
-                    ? ($this->mahasiswa['program_pt'] . ' ' . $this->mahasiswa['nama_pt']) 
+                $jenjangSebelumnya = $this->mahasiswa['nama_pt']
+                    ? ($this->mahasiswa['program_pt'] . ' ' . $this->mahasiswa['nama_pt'])
                     : $this->mahasiswa['nama_sekolah'];
 
                 // --- 2. TEMPLATE BIODATA ---
@@ -106,13 +106,13 @@ class AsesmenExport implements WithEvents, WithStyles, WithDrawings
                     $sheet->mergeCells("A{$row}:C{$row}");
                     $sheet->setCellValue("A{$row}", $data['label']);
                     $sheet->setCellValue("D{$row}", ':');
-                    
+
                     $sheet->mergeCells("E{$row}:K{$row}");
-                    $sheet->setCellValue("E{$row}", $data['value']); 
+                    $sheet->setCellValue("E{$row}", $data['value']);
 
                     $sheet->getStyle("A{$row}:K{$row}")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                     $sheet->getStyle("D{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                    
+
                     $sheet->getRowDimension($row)->setRowHeight(17);
                 }
 
@@ -121,34 +121,34 @@ class AsesmenExport implements WithEvents, WithStyles, WithDrawings
                 ]);
 
                 // --- 3. SPACING LOGO (Row 7 diperbesar khusus penampung logo) ---
-                $sheet->getRowDimension(7)->setRowHeight(55); 
+                $sheet->getRowDimension(7)->setRowHeight(55);
 
                 // --- 4. HEADER TABEL UTAMA (KINI MULAI DARI BARIS 8 & 9) ---
                 $sheet->mergeCells('A8:A9')->setCellValue('A8', 'No');
                 $sheet->mergeCells('B8:B9')->setCellValue('B8', 'Kode Mata kuliah');
-                
+
                 // Menggabungkan kolom C dan D untuk Matakuliah sesuai dengan CP Prodi
                 $sheet->mergeCells('C8:D8')->setCellValue('C8', 'Matakuliah');
                 $sheet->mergeCells('C9:D9')->setCellValue('C9', 'sesuai dengan CP Prodi');
-                
+
                 $sheet->setCellValue('E8', 'Skor');
                 $sheet->setCellValue('E9', 'Mandiri');
-                
+
                 $sheet->mergeCells('F8:H8')->setCellValue('F8', 'Hasil asesmen');
                 $sheet->setCellValue('F9', 'Asesor RPL 1');
                 $sheet->setCellValue('G9', 'Asesor RPL 2');
                 $sheet->setCellValue('H9', 'Asesor RPL 3');
-                
+
                 $sheet->mergeCells('I8:I9')->setCellValue('I8', "Rata-rata\nAsesmen");
                 $sheet->mergeCells('J8:J9')->setCellValue('J8', "Skor\nMinimunm");
-                
+
                 $sheet->mergeCells('K8:K9')->setCellValue('K8', "Status\nDiisi hasil rapat pleno");
 
                 // Styling Header Tabel Utama
                 $sheet->getStyle('A8:K9')->applyFromArray([
                     'font' => ['bold' => true],
                     'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER, 
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
                         'vertical' => Alignment::VERTICAL_CENTER,
                         'wrapText' => true
                     ],
@@ -164,14 +164,14 @@ class AsesmenExport implements WithEvents, WithStyles, WithDrawings
 
                     $sheet->setCellValue("A{$currentRow}", $item['no'] ?? ($index + 1));
                     $sheet->setCellValue("B{$currentRow}", $item['kode_mk'] ?? '');
-                    
+
                     // Rekatkan kolom C dan D untuk nama matakuliah agar satu kotak border
                     $sheet->mergeCells("C{$currentRow}:D{$currentRow}");
                     $sheet->setCellValue("C{$currentRow}", $item['mata_kuliah'] ?? '');
-                    
+
                     $sheet->setCellValue("E{$currentRow}", $item['nilai_mandiri'] ?? '');
-                    $sheet->setCellValue("F{$currentRow}", $item['asesor_1'] ?? ''); 
-                    $sheet->setCellValue("G{$currentRow}", $item['asesor_2'] ?? ''); 
+                    $sheet->setCellValue("F{$currentRow}", $item['asesor_1'] ?? '');
+                    $sheet->setCellValue("G{$currentRow}", $item['asesor_2'] ?? '');
                     $sheet->setCellValue("H{$currentRow}", $item['asesor_3'] ?? '');
 
                     // Inject Formula Excel Rata-rata otomatis dari kolom F sampai H
@@ -186,26 +186,29 @@ class AsesmenExport implements WithEvents, WithStyles, WithDrawings
                     $sheet->getStyle("A{$currentRow}:K{$currentRow}")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                     $sheet->getRowDimension($currentRow)->setRowHeight(18);
                 }
-                $signStartRow = $startRow + count($this->rows) + 2; 
+                $signStartRow = $startRow + count($this->rows) + 2;
 
                 // Teks Tanda Tangan digabung mulai dari Kolom A sampai D agar simetris di sisi paling kiri
-                $sheet->mergeCells("A{$signStartRow}:D{$signStartRow}")->setCellValue("A{$signStartRow}", "Badung,  ".date('Y'));
-                
+                $sheet->mergeCells("A{$signStartRow}:D{$signStartRow}")->setCellValue("A{$signStartRow}", "Badung,  " . date('Y'));
+
                 $row1 = $signStartRow + 1;
                 $sheet->mergeCells("A{$row1}:D{$row1}")->setCellValue("A{$row1}", "Jurusan " . $this->jurusan['nama_jurusan']);
-                
+
                 $row2 = $signStartRow + 2;
                 $sheet->mergeCells("A{$row2}:D{$row2}")->setCellValue("A{$row2}", "Ketua,");
-                
-                // Ruang tanda tangan fisik (jeda baris)
+
                 $rowName = $signStartRow + 6;
-                $sheet->mergeCells("A{$rowName}:D{$rowName}")->setCellValue("A{$rowName}", "(".$this->jurusan['ketua_jurusan'].")");
 
-                // Styling Blok Tanda Tangan Kiri Ujung (Kolom A-D)
+                // Cek apakah nama ketua jurusan tersedia
+                if (!empty($this->jurusan['ketua_jurusan'])) {
+                    $sheet->mergeCells("A{$rowName}:D{$rowName}")->setCellValue("A{$rowName}", "(" . $this->jurusan['ketua_jurusan'] . ")");
+                    $sheet->getStyle("A{$rowName}:D{$rowName}")->getFont()->setBold(true);
+                }
+
+                // Styling Blok Tanda Tangan Kiri Ujung (Kolom A-D) tetap berlaku untuk teks jabatan di atasnya
                 $sheet->getStyle("A{$signStartRow}:D{$rowName}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle("A{$rowName}:D{$rowName}")->getFont()->setBold(true);
 
-                // Mengatur tinggi baris blok tanda tangan
+                // Mengatur tinggi baris blok tanda tangan agar tetap rapi
                 for ($r = $signStartRow; $r <= $rowName; $r++) {
                     $sheet->getRowDimension($r)->setRowHeight(16);
                 }

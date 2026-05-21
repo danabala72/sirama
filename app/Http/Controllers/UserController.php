@@ -343,6 +343,9 @@ class UserController extends Controller
         // =========================
         // SEMUA MK
         // =========================
+
+        $jurusanId = $mhs->jurusan->id ?? null;
+
         $mataKuliah = MataKuliahSemester::with([
             'mataKuliah',
             'semester',
@@ -350,7 +353,11 @@ class UserController extends Controller
             ->whereHas('semester', function ($q) {
                 $q->where('is_active', 1);
             })
-            ->whereHas('mataKuliah')
+            ->whereHas('mataKuliah', function ($query) use ($jurusanId) {
+                if ($jurusanId) {
+                    $query->where('jurusan_id', $jurusanId);
+                }
+            })
             ->orderBy('semester_id')
             ->get();
 
