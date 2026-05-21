@@ -11,10 +11,8 @@
             </svg>
             <span class="hidden sm:inline">Tambah Admin Jurusan</span>
         </button>
-    </div>
-
-    <div class="card shadow-sm">
-        <div class="table-responsive">
+        <div class="card shadow-sm mt-4">
+        <div class="table-responsive ">
             <table id="adminJurusanTable" class="table table-hover align-middle w-100">
                 <thead class="bg-light">
                     <tr>
@@ -59,6 +57,9 @@
             </table>
         </div>
     </div>
+    </div>
+
+    
     </div>
 
     <!-- 1. MODAL TAMBAH (CREATE) -->

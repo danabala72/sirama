@@ -16,7 +16,7 @@
         </div>
         @endif
 
-        @if(Auth::user()->role->role === 'Admin')
+        @if(Auth::user()->role->role === 'Admin' || Auth::user()->role->role === 'AdminJurusan')
         <div class="d-flex flex-wrap gap-2 mb-3">
             <a href="{{ route('jurusan.create') }}" class="btn btn-outline-info btn-sm inline-flex items-center gap-x-2 my-2">
                 <svg xmlns="http://w3.org" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -51,6 +51,7 @@
                             <th class="text-nowrap w-1">No</th>
                             <th class="text-nowrap">Kode Jurusan</th>
                             <th class="text-nowrap">Nama Jurusan</th>
+                            <th class="text-nowrap">Ketua Jurusan</th>
                             <th class="text-nowrap text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -62,6 +63,7 @@
                                 <span class="badge bg-blue-lt">{{ $item->kode_jurusan }}</span>
                             </td>
                             <td class="text-sm font-medium">{{ $item->nama_jurusan }}</td>
+                            <td class="text-sm font-medium">{{ $item->ketua_jurusan }}</td>
                             <td class="text-sm text-center">
                                 <div class="d-flex justify-content-center gap-2">
                                     @if($item->mataKuliah->count() > 0)
@@ -148,7 +150,7 @@
                                 <div class="mt-3 p-2 bg-light rounded border">
                                     <small class="text-muted d-block mb-1 font-bold text-uppercase">Format Header Excel:</small>
                                     <code class="text-primary" style="font-size: 0.75rem;">
-                                        kode_jurusan, nama_jurusan
+                                        kode_jurusan, nama_jurusan, ketua_jurusan
                                     </code>
                                 </div>
                             </div>

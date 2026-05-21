@@ -61,8 +61,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/mahasiswa/template', [UserController::class, 'templateDownload'])->name('mahasiswa.template');
         Route::post('/mahasiswa/import', [UserController::class, 'userImport'])->name('mahasiswa.import');
         Route::put('mahasiswa/{user}/update', [UserController::class, 'update'])->name('mahasiswa.update');
+        Route::get('/mahasiswa/template-nim', [UserController::class, 'templateNim'])->name('mahasiswa.template_nim');
+        Route::post('/mahasiswa/import-nim', [UserController::class, 'importNim'])->name('mahasiswa.import-nim');
 
         Route::get('/mahasiswa/{id}/laporan/form1', [UserController::class, 'laporanForm1'])->name('mahasiswa.laporan.form1');
+        Route::get('/mahasiswa/{id}/laporan/asesmen', [UserController::class, 'laporanAsesmen'])->name('mahasiswa.laporan.asesmen');
 
         Route::get('/asesor', [UserController::class, 'asesorIndex'])->name('asesor.index');
         Route::get('/asesor/{user}/edit', [UserController::class, 'asesorEdit'])->name('asesor.edit');
@@ -106,7 +109,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-        Route::middleware(['role:Asesor'])->group(function() {
+        Route::middleware(['role:Asesor'])->group(function () {
             Route::post('/profile/signature', [ProfileController::class, 'signature'])->name('profile.signature.update');
         });
     });

@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AsesmenExport;
 use App\Exports\TemplateAsesorExport;
 use App\Exports\TemplateMahasiswaExport;
+use App\Exports\TemplateUpdateNimExport;
 use App\Imports\AsesorImport;
 use App\Imports\MahasiswaImport;
+use App\Imports\UpdateNimImport;
 use App\Models\Asesor;
 use App\Models\Mahasiswa;
+use App\Models\MataKuliahSemester;
 use App\Models\Role;
 use App\Models\ROLES;
 use App\Models\User;
-use BcMath\Number;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -43,7 +46,7 @@ class UserController extends Controller
 
             ->with(['mahasiswa', 'asesor', 'role', 'jurusan'])
             ->get();
-            
+
         return view('mahasiswa.index', compact('mahasiswa'));
     }
 
@@ -322,6 +325,107 @@ class UserController extends Controller
         return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
     }
 
+    public function laporanAsesmen($id)
+    {
+        $mhs = Mahasiswa::with([
+            'user',
+
+            // MK yang dipilih mahasiswa
+            'mataKuliahPilihan.mataKuliah',
+
+            // formal
+            'mataKuliahPilihan.transferSks.penilaian',
+
+            // nonformal
+            'mataKuliahPilihan.transferSksNonFormal.penilaian',
+        ])->findOrFail($id);
+
+        // =========================
+        // SEMUA MK
+        // =========================
+        $mataKuliah = MataKuliahSemester::with([
+            'mataKuliah',
+            'semester',
+        ])
+            ->whereHas('semester', function ($q) {
+                $q->where('is_active', 1);
+            })
+            ->whereHas('mataKuliah')
+            ->orderBy('semester_id')
+            ->get();
+
+        $rows = [];
+        $jurusan = $mhs->jurusan->toArray();
+
+        foreach ($mataKuliah as $index => $mkSemester) {
+
+            $mk = $mkSemester->mataKuliah;
+
+
+            if (!$mk) {
+                continue;
+            }
+
+
+
+            // cek MK dipilih mahasiswa
+            $mkPilihan = $mhs->mataKuliahPilihan
+                ->first(function ($item) use ($mk) {
+
+                    return
+                        $item->kode_mk === $mk->kode_mk &&
+                        $item->transferSks &&
+                        $item->transferSks->cpmkItems->count();
+                });
+            // default kosong
+            $nilaiMandiri = null;
+
+            $asesor1 = null;
+            $asesor2 = null;
+            $asesor3 = null;
+
+            $rataRata = null;
+
+            $status = $mk->status;
+
+            // isi hanya jika dipilih
+            if ($mkPilihan) {
+                $nilaiMandiri = $mkPilihan->nilai_angka;
+                [$asesor1, $asesor2, $asesor3, $rataRata] = $this->calculateFinalValue($mkPilihan);
+            }
+
+
+            $rows[] = [
+                'no' => $index + 1,
+
+                'semester' => $mkSemester->semester->label ?? '',
+
+                'kode_mk' => $mk->kode_mk,
+
+                'mata_kuliah' => $mk->nama_mk,
+
+                'nilai_mandiri' => $nilaiMandiri,
+
+                'asesor_1' => $asesor1,
+                'asesor_2' => $asesor2,
+                'asesor_3' => $asesor3,
+
+                'rata_rata' => $rataRata,
+
+                'minimum' => $mk->nilai_minimum,
+
+                'status' => $status,
+            ];
+        }
+        $namaClean = str_replace(' ', '_', $mhs['name']);
+
+        $timestamp = time();
+
+        $namaFile = "Rekap_Asesmen_" . $namaClean . "_" . $timestamp . ".xlsx";
+
+        return Excel::download(new AsesmenExport($mhs->toArray(), $rows, $jurusan), $namaFile);
+    }
+
     public function unlock($id)
     {
         $mahasiswa = Mahasiswa::findOrFail($id);
@@ -330,5 +434,95 @@ class UserController extends Controller
         ]);
 
         return back()->with('success', 'Data berhasil dibuka kembali (unlock).');
+    }
+
+    private function calculateFinalValue($mkPilihan): array
+    {
+        $formalNilai = collect();
+        $nonformalNilai = collect();
+
+        // =========================
+        // FORMAL
+        // =========================
+        if ($mkPilihan?->transferSks) {
+            $formalNilai = $mkPilihan
+                ->transferSks
+                ->penilaian
+                ->pluck('hasil')
+                ->filter(fn($v) => $v !== null)
+                ->take(3)
+                ->values();
+        }
+
+        // =========================
+        // NONFORMAL
+        // =========================
+        if ($mkPilihan?->transferSksNonFormal) {
+            $nonformalNilai = $mkPilihan
+                ->transferSksNonFormal
+                ->penilaian
+                ->pluck('nilai')
+                ->filter(fn($v) => $v !== null)
+                ->take(3)
+                ->values();
+        }
+
+        // =========================
+        // FINAL PER ASESOR
+        // =========================
+
+        // --- ASESOR 1 ---
+        $bonus1 = isset($nonformalNilai[0]) ? ($nonformalNilai[0] * 0.1) : 0;
+        $asesor1 = isset($formalNilai[0])
+            ? (int) min(round($formalNilai[0] + $bonus1), 85)
+            : null;
+
+        // --- ASESOR 2 ---
+        $bonus2 = isset($nonformalNilai[1]) ? ($nonformalNilai[1] * 0.1) : 0;
+        $asesor2 = isset($formalNilai[1])
+            ? (int) min(round($formalNilai[1] + $bonus2), 85)
+            : null;
+
+        // --- ASESOR 3 ---
+        $bonus3 = isset($nonformalNilai[2]) ? ($nonformalNilai[2] * 0.1) : 0;
+        $asesor3 = isset($formalNilai[2])
+            ? (int) min(round($formalNilai[2] + $bonus3), 85)
+            : null;
+
+        // =========================
+        // RATA-RATA FINAL
+        // =========================
+        $nilaiAsesor = collect([$asesor1, $asesor2, $asesor3])
+            ->filter(fn($v) => $v !== null);
+
+        $rataRata = $nilaiAsesor->count()
+            ? (int) round($nilaiAsesor->avg())
+            : null;
+
+        // =========================
+        // RETURN SEMUA NILAI
+        // =========================
+        return [$asesor1, $asesor2, $asesor3, $rataRata];
+    }
+
+    public function templateNim()
+    {
+        $timestamp = time();
+
+        $filename = "template_update_nim_mahasiswa_" . $timestamp . ".xlsx";
+        return Excel::download(new TemplateUpdateNimExport,  $filename);
+    }
+
+    public function importNim(Request $request)
+    {
+        // Validasi input file
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:5120',
+        ]);
+
+        // Memanggil class import untuk memproses file Excel yang diunggah
+        Excel::import(new UpdateNimImport, $request->file('file'));
+
+        return redirect()->back()->with('success', 'Data NIM berhasil diperbarui!');
     }
 }

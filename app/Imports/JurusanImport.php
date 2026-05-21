@@ -14,7 +14,10 @@ class JurusanImport implements ToModel, WithHeadingRow
         // Hanya sinkronisasi data Jurusan
         return Jurusan::updateOrCreate(
             ['kode_jurusan' => $row['kode_jurusan']],
-            ['nama_jurusan' => $row['nama_jurusan']]
+            [
+                'nama_jurusan' => $row['nama_jurusan'], 
+                'ketua_jurusan' => $row['ketua_jurusan']
+            ]
         );
     }
     public function onError(Throwable $e)

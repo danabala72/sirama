@@ -12,7 +12,8 @@ class TemplateJurusanExport implements FromArray, WithHeadings, ShouldAutoSize
     {
         return [
             'kode_jurusan',
-            'nama_jurusan'
+            'nama_jurusan',
+            'ketua_jurusan'
         ];
     }
 
@@ -20,9 +21,9 @@ class TemplateJurusanExport implements FromArray, WithHeadings, ShouldAutoSize
     {
         // Memberikan beberapa baris contoh data jurusan
         return [
-            ['30', 'Teknik Elektro'],
-            ['31', 'Teknik Informatika'],
-            ['32', 'Sistem Informasi'],
+            ['30', 'Teknik Elektro', 'Agus'],
+            ['31', 'Teknik Informatika', ''],
+            ['32', 'Sistem Informasi', ''],
         ];
     }
 }

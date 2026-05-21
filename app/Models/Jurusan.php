@@ -11,7 +11,8 @@ class Jurusan extends Model
     protected $fillable = [
         'id',
         'kode_jurusan',
-        'nama_jurusan'
+        'nama_jurusan',
+        'ketua_jurusan'
     ];
 
     public function mataKuliah(): HasMany

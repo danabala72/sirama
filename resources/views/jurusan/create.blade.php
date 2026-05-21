@@ -20,7 +20,7 @@
 
             <!-- Container Form -->
             <div class="bg-white overflow-hidden p-2 max-w-xl">
-                <div class="mb-2 pb-2">                    
+                <div class="mb-2 pb-2">
                     <p class="text-sm text-gray-500">Daftarkan kode dan nama program studi baru ke dalam sistem.</p>
                 </div>
 
@@ -34,7 +34,7 @@
                             class="w-full border-gray-300 focus:border-emerald-500 focus:ring focus:ring-emerald-200 rounded-md shadow-sm transition duration-200 @error('kode_jurusan') border-red-500 @enderror"
                             placeholder="Kode Jurusan" required>
                         @error('kode_jurusan')
-                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -45,9 +45,21 @@
                             class="w-full border-gray-300 focus:border-emerald-500 focus:ring focus:ring-emerald-200 rounded-md shadow-sm transition duration-200 @error('nama_jurusan') border-red-500 @enderror"
                             placeholder="Contoh: Teknik Informatika" required>
                         @error('nama_jurusan')
-                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
+
+                    <!-- Ketua Jurusan -->
+                    <div class="mb-6">
+                        <label class="block mb-2 text-sm font-bold text-gray-700">Ketua Jurusan</label>
+                        <input type="text" name="ketua_jurusan" value="{{ old('ketua_jurusan') }}"
+                            class="w-full border-gray-300 focus:border-emerald-500 focus:ring focus:ring-emerald-200 rounded-md shadow-sm transition duration-200 @error('ketua_jurusan') border-red-500 @enderror"
+                            placeholder="Nama Ketua Jurusan (Boleh Kosong)">
+                        @error('ketua_jurusan')
+                        <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
 
                     <!-- Action Buttons -->
                     <div class="flex items-center justify-between gap-4 pt-2">

@@ -15,7 +15,7 @@
             </div>
             @endif
 
-            @if(Auth::user()->role->role === 'Admin')
+            @if(Auth::user()->role->role === 'Admin' || Auth::user()->role->role === 'AdminJurusan')
             <div class="bg-white overflow-hidden p-2 max-w-xl">
                 <div class="mb-2">
                     <p class="text-sm text-gray-500">Sesuaikan informasi kode dan nama program studi.</p>
@@ -45,6 +45,16 @@
                             class="w-full border-gray-300 focus:border-emerald-500 focus:ring focus:ring-emerald-200 rounded-md shadow-sm @error('nama_jurusan') border-red-500 @enderror"
                             required>
                         @error('nama_jurusan')
+                        <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <!-- Ketua Jurusan -->
+                    <div class="mb-6">
+                        <label class="block mb-2 text-sm font-bold text-gray-700">Ketua Jurusan</label>
+                        <input type="text" name="ketua_jurusan"
+                            value="{{ old('ketua_jurusan', $jurusan->ketua_jurusan) }}"
+                            class="w-full border-gray-300 focus:border-emerald-500 focus:ring focus:ring-emerald-200 rounded-md shadow-sm @error('ketua_jurusan') border-red-500 @enderror">
+                        @error('ketua_jurusan')
                         <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
@@ -201,7 +211,7 @@
                             data-placeholder="Pilih satu atau lebih semester...">
                             @foreach($semuaSemester as $smt)
                             <option value="{{ $smt->id }}"
-                                {{ in_array($smt->id, old('semester_id', $mk->semester->pluck('id')->toArray())) ? 'selected' : '' }}>
+                                 {{ old('semester_id') == $smt->id ? 'selected' : '' }}>
                                 {{ $smt->label }} {{ $smt->is_active ? '(Aktif)' : '' }}
                             </option>
                             @endforeach

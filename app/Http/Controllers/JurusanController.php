@@ -76,6 +76,7 @@ class JurusanController extends Controller
         $request->validate([
             'kode_jurusan' => 'required|string|max:255|unique:jurusan,kode_jurusan',
             'nama_jurusan' => 'required|string|max:255',
+            'ketua_jurusan' => 'nullable|string|max:255'
         ], [
             // Custom Pesan Error (Opsional)
             'kode_jurusan.unique' => 'Kode jurusan ini sudah terdaftar dalam sistem.',
@@ -87,6 +88,7 @@ class JurusanController extends Controller
         Jurusan::create([
             'kode_jurusan' => strtoupper($request->kode_jurusan), // Otomatis Uppercase
             'nama_jurusan' => $request->nama_jurusan,
+            'ketua_jurusan' => $request->ketua_jurusan
         ]);
 
         // 3. Redirect kembali ke index dengan pesan sukses
@@ -101,6 +103,7 @@ class JurusanController extends Controller
         $request->validate([
             'kode_jurusan' => 'required|string|max:255|unique:jurusan,kode_jurusan,' . $id,
             'nama_jurusan' => 'required|string|max:255',
+            'ketua_jurusan' => 'nullable|string|max:255'
         ], [
             'kode_jurusan.unique' => 'Kode jurusan sudah digunakan oleh program studi lain.',
             'kode_jurusan.required' => 'Kode jurusan wajib diisi.',
@@ -115,6 +118,7 @@ class JurusanController extends Controller
             $jurusan->update([
                 'kode_jurusan' => $request->kode_jurusan,
                 'nama_jurusan' => $request->nama_jurusan,
+                'ketua_jurusan' => $request->ketua_jurusan
             ]);
 
             // 4. Redirect dengan pesan sukses

@@ -54,6 +54,15 @@
                 </svg>
                 Import Mahasiswa
             </button>
+            <button type="button" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-success my-2" data-bs-toggle="modal" data-bs-target="#modalUpdateNim">
+                <!-- Ikon Update/Pencil -->
+                <svg xmlns="http://w3.org" class="w-4 h-4" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                    <path d="M13.5 6.5l4 4" />
+                </svg>
+                Update NIM
+            </button>
 
         </div>
 
@@ -66,6 +75,7 @@
                         <tr class="bg-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             <th class="text-nowrap w-1">No</th>
                             <th class="text-nowrap">Username</th>
+                            <th class="text-nowrap">NIM</th>
                             <th class="text-nowrap">Nama</th>
                             <th class="text-nowrap">Jurusan</th>
                             <th class="text-nowrap">Email</th>
@@ -77,7 +87,8 @@
                         <tr class="transition">
                             <td class="text-sm text-muted">{{ $index + 1 }}</td>
                             <td class="text-sm font-medium text-gray-900">{{ $mhs->username }}</td>
-                            <td class="text-sm font-medium">{{ $mhs->mahasiswa->name ?? '-' }}</td>
+                            <td class="text-sm font-medium">{{ $mhs->mahasiswa->nim ?? '-' }}</td>
+                            <td class="text-sm font-medium">{{ $mhs->mahasiswa->name ?? '-' }}</td>                            
                             <td class="text-sm font-medium">{{ $mhs->mahasiswa->jurusan->nama_jurusan ?? '-' }}</td>
                             <td class="text-sm text-muted">{{ $mhs->mahasiswa->email ?? '-' }}</td>
                             <td class="text-sm text-center">
@@ -106,13 +117,17 @@
                                             data-bs-toggle="dropdown"
                                             style="height: 32px; padding: 0 8px; border-color: #dee2e6;">
                                             <i class="ti ti-file me-2"></i>
-                                            <span style="font-size: 13px;">Formulir</span>
+                                            <span style="font-size: 13px;">Dokumen</span>
                                             <!-- Menghilangkan class dropdown-toggle agar tidak ada panah -->
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-start shadow-sm">
                                             <a class="dropdown-item" href="{{ route('mahasiswa.laporan.form1', $mhs->mahasiswa->id)}}">
                                                 <i class="ti ti-download me-2"></i>
                                                 Detail Calon Mahasiswa
+                                            </a>
+                                            <a class="dropdown-item" href="{{ route('mahasiswa.laporan.asesmen', $mhs->mahasiswa->id)}}">
+                                                <i class="ti ti-download me-2"></i>
+                                                Rekapitulasi Hasil Asesmen
                                             </a>
                                         </div>
                                     </div>
@@ -198,6 +213,53 @@
             </div>
         </div>
     </div>
+
+    <div class="modal modal-blur fade" id="modalUpdateNim" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form action="{{ route('mahasiswa.import-nim') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import Update NIM Mahasiswa</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Pilih File Excel (.xlsx / .xls)</label>
+                            <input type="file" name="file" class="form-control @error('file') is-invalid @enderror" required accept=".xlsx, .xls">
+                            @error('file') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                            <div class="mt-3 p-2 bg-light rounded border">
+                                <small class="text-muted d-block mb-1 font-bold text-uppercase">Format Header Excel:</small>
+                                <code class="text-primary" style="font-size: 0.75rem; word-break: break-all;">
+                                    username, nama, nim
+                                </code>
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">*Pastikan data mahasiswa di dalam file Excel sudah berstatus lulus.</small>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <a href="{{ route('mahasiswa.template_nim') }}" class="btn btn-sm btn-outline-info">
+                                <svg xmlns="http://w3.org" class="icon icon-tabler icon-tabler-download" width="18" height="18" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                                    <path d="M7 11l5 5l5 -5"></path>
+                                    <path d="M12 4l0 12"></path>
+                                </svg>
+                                Unduh Template Update NIM
+                            </a>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Mulai Import</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
 
     @push('scripts')
     <script>
