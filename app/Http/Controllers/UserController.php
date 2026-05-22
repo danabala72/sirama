@@ -44,9 +44,22 @@ class UserController extends Controller
                 $q->where('jurusan_id', $jurusanId);
             })
 
-            ->with(['mahasiswa', 'asesor', 'role', 'jurusan'])
+            ->with([
+                'mahasiswa' => function ($query) {
+                    $query->with(['mataKuliahPilihan' => function ($q) {
+                        $q->whereHas('attachment', function ($subQ) {
+                            $subQ->whereIn('label', ['ijazah', 'transkrip']);
+                        });
+                        $q->withCount(['attachment' => function ($subQ) {
+                            $subQ->whereIn('label', ['ijazah', 'transkrip']);
+                        }]);
+                    }]);
+                },
+                'asesor',
+                'role',
+                'jurusan'
+            ])
             ->get();
-
         return view('mahasiswa.index', compact('mahasiswa'));
     }
 

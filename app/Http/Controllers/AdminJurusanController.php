@@ -62,7 +62,7 @@ class AdminJurusanController extends Controller
 
                 // Simpan ke tabel admin_jurusan
                 AdminJurusan::create([
-                    'user_id'       => $user->id,                    
+                    'user_id'       => $user->id,
                     'nama'          => $request->nama,
                     'jenis_kelamin' => $request->jenis_kelamin,
                     'email'         => $request->email,
@@ -131,7 +131,7 @@ class AdminJurusanController extends Controller
                 $user->save();
 
                 // Update data Profil Admin Jurusan
-                $admin->update([                   
+                $admin->update([
                     'nama'          => $request->nama,
                     'jenis_kelamin' => $request->jenis_kelamin,
                     'email'         => $request->email,
