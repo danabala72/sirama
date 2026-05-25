@@ -127,8 +127,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [TransferSksController::class, 'asesorIndex'])->name('index');
             Route::get('/nonformal', [TransferSksNonFormalController::class, 'asesorIndex'])->name('nonformal');
             Route::get('/review/{id}', [TransferSksController::class, 'formalReview'])->name('review');
+            Route::get('/review-detail/{id}', [TransferSksController::class, 'formalReviewDetail'])->name('review.detail');
             Route::get('/nonformal/review/{id}', [TransferSksNonFormalController::class, 'nonFormalReview'])->name('nonformal.review');
-            Route::put('/update', [TransferSksController::class, 'reviewUpdate'])->name('update');
+            Route::put('/update/{id}', [TransferSksController::class, 'reviewUpdate'])->name('update');
             Route::put('/nonformal/update', [TransferSksNonFormalController::class, 'nonFormalReviewUpdate'])->name('nonformal.update');
         });
     });

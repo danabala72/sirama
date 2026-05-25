@@ -48,39 +48,24 @@
                                 </div>
                             </td>
                             <td class="text-sm text-center">
-                                @php
-                                $mkList = collect($mhs->mataKuliahPilihan ?? []);
 
-                                $belumDinilai = $mkList->filter(function ($mk) {
+    @if($mhs->jumlah_belum_dinilai > 0)
 
-                                $transferSks = $mk->transferSks;
+        <span class="badge bg-warning-lt">
+            {{ $mhs->jumlah_belum_dinilai }} /
+            {{ $mhs->total_mk_pilihan }}
+            Penilaian Belum Lengkap
+        </span>
 
-                                if (!$transferSks) return true;
+    @else
 
-                                $asesorId = auth()->user()->asesor->id;
+        <span class="badge bg-success-lt">
+            Lengkap
+        </span>
 
-                                $penilaian = $transferSks->penilaian
-                                ->where('asesor_id', $asesorId)
-                                ->first();
+    @endif
 
-                                return !$penilaian ||
-                                is_null($penilaian->kesenjangan) ||
-                                is_null($penilaian->hasil) ||
-                                is_null($penilaian->catatan_asesor);
-
-                                })->count();
-                                @endphp
-
-                                @if($belumDinilai > 0)
-                                <span class="badge bg-warning-lt">
-                                    {{ $belumDinilai }} / {{ count($mkList) }} Penilaian Belum Lengkap
-                                </span>
-                                @else
-                                <span class="badge bg-success-lt">
-                                    Lengkap
-                                </span>
-                                @endif
-                            </td>
+</td>
                             <td class="text-sm text-center">
                                 <div class="d-flex justify-content-center gap-2">
                                     @php
@@ -91,7 +76,7 @@
                                     @if($hasTransfer)
                                     <a href="{{ route('asesmen.review', $mhs->id) }}" class="btn btn-sm btn-outline-primary">
                                         <i class="ti ti-checklist me-1"></i>
-                                        Mulai Penilaian
+                                        Review Mata Kuliah
                                     </a>
                                     @else
                                     <button class="btn btn-sm btn-outline-secondary disabled" title="Mahasiswa belum input data transfer" disabled>

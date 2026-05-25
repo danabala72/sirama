@@ -95,41 +95,51 @@ class TransferSksController extends Controller
             ->get();
 
         // hitung status kelengkapan
-        $mahasiswas->map(function ($mhs) {
+        $mahasiswas->map(function ($mhs) use ($asesorId) {
 
             $mkList = collect($mhs->mataKuliahPilihan ?? []);
 
             $mhs->total_mk_pilihan = $mkList->count();
 
-            $mhs->jumlah_belum_dinilai = $mkList->filter(function ($mk) {
+            $mhs->jumlah_belum_dinilai = $mkList->filter(function ($mk) use ($asesorId) {
 
-                $transferSks = $mk->transferSks;
+                // ================= FORMAL =================
+                $formalBelum = false;
 
-                if (!$transferSks) {
-                    return true;
+                if ($mk->transferSks) {
+
+                    $penilaianFormal = $mk->transferSks->penilaian
+                        ->where('asesor_id', $asesorId)
+                        ->first();
+
+                    $formalBelum =
+                        !$penilaianFormal ||
+                        is_null($penilaianFormal->kesenjangan) ||
+                        is_null($penilaianFormal->hasil) ||
+                        is_null($penilaianFormal->catatan_asesor);
                 }
 
-                $penilaian = $transferSks->penilaian->first();
 
-                if (
-                    !$penilaian ||
-                    is_null($penilaian->kesenjangan) ||
-                    is_null($penilaian->hasil) ||
-                    is_null($penilaian->catatan_asesor)
-                ) {
-                    return true;
+                // ================= CP =================
+                $cpBelum = true;
+
+                if ($mk->cpLevels->isNotEmpty()) {
+
+                    $cpBelum = !$mk->cpLevels->every(function ($cp) use ($asesorId) {
+
+                        $pCp = $cp->penilaian
+                            ->where('asesor_id', $asesorId)
+                            ->first();
+
+                        return $pCp &&
+                            $pCp->valid == 1 &&
+                            $pCp->asli == 1 &&
+                            $pCp->terkini == 1 &&
+                            $pCp->memadai == 1;
+                    });
                 }
 
-                // cek CP
-                foreach ($mk->cpLevels as $cp) {
-                    $pCp = $cp->penilaian->first();
-
-                    if (!$pCp) {
-                        return true;
-                    }
-                }
-
-                return false;
+                return $formalBelum || $cpBelum;
             })->count();
 
             return $mhs;
@@ -149,7 +159,6 @@ class TransferSksController extends Controller
         $pilihanMk = MataKuliahPilihan::with([
             'transferSks.cpmkItems',
 
-            // 🔥 IMPORTANT: filter asesor di sini
             'transferSks.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
 
             'transferSksNonFormal.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
@@ -164,6 +173,7 @@ class TransferSksController extends Controller
                 $q->whereHas('transferSks')
                     ->orWhereHas('transferSksNonFormal');
             })
+            ->whereHas('mataKuliah.cps')
             ->get();
 
         return view('asesor.asesmen.review', [
@@ -171,6 +181,26 @@ class TransferSksController extends Controller
             'pilihanMk'     => $pilihanMk,
             'asesorId'      => $asesorId,
         ]);
+    }
+
+    public function formalReviewDetail($pilihanMkId)
+    {
+        $asesorId = Auth::user()->asesor->id;
+
+        // Load relasi lengkap secara mendalam HANYA untuk 1 ID Mata Kuliah Pilihan ini saja
+        $mkSpesifik = MataKuliahPilihan::with([
+            'mahasiswa',
+            'transferSks.cpmkItems',
+            'transferSks.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
+            'transferSksNonFormal.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
+            'mataKuliah.cps',
+            'attachment',
+            'cpLevels.cp',
+            'cpLevels.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
+        ])->findOrFail($pilihanMkId);
+        $mahasiswa = $mkSpesifik->mahasiswa;
+
+        return view('asesor.asesmen.review-detail', compact('mkSpesifik', 'asesorId', 'mahasiswa'));
     }
 
     public function formalReviewUpdate(Request $request)
@@ -224,7 +254,7 @@ class TransferSksController extends Controller
         }
     }
 
-    public function reviewUpdate(Request $request)
+    public function reviewUpdate(Request $request, $id)
     {
         // 1. Ambil ID Asesor yang sedang login
         $asesorId = Auth::user()->asesor->id;
@@ -274,7 +304,6 @@ class TransferSksController extends Controller
         ];
 
         $validated = $request->validate($rules, $messages);
-
         try {
             DB::transaction(function () use ($validated, $asesorId, $request) {
 
@@ -333,7 +362,7 @@ class TransferSksController extends Controller
 
 
 
-                foreach (($validated['verif']) as $cpLevelId => $vData) {
+                foreach (($validated['verif'] ?? []) as $cpLevelId => $vData) {
                     PenilaianCpKompetensi::updateOrCreate(
                         [
                             'cp_level_kompetensi_id' => $cpLevelId,
@@ -350,7 +379,7 @@ class TransferSksController extends Controller
             });
 
             return redirect()
-                ->route('asesmen.index')
+                ->route('asesmen.review', $id)
                 ->with('success', 'Penilaian dan verifikasi asesmen berhasil disimpan.');
         } catch (ModelNotFoundException $e) {
             return back()->with('error', 'Data induk ajuan mahasiswa tidak ditemukan.');
