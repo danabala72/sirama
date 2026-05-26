@@ -461,52 +461,58 @@ class UserController extends Controller
         $nonformalNilai = collect();
 
         // =========================
-        // FORMAL
+        // FORMAL (Gunakan keyBy agar dikunci berdasarkan asesor_id)
         // =========================
         if ($mkPilihan?->transferSks) {
-            $formalNilai = $mkPilihan
-                ->transferSks
-                ->penilaian
-                ->pluck('hasil')
-                ->filter(fn($v) => $v !== null)
-                ->take(3)
-                ->values();
+            $formalNilai = $mkPilihan->transferSks->penilaian
+                ->keyBy('asesor_id');
         }
 
         // =========================
-        // NONFORMAL
+        // NONFORMAL (Gunakan keyBy agar dikunci berdasarkan asesor_id)
         // =========================
         if ($mkPilihan?->transferSksNonFormal) {
-            $nonformalNilai = $mkPilihan
-                ->transferSksNonFormal
-                ->penilaian
-                ->pluck('nilai')
-                ->filter(fn($v) => $v !== null)
-                ->take(3)
-                ->values();
+            $nonformalNilai = $mkPilihan->transferSksNonFormal->penilaian
+                ->keyBy('asesor_id');
         }
 
-        // =========================
-        // FINAL PER ASESOR
-        // =========================
+        // Gabungkan semua unique asesor_id yang ada di formal maupun nonformal
+        $allAsesorIds = $formalNilai->keys()
+            ->concat($nonformalNilai->keys())
+            ->unique()
+            ->values();
 
-        // --- ASESOR 1 ---
-        $bonus1 = isset($nonformalNilai[0]) ? ($nonformalNilai[0] * 0.1) : 0;
-        $asesor1 = isset($formalNilai[0])
-            ? (int) min(round($formalNilai[0] + $bonus1), 85)
-            : null;
+        $asesor1 = null;
+        $asesor2 = null;
+        $asesor3 = null;
 
-        // --- ASESOR 2 ---
-        $bonus2 = isset($nonformalNilai[1]) ? ($nonformalNilai[1] * 0.1) : 0;
-        $asesor2 = isset($formalNilai[1])
-            ? (int) min(round($formalNilai[1] + $bonus2), 85)
-            : null;
+        // Loop maksimal 3 asesor berdasarkan ID yang melakukan penilaian
+        foreach ($allAsesorIds->take(3) as $index => $asesorId) {
+            // Ambil data penilaian spesifik per asesor
+            $pformal = $formalNilai->get($asesorId);
+            $pnonformal = $nonformalNilai->get($asesorId);
 
-        // --- ASESOR 3 ---
-        $bonus3 = isset($nonformalNilai[2]) ? ($nonformalNilai[2] * 0.1) : 0;
-        $asesor3 = isset($formalNilai[2])
-            ? (int) min(round($formalNilai[2] + $bonus3), 85)
-            : null;
+            // Ambil nilai mentahnya
+            $fNilai = $pformal ? $pformal->hasil : null;
+            $nfNilai = $pnonformal ? $pnonformal->nilai : null;
+
+            // Hitung bonus jika nilai non-formal ada dan berupa angka (tidak null)
+            $bonus = (is_numeric($nfNilai)) ? ($nfNilai * 0.1) : 0;
+
+            // Hitung nilai akhir jika nilai formal ada
+            $nilaiAkhir = null;
+            if (is_numeric($fNilai)) {
+                $nilaiAkhir = (int) min(round($fNilai + $bonus), 85);
+            } elseif (is_numeric($nfNilai)) {
+                // Opsional: jika formal kosong tapi non-formal ada nilainya
+                $nilaiAkhir = (int) min(round($bonus), 85);
+            }
+
+            // Petakan ke variabel asesor berdasarkan urutan tampil (maksimal 3)
+            if ($index === 0) $asesor1 = $nilaiAkhir;
+            if ($index === 1) $asesor2 = $nilaiAkhir;
+            if ($index === 2) $asesor3 = $nilaiAkhir;
+        }
 
         // =========================
         // RATA-RATA FINAL
