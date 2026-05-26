@@ -394,8 +394,7 @@ class UserController extends Controller
 
                     return
                         $item->kode_mk === $mk->kode_mk &&
-                        $item->transferSks &&
-                        $item->transferSks->cpmkItems->count();
+                        $item->transferSks;
                 });
             // default kosong
             $nilaiMandiri = null;
