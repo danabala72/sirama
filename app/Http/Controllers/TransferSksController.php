@@ -73,7 +73,7 @@ class TransferSksController extends Controller
 
             // pastikan ada data MK + CP
             ->whereHas('mataKuliahPilihan.mataKuliah.cps')
-            ->whereHas('mataKuliahPilihan.transferSks.cpmkItems')
+            // ->whereHas('mataKuliahPilihan.transferSks.cpmkItems')
 
             ->with([
                 'mataKuliahPilihan' => function ($query) {
