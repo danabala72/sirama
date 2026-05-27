@@ -455,78 +455,89 @@ class UserController extends Controller
         return back()->with('success', 'Data berhasil dibuka kembali (unlock).');
     }
 
-    private function calculateFinalValue($mkPilihan): array
-    {
-        $formalNilai = collect();
-        $nonformalNilai = collect();
+private function calculateFinalValue($mkPilihan): array
+{
+    $formalNilai = collect();
+    $nonformalNilai = collect();
 
-        // =========================
-        // FORMAL (Gunakan keyBy agar dikunci berdasarkan asesor_id)
-        // =========================
-        if ($mkPilihan?->transferSks) {
-            $formalNilai = $mkPilihan->transferSks->penilaian
-                ->keyBy('asesor_id');
-        }
+    if ($mkPilihan?->transferSks) {
+        $formalNilai = $mkPilihan->transferSks->penilaian->keyBy('asesor_id');
+    }
 
-        // =========================
-        // NONFORMAL (Gunakan keyBy agar dikunci berdasarkan asesor_id)
-        // =========================
-        if ($mkPilihan?->transferSksNonFormal) {
-            $nonformalNilai = $mkPilihan->transferSksNonFormal->penilaian
-                ->keyBy('asesor_id');
-        }
+    if ($mkPilihan?->transferSksNonFormal) {
+        $nonformalNilai = $mkPilihan->transferSksNonFormal->penilaian->keyBy('asesor_id');
+    }
 
-        // Gabungkan semua unique asesor_id yang ada di formal maupun nonformal
-        $allAsesorIds = $formalNilai->keys()
+    // =========================================================================
+    // FIX: Menggunakan nama relasi 'asesors' sesuai yang ada di model Anda
+    // =========================================================================
+    $mahasiswa = $mkPilihan->mahasiswa;
+    if ($mahasiswa && !$mahasiswa->relationLoaded('asesors')) {
+        $mahasiswa->load('asesors');
+    }
+
+    // Ambil daftar urutan ID Asesor resmi dari pivot table
+    $masterAsesorIds = $mahasiswa && $mahasiswa->asesors 
+        ? $mahasiswa->asesors->pluck('id')->values() 
+        : collect();
+
+    // Fallback cadangan jika plot kosong, urutkan ID secara permanen (sort)
+    if ($masterAsesorIds->isEmpty()) {
+        $masterAsesorIds = $formalNilai->keys()
             ->concat($nonformalNilai->keys())
             ->unique()
+            ->sort()
             ->values();
+    }
 
-        $asesor1 = null;
-        $asesor2 = null;
-        $asesor3 = null;
+    // Ambil semua ID asesor yang memberikan nilai saat ini
+    $incomingAsesorIds = $formalNilai->keys()->concat($nonformalNilai->keys())->unique();
 
-        // Loop maksimal 3 asesor berdasarkan ID yang melakukan penilaian
-        foreach ($allAsesorIds->take(3) as $index => $asesorId) {
-            // Ambil data penilaian spesifik per asesor
-            $pformal = $formalNilai->get($asesorId);
-            $pnonformal = $nonformalNilai->get($asesorId);
+    $asesor1 = null;
+    $asesor2 = null;
+    $asesor3 = null;
 
-            // Ambil nilai mentahnya (pastikan bertipe numeric/float agar kalkulasi akurat)
-            $fNilai = $pformal && is_numeric($pformal->hasil) ? (float) $pformal->hasil : 0;
-            $nfNilai = $pnonformal && is_numeric($pnonformal->nilai) ? (float) $pnonformal->nilai : 0;
+    foreach ($incomingAsesorIds as $asesorId) {
+        $pformal = $formalNilai->get($asesorId);
+        $pnonformal = $nonformalNilai->get($asesorId);
 
-            // Logika penentuan nilai per asesor (Sesuai rumus Excel: IF(I3=0, J3, I3+J3*10%))
-            if ($fNilai == 0) {
-                $nilaiAsesorIdv = $nfNilai;
-            } else {
-                $nilaiAsesorIdv = $fNilai + ($nfNilai * 0.1);
-            }
+        $hasFormal = $pformal && is_numeric($pformal->hasil);
+        $hasNonFormal = $pnonformal && is_numeric($pnonformal->nilai);
 
-            // Batasi maksimal nilai 85 dan bulatkan (sesuai logika batas atas kode lama Anda)
-            $nilaiAkhir = (int) min(round($nilaiAsesorIdv), 85);
-
-            // Petakan ke variabel asesor berdasarkan urutan tampil (maksimal 3)
-            if ($index === 0) $asesor1 = $nilaiAkhir;
-            if ($index === 1) $asesor2 = $nilaiAkhir;
-            if ($index === 2) $asesor3 = $nilaiAkhir;
+        if (!$hasFormal && !$hasNonFormal) {
+            continue;
         }
 
-        // =========================
-        // RATA-RATA FINAL
-        // =========================
-        $nilaiAsesor = collect([$asesor1, $asesor2, $asesor3])
-            ->filter(fn($v) => $v !== null);
+        $fNilai = $hasFormal ? (float) $pformal->hasil : 0;
+        $nfNilai = $hasNonFormal ? (float) $pnonformal->nilai : 0;
 
-        $rataRata = $nilaiAsesor->count()
-            ? (int) round($nilaiAsesor->avg())
-            : null;
+        // Rumus Excel: IF(I3=0, J3, I3+J3*10%)
+        if ($fNilai == 0) {
+            $nilaiAsesorIdv = $nfNilai;
+        } else {
+            $nilaiAsesorIdv = $fNilai + ($nfNilai * 0.1);
+        }
 
-        // =========================
-        // RETURN SEMUA NILAI
-        // =========================
-        return [$asesor1, $asesor2, $asesor3, $rataRata];
+        $nilaiAkhir = (int) min(round($nilaiAsesorIdv), 85);
+
+        // Kunci posisi kolom berdasarkan indeks pencarian di relasi masterAsesorIds
+        $posisiAsli = $masterAsesorIds->search($asesorId);
+
+        if ($posisiAsli === 0) $asesor1 = $nilaiAkhir;
+        if ($posisiAsli === 1) $asesor2 = $nilaiAkhir;
+        if ($posisiAsli === 2) $asesor3 = $nilaiAkhir;
     }
+
+    // =========================
+    // RATA-RATA FINAL
+    // =========================
+    $nilaiAsesor = collect([$asesor1, $asesor2, $asesor3])->filter(fn($v) => $v !== null);
+    $rataRata = $nilaiAsesor->count() ? (int) round($nilaiAsesor->avg()) : null;
+
+    return [$asesor1, $asesor2, $asesor3, $rataRata];
+}
+
+
 
     public function templateNim()
     {
