@@ -142,6 +142,30 @@ class TransferSksController extends Controller
                 return $formalBelum || $cpBelum;
             })->count();
 
+            $mhs->jumlah_sudah_dinilai = $mkList->filter(function ($mk) use ($asesorId) {
+                // 1. Cek isi nilai angka Formal (kolom hasil)
+                $hasFormalValue = false;
+                if ($mk->transferSks) {
+                    $pFormal = $mk->transferSks->penilaian
+                        ->where('asesor_id', $asesorId)
+                        ->first();
+                    $hasFormalValue = $pFormal && !is_null($pFormal->hasil);
+                }
+
+                // 2. Cek isi nilai angka Non-Formal (kolom nilai)
+                $hasNonFormalValue = false;
+                if ($mk->transferSksNonFormal) {
+                    $pNonFormal = $mk->transferSksNonFormal->penilaian
+                        ->where('asesor_id', $asesorId)
+                        ->first();
+                    $hasNonFormalValue = $pNonFormal && !is_null($pNonFormal->nilai);
+                }
+
+                // Kembali true jika salah satu atau kedua nilai sudah diinput oleh asesor
+                return $hasFormalValue || $hasNonFormalValue;
+            })->count();
+
+
             return $mhs;
         });
 

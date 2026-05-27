@@ -149,6 +149,7 @@
                             <th class="w-1">No</th>
                             <th>Mata Kuliah Pilihan</th>
                             <th>SKS</th>
+                            <th>Penilaian</th>
                             <th>Metode Penilaian</th>
                             <th class="text-center">Status Penilaian</th>
                             <th class="text-center">Aksi</th>
@@ -164,6 +165,37 @@
                             </td>
                             <td class="text-sm text-muted">
                                 {{ $mk->mataKuliah->sks ?? 0 }} SKS
+                            </td>
+                            <td class="text-sm text-center">
+                                @php
+                                $hasAnyValue = false;
+
+                                // Cek input nilai angka Formal
+                                if ($mk->transferSks) {
+                                $pFormal = $mk->transferSks->penilaian->where('asesor_id', $asesorId)->first();
+                                if ($pFormal && !is_null($pFormal->hasil)) {
+                                $hasAnyValue = true;
+                                }
+                                }
+
+                                // Cek input nilai angka Non-Formal
+                                if ($mk->transferSksNonFormal) {
+                                $pNonFormal = $mk->transferSksNonFormal->penilaian->where('asesor_id', $asesorId)->first();
+                                if ($pNonFormal && !is_null($pNonFormal->nilai)) {
+                                $hasAnyValue = true;
+                                }
+                                }
+                                @endphp
+
+                                @if($hasAnyValue)
+                                <span class="badge bg-success-lt">
+                                    Dinilai
+                                </span>
+                                @else
+                                <span class="badge bg-danger-lt">
+                                    Belum
+                                </span>
+                                @endif
                             </td>
                             <td class="text-sm">
                                 <div class="d-flex flex-wrap gap-1">

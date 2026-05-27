@@ -25,6 +25,7 @@
                             <th class="text-nowrap">Mahasiswa</th>
                             <th class="text-nowrap">Jurusan</th>
                             <th class="text-nowrap">Kontak & Email</th>
+                            <th class="text-nowrap text-center">MK Dinilai</th>
                             <th class="text-nowrap text-center">Asesmen</th>
                             <th class="text-nowrap text-center">Aksi</th>
                         </tr>
@@ -48,24 +49,37 @@
                                 </div>
                             </td>
                             <td class="text-sm text-center">
+                                @if($mhs->jumlah_sudah_dinilai < $mhs->total_mk_pilihan)
+                                    <span class="badge bg-warning-lt">
+                                        {{ $mhs->jumlah_sudah_dinilai }} dari {{ $mhs->total_mk_pilihan }} Telah Dinilai
+                                    </span>
+                                    @else
+                                    <span class="badge bg-success-lt">
+                                        Semua MK Selesai Dinilai
+                                    </span>
+                                    @endif
+                            </td>
 
-    @if($mhs->jumlah_belum_dinilai > 0)
 
-        <span class="badge bg-warning-lt">
-            {{ $mhs->jumlah_belum_dinilai }} /
-            {{ $mhs->total_mk_pilihan }}
-            Penilaian Belum Lengkap
-        </span>
+                            <td class="text-sm text-center">
 
-    @else
+                                @if($mhs->jumlah_belum_dinilai > 0)
 
-        <span class="badge bg-success-lt">
-            Lengkap
-        </span>
+                                <span class="badge bg-warning-lt">
+                                    {{ $mhs->jumlah_belum_dinilai }} /
+                                    {{ $mhs->total_mk_pilihan }}
+                                    Penilaian Belum Lengkap
+                                </span>
 
-    @endif
+                                @else
 
-</td>
+                                <span class="badge bg-success-lt">
+                                    Lengkap
+                                </span>
+
+                                @endif
+
+                            </td>
                             <td class="text-sm text-center">
                                 <div class="d-flex justify-content-center gap-2">
                                     @php
