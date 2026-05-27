@@ -492,21 +492,19 @@ class UserController extends Controller
             $pformal = $formalNilai->get($asesorId);
             $pnonformal = $nonformalNilai->get($asesorId);
 
-            // Ambil nilai mentahnya
-            $fNilai = $pformal ? $pformal->hasil : null;
-            $nfNilai = $pnonformal ? $pnonformal->nilai : null;
+            // Ambil nilai mentahnya (pastikan bertipe numeric/float agar kalkulasi akurat)
+            $fNilai = $pformal && is_numeric($pformal->hasil) ? (float) $pformal->hasil : 0;
+            $nfNilai = $pnonformal && is_numeric($pnonformal->nilai) ? (float) $pnonformal->nilai : 0;
 
-            // Hitung bonus jika nilai non-formal ada dan berupa angka (tidak null)
-            $bonus = (is_numeric($nfNilai)) ? ($nfNilai * 0.1) : 0;
-
-            // Hitung nilai akhir jika nilai formal ada
-            $nilaiAkhir = null;
-            if (is_numeric($fNilai)) {
-                $nilaiAkhir = (int) min(round($fNilai + $bonus), 85);
-            } elseif (is_numeric($nfNilai)) {
-                // Opsional: jika formal kosong tapi non-formal ada nilainya
-                $nilaiAkhir = (int) min(round($bonus), 85);
+            // Logika penentuan nilai per asesor (Sesuai rumus Excel: IF(I3=0, J3, I3+J3*10%))
+            if ($fNilai == 0) {
+                $nilaiAsesorIdv = $nfNilai;
+            } else {
+                $nilaiAsesorIdv = $fNilai + ($nfNilai * 0.1);
             }
+
+            // Batasi maksimal nilai 85 dan bulatkan (sesuai logika batas atas kode lama Anda)
+            $nilaiAkhir = (int) min(round($nilaiAsesorIdv), 85);
 
             // Petakan ke variabel asesor berdasarkan urutan tampil (maksimal 3)
             if ($index === 0) $asesor1 = $nilaiAkhir;
