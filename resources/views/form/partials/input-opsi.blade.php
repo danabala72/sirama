@@ -40,12 +40,12 @@
                     id="nilai_huruf"
                     value="{{ $editMk->nilai_huruf ?? '' }}"
                     class="form-control text-center"
-                    placeholder="Misal A, B, C dan lain-lain"
+                    placeholder="A, AB, B, BC, C, D, E"
                     maxlength="2"
-                    pattern="^[A-Ea-e][+-]?$"
-                    oninput="this.value = this.value.toUpperCase()"
-                    title="Masukkan format nilai yang valid (A, B, C, A+, B-, dll)">
-
+                    pattern="^(A|AB|B|BC|C|D|E)$"
+                    oninput="this.value = this.value.toUpperCase(); this.setCustomValidity('');"
+                    oninvalid="this.setCustomValidity('Hanya masukkan nilai yang valid: A, AB, B, BC, C, D, atau E')"
+                    style="text-transform: uppercase;">
             </div>
 
 
@@ -60,7 +60,8 @@
                     class="form-control text-center"
                     placeholder="Nilai Mata Kuliah Asal"
                     min="0"
-                    max="100">
+                    max="100"
+                    step="0.01">
             </div>
 
 
@@ -87,14 +88,20 @@
         let first = '';
         let second = '';
 
-        // Ambil huruf pertama hanya A-E
+        // Karakter pertama hanya boleh A, B, C, D, atau E
         if (v.length >= 1) {
             first = v[0].match(/[A-E]/) ? v[0] : '';
         }
 
-        // Ambil karakter kedua hanya + atau -
-        if (v.length >= 2) {
-            second = v[1].match(/[+-]/) ? v[1] : '';
+        // Karakter kedua hanya boleh B (jika pertamanya A) atau C (jika pertamanya B)
+        if (v.length >= 2 && first !== '') {
+            if (first === 'A' && v[1] === 'B') {
+                second = 'B';
+            } else if (first === 'B' && v[1] === 'C') {
+                second = 'C';
+            } else {
+                second = ''; // Hapus jika mengetik karakter selain itu
+            }
         }
 
         e.target.value = first + second;

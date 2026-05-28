@@ -150,6 +150,11 @@
                                                         <i class="ti ti-download me-2"></i>
                                                         Rekapitulasi Hasil Asesmen
                                                     </a>
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('mahasiswa.laporan.mk-rpl', $mhs->mahasiswa->id) }}">
+                                                        <i class="ti ti-download me-2"></i>
+                                                        Laporan Mata Kuliah RPL
+                                                    </a>
                                                 </div>
                                             </div>
                                         @endif

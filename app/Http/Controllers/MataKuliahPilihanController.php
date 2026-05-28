@@ -96,7 +96,7 @@ class MataKuliahPilihanController extends Controller
             // Pastikan yang divalidasi adalah ID Pivot (Mata Kuliah Semester)
             'mata_kuliah_semester_id' => 'required|exists:mata_kuliah_semester,id',
             'sks'                     => 'required|numeric',
-            'nilai_huruf'             => 'required',
+            'nilai_huruf'             => 'required|string|in:A,AB,B,BC,C,D,E',
             'nilai_angka'             => 'required|numeric',
         ]);
 
