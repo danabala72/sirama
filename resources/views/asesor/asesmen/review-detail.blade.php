@@ -136,9 +136,13 @@
             $label = strtolower($file->label);
             return !str_contains($label, 'ijazah') && !str_contains($label, 'transkrip');
             });
+
+            $hasFormal = $formalFiles->isNotEmpty();
+            $hasNonFormal = $nonFormalFiles->isNotEmpty();
+            $hasFile = $hasFormal || $hasNonFormal;
             @endphp
 
-            @if ($mk->transferSks)
+            @if ($mk->transferSks || $mk->transferSksNonFormal)
 
             {{-- ===================== CARD MK ===================== --}}
             <div class="mb-4">
@@ -268,11 +272,6 @@
                                     @php
                                     $cpLevels = $mk->cpLevels ?? [];
                                     $rowspan = count($cpLevels);
-
-                                    $hasFormal = $formalFiles->isNotEmpty();
-                                    $hasNonFormal = $nonFormalFiles->isNotEmpty();
-
-                                    $hasFile = $hasFormal || $hasNonFormal;
                                     @endphp
 
                                     @forelse ($cpLevels as $index => $cpmk)
@@ -290,6 +289,7 @@
                                         <td rowspan="{{ $rowspan }}" class="align-top">
 
                                             {{-- ================= FORMAL ================= --}}
+                                            @if($hasFormal)
                                             <div class="p-2 rounded bg-green-lt border border-green-subtle mb-3">
 
                                                 <div class="fw-bold text-green small uppercase mb-2">
@@ -326,8 +326,10 @@
                                                 @endforelse
 
                                             </div>
+                                            @endif
 
                                             {{-- ================= NON FORMAL ================= --}}
+                                            @if($hasNonFormal)
                                             <div class="p-2 rounded bg-purple-lt border border-purple-subtle">
 
                                                 <div class="fw-bold text-purple small uppercase mb-2">
@@ -364,6 +366,7 @@
                                                 @endforelse
 
                                             </div>
+                                            @endif
 
                                         </td>
 
@@ -373,7 +376,7 @@
                                         @foreach (['valid', 'asli', 'terkini', 'memadai'] as $attr)
                                         <td class="text-center">
 
-                                            @if($hasFile)
+                                            @if($hasFormal || $hasNonFormal)
                                             @php
                                             // 1. Ambil objek relasi penilaian milik asesor yang sedang login
                                             $penilaianAsesor = $cpmk->penilaianAsesorLogin;
@@ -434,7 +437,7 @@
                                 $penilaian = $transferSks?->penilaian->first(); // sudah difilter di controller
                                 @endphp
 
-                                @if($transferSksId)
+                                @if($transferSksId && $hasFormal)
                                 <div class="col-12">
                                     <div class="p-3 rounded bg-green-lt border border-green-subtle">
 
@@ -505,7 +508,7 @@
                                 : null;
                                 @endphp
 
-                                @if($nonFormal)
+                                @if($nonFormal && $hasNonFormal)
                                 <div class="col-12">
                                     <div class="p-3 rounded bg-purple-lt border border-purple-subtle">
 
