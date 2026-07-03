@@ -142,7 +142,7 @@
             $hasFile = $hasFormal || $hasNonFormal;
             @endphp
 
-            @if ($mk->transferSks || $mk->transferSksNonFormal)
+            @if ($hasFile || $mk->transferSks || $mk->transferSksNonFormal)
 
             {{-- ===================== CARD MK ===================== --}}
             <div class="mb-4">

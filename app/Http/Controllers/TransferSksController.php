@@ -180,6 +180,19 @@ class TransferSksController extends Controller
 
         $asesorId = Auth::user()->asesor->id;
 
+        MataKuliahPilihan::with('attachment')
+            ->where('mahasiswa_id', $id)
+            ->whereHas('mataKuliah.cps')
+            ->whereHas('attachment', function ($query) {
+                $query->whereNotIn('label', ['ijazah', 'transkrip']);
+            })
+            ->get()
+            ->each(function ($mk) {
+                TransferSksNonformal::firstOrCreate([
+                    'mata_kuliah_pilihan_id' => $mk->id,
+                ]);
+            });
+
         $pilihanMk = MataKuliahPilihan::with([
             'transferSks.cpmkItems',
 
@@ -222,6 +235,21 @@ class TransferSksController extends Controller
             'cpLevels.cp',
             'cpLevels.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
         ])->findOrFail($pilihanMkId);
+
+        $hasNonFormalFile = collect($mkSpesifik->attachment ?? [])->contains(function ($file) {
+            return !in_array($file->label, ['ijazah', 'transkrip']);
+        });
+
+        if ($hasNonFormalFile && !$mkSpesifik->transferSksNonFormal) {
+            TransferSksNonformal::firstOrCreate([
+                'mata_kuliah_pilihan_id' => $mkSpesifik->id,
+            ]);
+
+            $mkSpesifik->load([
+                'transferSksNonFormal.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
+            ]);
+        }
+
         $mahasiswa = $mkSpesifik->mahasiswa;
 
         return view('asesor.asesmen.review-detail', compact('mkSpesifik', 'asesorId', 'mahasiswa'));
