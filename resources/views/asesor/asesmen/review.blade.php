@@ -201,6 +201,21 @@
                                 <div class="d-flex flex-wrap gap-1">
 
                                     @php
+                                    $attachments = collect($mk->attachment ?? []);
+
+                                    $formalFiles = $attachments->filter(function ($file) {
+                                    $label = strtolower($file->label ?? '');
+                                    return str_contains($label, 'ijazah') || str_contains($label, 'transkrip');
+                                    });
+
+                                    $nonFormalFiles = $attachments->filter(function ($file) {
+                                    $label = strtolower($file->label ?? '');
+                                    return !str_contains($label, 'ijazah') && !str_contains($label, 'transkrip');
+                                    });
+
+                                    $hasFormalFile = $formalFiles->isNotEmpty();
+                                    $hasNonFormalFile = $nonFormalFiles->isNotEmpty();
+
                                     $formalDone = false;
 
                                     if ($mk->transferSks) {
@@ -211,13 +226,11 @@
 
                                     $formalDone =
                                     $formalPenilaian &&
-                                    !is_null($formalPenilaian->kesenjangan) &&
-                                    !is_null($formalPenilaian->catatan_asesor) &&
                                     !is_null($formalPenilaian->hasil);
                                     }
                                     @endphp
 
-                                    @if($mk->transferSks)
+                                    @if($hasFormalFile)
 
                                     <span class="badge {{ $formalDone ? 'bg-success-lt' : 'bg-red-lt' }}">
                                         Formal
@@ -236,13 +249,11 @@
 
                                     $nonFormalDone =
                                     $nonFormalPenilaian &&
-                                    !is_null($nonFormalPenilaian->kesenjangan) &&
-                                    !is_null($nonFormalPenilaian->catatan_asesor) &&
                                     !is_null($nonFormalPenilaian->nilai);
                                     }
                                     @endphp
 
-                                    @if($mk->transferSksNonFormal)
+                                    @if($hasNonFormalFile)
 
                                     <span class="badge {{ $nonFormalDone ? 'bg-success-lt' : 'bg-red-lt' }}">
                                         Non-Formal
@@ -250,15 +261,6 @@
 
                                     @endif
 
-
-                                    {{-- ================= EMPTY ================= --}}
-                                    @if(!$mk->transferSks && !$mk->transferSksNonFormal)
-
-                                    <span class="badge bg-secondary-lt">
-                                        -
-                                    </span>
-
-                                    @endif
 
                                 </div>
                             </td>
