@@ -339,10 +339,19 @@ class UserController extends Controller
         return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
     }
 
-    public function laporanAsesmen($id)
+    public function laporanAsesmen(Request $request, $id, ?string $jenis = null)
     {
+        $jenis = strtolower($jenis ?? $request->query('jenis', $request->query('type', $request->query('param', 'final'))));
+        $jenis = str_replace([' ', '-', '_'], '', $jenis);
+        $jenis = $jenis === 'informal' ? 'nonformal' : $jenis;
+
+        $allowedJenis = ['final', 'formal', 'nonformal'];
+
+        abort_unless(in_array($jenis, $allowedJenis, true), 404);
+
         $mhs = Mahasiswa::with([
             'user',
+            'asesors',
 
             // MK yang dipilih mahasiswa
             'mataKuliahPilihan.mataKuliah',
@@ -377,6 +386,11 @@ class UserController extends Controller
 
         $rows = [];
         $jurusan = $mhs->jurusan->toArray();
+        $asesorNames = $mhs->asesors
+            ->take(3)
+            ->values()
+            ->map(fn($asesor) => $asesor->name)
+            ->toArray();
 
         foreach ($mataKuliah as $index => $mkSemester) {
 
@@ -391,11 +405,16 @@ class UserController extends Controller
 
             // cek MK dipilih mahasiswa
             $mkPilihan = $mhs->mataKuliahPilihan
-                ->first(function ($item) use ($mk) {
+                ->first(function ($item) use ($mk, $jenis) {
+                    $hasMatchingMk = $item->kode_mk === $mk->kode_mk;
+                    $hasFormal = (bool) $item->transferSks;
+                    $hasNonFormal = (bool) $item->transferSksNonFormal;
 
-                    return
-                        $item->kode_mk === $mk->kode_mk &&
-                        $item->transferSks;
+                    return match ($jenis) {
+                        'formal' => $hasMatchingMk && $hasFormal,
+                        'nonformal' => $hasMatchingMk && $hasNonFormal,
+                        default => $hasMatchingMk && ($hasFormal || $hasNonFormal),
+                    };
                 });
             // default kosong
             $nilaiMandiri = null;
@@ -411,7 +430,7 @@ class UserController extends Controller
             // isi hanya jika dipilih
             if ($mkPilihan) {
                 $nilaiMandiri = $mkPilihan->nilai_angka;
-                [$asesor1, $asesor2, $asesor3, $rataRata] = $this->calculateFinalValue($mkPilihan);
+                [$asesor1, $asesor2, $asesor3, $rataRata] = $this->calculateAssessmentValue($mkPilihan, $jenis);
             }
 
 
@@ -441,9 +460,15 @@ class UserController extends Controller
 
         $timestamp = time();
 
-        $namaFile = "Rekap_Asesmen_" . $namaClean . "_" . $timestamp . ".xlsx";
+        $jenisLabel = match ($jenis) {
+            'formal' => 'Formal',
+            'nonformal' => 'Nonformal',
+            default => 'Final',
+        };
 
-        return Excel::download(new AsesmenExport($mhs->toArray(), $rows, $jurusan), $namaFile);
+        $namaFile = "Rekap_Asesmen_" . $jenisLabel . "_" . $namaClean . "_" . $timestamp . ".xlsx";
+
+        return Excel::download(new AsesmenExport($mhs->toArray(), $rows, $jurusan, $jenis, $asesorNames), $namaFile);
     }
 
     public function laporanMkRpl($id)
@@ -494,6 +519,11 @@ class UserController extends Controller
 
     private function calculateFinalValue($mkPilihan): array
     {
+        return $this->calculateAssessmentValue($mkPilihan, 'final');
+    }
+
+    private function calculateAssessmentValue($mkPilihan, string $jenis = 'final'): array
+    {
         $formalNilai = collect();
         $nonformalNilai = collect();
 
@@ -541,21 +571,39 @@ class UserController extends Controller
             $hasFormal = $pformal && is_numeric($pformal->hasil);
             $hasNonFormal = $pnonformal && is_numeric($pnonformal->nilai);
 
-            if (!$hasFormal && !$hasNonFormal) {
+            if ($jenis === 'formal' && !$hasFormal) {
                 continue;
             }
 
-            $fNilai = $hasFormal ? (float) $pformal->hasil : 0;
-            $nfNilai = $hasNonFormal ? (float) $pnonformal->nilai : 0;
-
-            // Rumus Excel: IF(I3=0, J3, I3+J3*10%)
-            if ($fNilai == 0) {
-                $nilaiAsesorIdv = $nfNilai;
-            } else {
-                $nilaiAsesorIdv = $fNilai + ($nfNilai * 0.1);
+            if ($jenis === 'nonformal' && !$hasNonFormal) {
+                continue;
             }
 
-            $nilaiAkhir = (float) min(round($nilaiAsesorIdv, 2), 85);
+            if ($jenis === 'final' && !$hasFormal && !$hasNonFormal) {
+                continue;
+            }
+
+            if ($jenis === 'formal') {
+                $nilaiAsesorIdv = (float) $pformal->hasil;
+            } elseif ($jenis === 'nonformal') {
+                $nilaiAsesorIdv = (float) $pnonformal->nilai;
+            } else {
+                $fNilai = $hasFormal ? (float) $pformal->hasil : 0;
+                $nfNilai = $hasNonFormal ? (float) $pnonformal->nilai : 0;
+
+                // Rumus Excel: IF(I3=0, J3, I3+J3*10%)
+                if ($fNilai == 0) {
+                    $nilaiAsesorIdv = $nfNilai;
+                } else {
+                    $nilaiAsesorIdv = $fNilai + ($nfNilai * 0.1);
+                }
+            }
+
+            $nilaiAkhir = (float) round($nilaiAsesorIdv, 2);
+
+            if ($jenis === 'final') {
+                $nilaiAkhir = (float) min($nilaiAkhir, 85);
+            }
 
             // Kunci posisi kolom berdasarkan indeks pencarian di relasi masterAsesorIds
             $posisiAsli = $masterAsesorIds->search($asesorId);

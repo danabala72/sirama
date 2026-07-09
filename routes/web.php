@@ -65,7 +65,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/mahasiswa/import-nim', [UserController::class, 'importNim'])->name('mahasiswa.import-nim');
 
         Route::get('/mahasiswa/{id}/laporan/form1', [UserController::class, 'laporanForm1'])->name('mahasiswa.laporan.form1');
-        Route::get('/mahasiswa/{id}/laporan/asesmen', [UserController::class, 'laporanAsesmen'])->name('mahasiswa.laporan.asesmen');
+        Route::get('/mahasiswa/{id}/laporan/asesmen/{jenis?}', [UserController::class, 'laporanAsesmen'])->name('mahasiswa.laporan.asesmen');
         Route::get('/mahasiswa/{id}/laporan/mk-rpl', [UserController::class, 'laporanMkRpl'])->name('mahasiswa.laporan.mk-rpl');
 
         Route::get('/asesor', [UserController::class, 'asesorIndex'])->name('asesor.index');

@@ -146,9 +146,19 @@
                                                         Detail Calon Mahasiswa
                                                     </a>
                                                     <a class="dropdown-item"
-                                                        href="{{ route('mahasiswa.laporan.asesmen', $mhs->mahasiswa->id) }}">
+                                                        href="{{ route('mahasiswa.laporan.asesmen', ['id' => $mhs->mahasiswa->id, 'jenis' => 'final']) }}">
                                                         <i class="ti ti-download me-2"></i>
-                                                        Rekapitulasi Hasil Asesmen
+                                                        Rekapitulasi Hasil Asesmen Final
+                                                    </a>
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('mahasiswa.laporan.asesmen', ['id' => $mhs->mahasiswa->id, 'jenis' => 'formal']) }}">
+                                                        <i class="ti ti-download me-2"></i>
+                                                        Rekapitulasi Hasil Asesmen Formal
+                                                    </a>
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('mahasiswa.laporan.asesmen', ['id' => $mhs->mahasiswa->id, 'jenis' => 'nonformal']) }}">
+                                                        <i class="ti ti-download me-2"></i>
+                                                        Rekapitulasi Hasil Asesmen Non-Formal
                                                     </a>
                                                     <a class="dropdown-item"
                                                         href="{{ route('mahasiswa.laporan.mk-rpl', $mhs->mahasiswa->id) }}">
