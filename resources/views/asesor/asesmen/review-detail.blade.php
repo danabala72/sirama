@@ -425,6 +425,16 @@
                         </div>
 
                         {{-- ===================== FORM PENILAIAN ===================== --}}
+                        @if ($errors->has('penilaian') || $errors->has('penilaian_nonformal'))
+                            <div class="alert alert-danger mb-2 mx-2">
+                                @error('penilaian')
+                                    <div>{{ $message }}</div>
+                                @enderror
+                                @error('penilaian_nonformal')
+                                    <div>{{ $message }}</div>
+                                @enderror
+                            </div>
+                        @endif
                         <div class="m-3">
 
                             <div class="row g-3">
@@ -449,7 +459,7 @@
 
                                             {{-- KESENJANGAN --}}
                                             <div class="col-12">
-                                                <label class="form-label fw-bold">Analisis Kesenjangan</label>
+                                                <label class="form-label fw-bold">Analisis Kesenjangan <span class="text-danger">*</span></label>
 
                                                 <textarea
                                                     name="penilaian[{{ $transferSksId }}][kesenjangan]"
@@ -464,7 +474,7 @@
 
                                             {{-- HASIL --}}
                                             <div class="col-12 col-md-4">
-                                                <label class="form-label fw-bold">Hasil Rekognisi (Skor/SKS)</label>
+                                                <label class="form-label fw-bold">Hasil Rekognisi (Skor/SKS) <span class="text-danger">*</span></label>
 
                                                 <input
                                                     type="number"
@@ -480,7 +490,7 @@
 
                                             {{-- CATATAN --}}
                                             <div class="col-12 col-md-8">
-                                                <label class="form-label fw-bold">Catatan Verifikasi Asesor</label>
+                                                <label class="form-label fw-bold">Catatan Verifikasi Asesor <span class="text-danger">*</span></label>
 
                                                 <textarea
                                                     name="penilaian[{{ $transferSksId }}][catatan_asesor]"
@@ -520,7 +530,7 @@
 
                                             {{-- KESENJANGAN --}}
                                             <div class="col-12">
-                                                <label class="form-label fw-bold">Analisis Kesenjangan</label>
+                                                <label class="form-label fw-bold">Analisis Kesenjangan <span class="text-danger">*</span></label>
 
                                                 <textarea
                                                     name="penilaian_nonformal[{{ $nonFormal->id }}][kesenjangan]"
@@ -534,7 +544,7 @@
 
                                             {{-- NILAI --}}
                                             <div class="col-12 col-md-4">
-                                                <label class="form-label fw-bold">Hasil Rekognisi (Skor/SKS)</label>
+                                                <label class="form-label fw-bold">Hasil Rekognisi (Skor/SKS) <span class="text-danger">*</span></label>
 
                                                 <input
                                                     type="number"
@@ -550,7 +560,7 @@
 
                                             {{-- CATATAN --}}
                                             <div class="col-12 col-md-8">
-                                                <label class="form-label fw-bold">Catatan Verifikasi Asesor</label>
+                                                <label class="form-label fw-bold">Catatan Verifikasi Asesor <span class="text-danger">*</span></label>
 
                                                 <textarea
                                                     name="penilaian_nonformal[{{ $nonFormal->id }}][catatan_asesor]"

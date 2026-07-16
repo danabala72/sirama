@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class TransferSksController extends Controller
 {
@@ -45,9 +46,9 @@ class TransferSksController extends Controller
                 if (isset($input['item_cpmk']) && is_array($input['item_cpmk'])) {
 
                     foreach ($input['item_cpmk'] as $poin) {
-                        if (!empty($poin)) {
+                        if (! empty($poin)) {
                             $transfer->cpmkItems()->create([
-                                'cpmk' => $poin
+                                'cpmk' => $poin,
                             ]);
                         }
                     }
@@ -90,7 +91,7 @@ class TransferSksController extends Controller
                     $q->where('asesor_id', $asesorId);
                 },
 
-                'user.jurusan'
+                'user.jurusan',
             ])
             ->get();
 
@@ -113,19 +114,18 @@ class TransferSksController extends Controller
                         ->first();
 
                     $formalBelum =
-                        !$penilaianFormal ||
+                        ! $penilaianFormal ||
                         is_null($penilaianFormal->kesenjangan) ||
                         is_null($penilaianFormal->hasil) ||
                         is_null($penilaianFormal->catatan_asesor);
                 }
-
 
                 // ================= CP =================
                 $cpBelum = true;
 
                 if ($mk->cpLevels->isNotEmpty()) {
 
-                    $cpBelum = !$mk->cpLevels->every(function ($cp) use ($asesorId) {
+                    $cpBelum = ! $mk->cpLevels->every(function ($cp) use ($asesorId) {
 
                         $pCp = $cp->penilaian
                             ->where('asesor_id', $asesorId)
@@ -149,7 +149,7 @@ class TransferSksController extends Controller
                     $pFormal = $mk->transferSks->penilaian
                         ->where('asesor_id', $asesorId)
                         ->first();
-                    $hasFormalValue = $pFormal && !is_null($pFormal->hasil);
+                    $hasFormalValue = $pFormal && ! is_null($pFormal->hasil);
                 }
 
                 // 2. Cek isi nilai angka Non-Formal (kolom nilai)
@@ -158,21 +158,18 @@ class TransferSksController extends Controller
                     $pNonFormal = $mk->transferSksNonFormal->penilaian
                         ->where('asesor_id', $asesorId)
                         ->first();
-                    $hasNonFormalValue = $pNonFormal && !is_null($pNonFormal->nilai);
+                    $hasNonFormalValue = $pNonFormal && ! is_null($pNonFormal->nilai);
                 }
 
                 // Kembali true jika salah satu atau kedua nilai sudah diinput oleh asesor
                 return $hasFormalValue || $hasNonFormalValue;
             })->count();
 
-
             return $mhs;
         });
 
         return view('asesor.asesmen.index', compact('mahasiswas'));
     }
-
-
 
     public function formalReview($id)
     {
@@ -210,14 +207,14 @@ class TransferSksController extends Controller
         $pilihanMk = MataKuliahPilihan::with([
             'transferSks.cpmkItems',
 
-            'transferSks.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
+            'transferSks.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
 
-            'transferSksNonFormal.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
+            'transferSksNonFormal.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
 
             'mataKuliah.cps',
             'attachment',
             'cpLevels.cp',
-            'cpLevels.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
+            'cpLevels.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
         ])
             ->where('mahasiswa_id', $id)
             ->where(function ($q) {
@@ -228,9 +225,9 @@ class TransferSksController extends Controller
             ->get();
 
         return view('asesor.asesmen.review', [
-            'mahasiswa'     => $mahasiswa,
-            'pilihanMk'     => $pilihanMk,
-            'asesorId'      => $asesorId,
+            'mahasiswa' => $mahasiswa,
+            'pilihanMk' => $pilihanMk,
+            'asesorId' => $asesorId,
         ]);
     }
 
@@ -242,40 +239,40 @@ class TransferSksController extends Controller
         $mkSpesifik = MataKuliahPilihan::with([
             'mahasiswa',
             'transferSks.cpmkItems',
-            'transferSks.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
-            'transferSksNonFormal.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
+            'transferSks.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
+            'transferSksNonFormal.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
             'mataKuliah.cps',
             'attachment',
             'cpLevels.cp',
-            'cpLevels.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
+            'cpLevels.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
         ])->findOrFail($pilihanMkId);
 
         $hasNonFormalFile = collect($mkSpesifik->attachment ?? [])->contains(function ($file) {
-            return !in_array($file->label, ['ijazah', 'transkrip']);
+            return ! in_array($file->label, ['ijazah', 'transkrip']);
         });
 
         $hasFormalFile = collect($mkSpesifik->attachment ?? [])->contains(function ($file) {
             return in_array($file->label, ['ijazah', 'transkrip']);
         });
 
-        if ($hasNonFormalFile && !$mkSpesifik->transferSksNonFormal) {
+        if ($hasNonFormalFile && ! $mkSpesifik->transferSksNonFormal) {
             TransferSksNonformal::firstOrCreate([
                 'mata_kuliah_pilihan_id' => $mkSpesifik->id,
             ]);
 
             $mkSpesifik->load([
-                'transferSksNonFormal.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
+                'transferSksNonFormal.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
             ]);
         }
 
-        if ($hasFormalFile && !$mkSpesifik->transferSks) {
+        if ($hasFormalFile && ! $mkSpesifik->transferSks) {
             $mkSpesifik->transferSks()->create([
                 'kode_mk_asal' => $mkSpesifik->kode_mk,
                 'nama_mk_asal' => $mkSpesifik->nama_mk,
             ]);
 
             $mkSpesifik->load([
-                'transferSks.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
+                'transferSks.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
             ]);
         }
 
@@ -307,8 +304,8 @@ class TransferSksController extends Controller
                 // 1. UPDATE DATA MATA KULIAH (TransferSks)
                 foreach ($request->penilaian as $id => $data) {
                     TransferSks::where('id', $id)->update([
-                        'kesenjangan'    => $data['kesenjangan'],
-                        'hasil'          => $data['hasil'],
+                        'kesenjangan' => $data['kesenjangan'],
+                        'hasil' => $data['hasil'],
                         'catatan_asesor' => $data['catatan_asesor'],
                     ]);
                 }
@@ -319,10 +316,10 @@ class TransferSksController extends Controller
                         // Checkbox jika tidak dicentang tidak masuk ke Request,
                         // maka kita set ke false jika tidak ada di array
                         CpLevelKompetensi::where('id', $cpmkId)->update([
-                            'valid'   => isset($vData['valid']),
-                            'asli'    => isset($vData['asli']),
+                            'valid' => isset($vData['valid']),
+                            'asli' => isset($vData['asli']),
                             'terkini' => isset($vData['terkini']),
-                            'memadai'   => isset($vData['memadai']),
+                            'memadai' => isset($vData['memadai']),
                         ]);
                     }
                 }
@@ -331,7 +328,7 @@ class TransferSksController extends Controller
             return redirect()->route('asesmen.index')
                 ->with('success', 'Penilaian dan verifikasi dokumen berhasil disimpan.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menyimpan: '.$e->getMessage());
         }
     }
 
@@ -347,10 +344,10 @@ class TransferSksController extends Controller
         | FORMAL
         |--------------------------------------------------------------------------
         */
-            'penilaian'                               => 'nullable|array',
-            'penilaian.*.kesenjangan'                 => 'nullable|string',
-            'penilaian.*.hasil'                       => 'nullable|numeric|min:0|max:100',
-            'penilaian.*.catatan_asesor'              => 'nullable|string',
+            'penilaian' => 'nullable|array',
+            'penilaian.*.kesenjangan' => 'nullable|string',
+            'penilaian.*.hasil' => 'nullable|numeric|min:0|max:100',
+            'penilaian.*.catatan_asesor' => 'nullable|string',
 
             /*
 
@@ -358,10 +355,10 @@ class TransferSksController extends Controller
         | NON FORMAL
         |--------------------------------------------------------------------------
         */
-            'penilaian_nonformal'                                 => 'nullable|array',
-            'penilaian_nonformal.*.kesenjangan'                   => 'nullable|string',
-            'penilaian_nonformal.*.nilai'                         => 'nullable|numeric|min:0|max:100',
-            'penilaian_nonformal.*.catatan_asesor'                => 'nullable|string',
+            'penilaian_nonformal' => 'nullable|array',
+            'penilaian_nonformal.*.kesenjangan' => 'nullable|string',
+            'penilaian_nonformal.*.nilai' => 'nullable|numeric|min:0|max:100',
+            'penilaian_nonformal.*.catatan_asesor' => 'nullable|string',
 
             /*
 
@@ -369,8 +366,8 @@ class TransferSksController extends Controller
         | VERIFIKASI / CP KOMPETENSI
         |--------------------------------------------------------------------------
         */
-            'verif'                                   => 'nullable|array',
-            'verif.*'                               => 'nullable|array'
+            'verif' => 'nullable|array',
+            'verif.*' => 'nullable|array',
         ];
 
         $messages = [
@@ -384,9 +381,63 @@ class TransferSksController extends Controller
             'penilaian_nonformal.*.nilai.max' => 'Nilai maksimal asesmen non formal adalah 100.',
         ];
 
-        $validated = $request->validate($rules, $messages);
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        $validator->after(function ($validator) use ($request) {
+            $hasFormalEntry = false;
+            if ($request->has('penilaian') && is_array($request->penilaian)) {
+                foreach ($request->penilaian as $transferSksId => $data) {
+                    $entryFilled = ($data['kesenjangan'] ?? '') !== ''
+                        || ($data['hasil'] ?? '') !== ''
+                        || ($data['catatan_asesor'] ?? '') !== '';
+
+                    if ($entryFilled) {
+                        $hasFormalEntry = true;
+                        if (($data['kesenjangan'] ?? '') === '') {
+                            $validator->errors()->add("penilaian.$transferSksId.kesenjangan", 'Analisis kesenjangan wajib diisi.');
+                        }
+                        if (! isset($data['hasil']) || $data['hasil'] === '') {
+                            $validator->errors()->add("penilaian.$transferSksId.hasil", 'Nilai hasil wajib diisi.');
+                        }
+                        if (($data['catatan_asesor'] ?? '') === '') {
+                            $validator->errors()->add("penilaian.$transferSksId.catatan_asesor", 'Catatan verifikasi asesor wajib diisi.');
+                        }
+                    }
+                }
+            }
+
+            $hasNonFormalEntry = false;
+            if ($request->has('penilaian_nonformal') && is_array($request->penilaian_nonformal)) {
+                foreach ($request->penilaian_nonformal as $transferNonFormalId => $data) {
+                    $entryFilled = ($data['kesenjangan'] ?? '') !== ''
+                        || ($data['nilai'] ?? '') !== ''
+                        || ($data['catatan_asesor'] ?? '') !== '';
+
+                    if ($entryFilled) {
+                        $hasNonFormalEntry = true;
+                        if (($data['kesenjangan'] ?? '') === '') {
+                            $validator->errors()->add("penilaian_nonformal.$transferNonFormalId.kesenjangan", 'Analisis kesenjangan wajib diisi.');
+                        }
+                        if (! isset($data['nilai']) || $data['nilai'] === '') {
+                            $validator->errors()->add("penilaian_nonformal.$transferNonFormalId.nilai", 'Nilai hasil wajib diisi.');
+                        }
+                        if (($data['catatan_asesor'] ?? '') === '') {
+                            $validator->errors()->add("penilaian_nonformal.$transferNonFormalId.catatan_asesor", 'Catatan verifikasi asesor wajib diisi.');
+                        }
+                    }
+                }
+            }
+
+            if (! $hasFormalEntry && ! $hasNonFormalEntry) {
+                $validator->errors()->add('penilaian', 'Minimal salah satu penilaian (formal atau nonformal) harus diisi.');
+
+                return;
+            }
+        });
+
+        $validated = $validator->validate();
         try {
-            DB::transaction(function () use ($validated, $asesorId, $request) {
+            DB::transaction(function () use ($validated, $asesorId) {
 
                 /*
 
@@ -396,7 +447,9 @@ class TransferSksController extends Controller
             */
                 foreach (($validated['penilaian'] ?? []) as $transferSksId => $data) {
 
-                    if (!$transferSksId) continue;
+                    if (! $transferSksId) {
+                        continue;
+                    }
 
                     PenilaianTransferSks::updateOrCreate(
                         [
@@ -419,16 +472,18 @@ class TransferSksController extends Controller
             */
                 foreach (($validated['penilaian_nonformal'] ?? []) as $transferNonFormalId => $data) {
 
-                    if (!$transferNonFormalId) continue;
+                    if (! $transferNonFormalId) {
+                        continue;
+                    }
 
                     PenilaianTransferNonformal::updateOrCreate(
                         [
                             'transfer_nonformal_id' => $transferNonFormalId,
-                            'asesor_id'             => $asesorId,
+                            'asesor_id' => $asesorId,
                         ],
                         [
-                            'kesenjangan'    => $data['kesenjangan'] ?? null,
-                            'nilai'          => $data['nilai'] ?? null,
+                            'kesenjangan' => $data['kesenjangan'] ?? null,
+                            'nilai' => $data['nilai'] ?? null,
                             'catatan_asesor' => $data['catatan_asesor'] ?? null,
                         ]
                     );
@@ -441,19 +496,17 @@ class TransferSksController extends Controller
             |--------------------------------------------------------------------------
             */
 
-
-
                 foreach (($validated['verif'] ?? []) as $cpLevelId => $vData) {
                     PenilaianCpKompetensi::updateOrCreate(
                         [
                             'cp_level_kompetensi_id' => $cpLevelId,
-                            'asesor_id'              => $asesorId
+                            'asesor_id' => $asesorId,
                         ],
                         [
-                            'valid'    => $vData['valid'] ?? 0,
-                            'asli'     => $vData['asli'] ?? 0,
-                            'terkini'  => $vData['terkini'] ?? 0,
-                            'memadai'  => $vData['memadai'] ?? 0,
+                            'valid' => $vData['valid'] ?? 0,
+                            'asli' => $vData['asli'] ?? 0,
+                            'terkini' => $vData['terkini'] ?? 0,
+                            'memadai' => $vData['memadai'] ?? 0,
                         ]
                     );
                 }
@@ -465,7 +518,7 @@ class TransferSksController extends Controller
         } catch (ModelNotFoundException $e) {
             return back()->with('error', 'Data induk ajuan mahasiswa tidak ditemukan.');
         } catch (\Throwable $e) {
-            return back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menyimpan data: '.$e->getMessage());
         }
     }
 }

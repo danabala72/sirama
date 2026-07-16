@@ -212,7 +212,7 @@
                         <div class="row g-3">
 
                             <div class="col-12">
-                                <label class="form-label fw-bold">Kesenjangan</label>
+                                <label class="form-label fw-bold">Kesenjangan <span class="text-danger">*</span></label>
                                 <textarea name="penilaian[{{ $mk->transferSks->id }}][kesenjangan]"
                                     rows="2"
                                     class="form-control"
@@ -220,7 +220,7 @@
                             </div>
 
                             <div class="col-12 col-md-4">
-                                <label class="form-label fw-bold">Hasil</label>
+                                <label class="form-label fw-bold">Hasil <span class="text-danger">*</span></label>
                                 <input type="number"
                                     name="penilaian[{{ $mk->transferSks->id }}][hasil]"
                                     class="form-control"
@@ -229,7 +229,7 @@
                             </div>
 
                             <div class="col-12 col-md-8">
-                                <label class="form-label fw-bold">Catatan Asesor</label>
+                                <label class="form-label fw-bold">Catatan Asesor <span class="text-danger">*</span></label>
                                 <textarea name="penilaian[{{ $mk->transferSks->id }}][catatan_asesor]"
                                     rows="2"
                                     class="form-control"

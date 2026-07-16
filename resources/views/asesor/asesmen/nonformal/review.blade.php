@@ -93,7 +93,7 @@
                     <div class="border-top pt-4">
                         <div class="row g-3">
                             <div class="col-12">
-                                <label class="form-label fw-bold">Analisis Kesenjangan</label>
+                                <label class="form-label fw-bold">Analisis Kesenjangan <span class="text-danger">*</span></label>
                                 <textarea
                                     name="penilaian[{{ $mk->transferSksNonFormal->id }}][kesenjangan]"
                                     rows="2"
@@ -105,7 +105,7 @@
                             </div>
 
                             <div class="col-12 col-md-4">
-                                <label class="form-label fw-bold">Hasil Rekognisi (Skor/SKS)</label>
+                                <label class="form-label fw-bold">Hasil Rekognisi (Skor/SKS) <span class="text-danger">*</span></label>
                                 <input type="number"
                                     name="penilaian[{{ $mk->transferSksNonFormal->id }}][nilai]"
                                     class="form-control"
@@ -117,7 +117,7 @@
                             </div>
 
                             <div class="col-12 col-md-8">
-                                <label class="form-label fw-bold">Catatan Verifikasi Asesor</label>
+                                <label class="form-label fw-bold">Catatan Verifikasi Asesor <span class="text-danger">*</span></label>
                                 <textarea
                                     name="penilaian[{{ $mk->transferSksNonFormal->id }}][catatan_asesor]"
                                     rows="2"
