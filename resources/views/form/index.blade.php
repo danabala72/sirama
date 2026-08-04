@@ -1,7 +1,7 @@
 <x-app-layout>
 
     @php
-    $locked = !$mahasiswa->is_editable;
+    $locked = $mahasiswa && !$mahasiswa->is_editable;
     @endphp
 
     <div class="modal fade" id="modalLocked" tabindex="-1"
