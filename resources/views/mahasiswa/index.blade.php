@@ -101,7 +101,7 @@
                                 <td class="text-sm font-medium">{{ $mhs->mahasiswa->jurusan->nama_jurusan ?? '-' }}</td>
                                 <td class="text-sm text-muted">{{ $mhs->mahasiswa->email ?? '-' }}</td>
                                 <td>
-                                    @if ($mhs->mahasiswa?->mataKuliafPilihan?->count() > 0)
+                                    @if ($mhs->mahasiswa?->mataKuliaPilihan?->count() > 0)
                                         <span class="badge badge-outline text-green">
                                             {{ $mhs->mahasiswa?->mataKuliafPilihan?->count() }} MK dengan bukti pendukung
                                         </span>
