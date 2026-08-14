@@ -67,30 +67,30 @@ class TransferSksController extends Controller
         $mahasiswas = Mahasiswa::query()
             ->locked()
 
-            // mahasiswa yang di-assign ke asesor ini
+            // Mahasiswa yang di-assign ke asesor ini
             ->whereHas('asesors', function ($query) use ($asesorId) {
                 $query->where('asesor_id', $asesorId);
             })
 
-            // pastikan ada data MK + CP
+            // Pastikan ada data MK + CP
             ->whereHas('mataKuliahPilihan.mataKuliah.cps')
-            // ->whereHas('mataKuliahPilihan.transferSks.cpmkItems')
 
             ->with([
                 'mataKuliahPilihan' => function ($query) {
                     $query->whereHas('mataKuliah.cps');
                 },
 
-                // CP level + penilaian asesor (sudah difilter di controller)
+                // CP + penilaian asesor
                 'mataKuliahPilihan.cpLevels.penilaian' => function ($q) use ($asesorId) {
                     $q->where('asesor_id', $asesorId);
                 },
 
-                // transfer SKS + semua penilaian (filter di controller, bukan model)
+                // Formal + penilaian asesor
                 'mataKuliahPilihan.transferSks.penilaian' => function ($q) use ($asesorId) {
                     $q->where('asesor_id', $asesorId);
                 },
 
+                // Non-Formal + penilaian asesor
                 'mataKuliahPilihan.transferSksNonFormal.penilaian' => function ($q) use ($asesorId) {
                     $q->where('asesor_id', $asesorId);
                 },
@@ -99,91 +99,100 @@ class TransferSksController extends Controller
             ])
             ->get();
 
-        // hitung status kelengkapan
         $mahasiswas->map(function ($mhs) use ($asesorId) {
 
             $mkList = collect($mhs->mataKuliahPilihan ?? []);
 
+            /*
+        |--------------------------------------------------------------------------
+        | TOTAL MATA KULIAH
+        |--------------------------------------------------------------------------
+        */
+
             $mhs->total_mk_pilihan = $mkList->count();
 
-            $mhs->jumlah_belum_dinilai = $mkList->filter(function ($mk) use ($asesorId) {
 
-                // ================= FORMAL =================
-                $formalBelum = false;
-
-                if ($mk->transferSks) {
-
-                    $penilaianFormal = $mk->transferSks->penilaian
-                        ->where('asesor_id', $asesorId)
-                        ->first();
-
-                    $formalBelum =
-                        ! $penilaianFormal ||
-                        is_null($penilaianFormal->kesenjangan) ||
-                        is_null($penilaianFormal->hasil) ||
-                        is_null($penilaianFormal->catatan_asesor);
-                }
-
-                // ================= NON FORMAL =================
-                $nonFormalBelum = false;
-
-                if ($mk->transferSksNonFormal) {
-
-                    $penilaianNonFormal = $mk->transferSksNonFormal->penilaian
-                        ->where('asesor_id', $asesorId)
-                        ->first();
-
-                    $nonFormalBelum =
-                        ! $penilaianNonFormal ||
-                        is_null($penilaianNonFormal->kesenjangan) ||
-                        is_null($penilaianNonFormal->nilai) ||
-                        is_null($penilaianNonFormal->catatan_asesor);
-                }
-
-                // ================= CP =================
-                $cpBelum = true;
-
-                if ($mk->cpLevels->isNotEmpty()) {
-
-                    $cpBelum = ! $mk->cpLevels->every(function ($cp) use ($asesorId) {
-
-                        $pCp = $cp->penilaian
-                            ->where('asesor_id', $asesorId)
-                            ->first();
-
-                        return $pCp &&
-                            $pCp->valid == 1 &&
-                            $pCp->asli == 1 &&
-                            $pCp->terkini == 1 &&
-                            $pCp->memadai == 1;
-                    });
-                }
-
-                return $formalBelum || $nonFormalBelum || $cpBelum;
-            })->count();
+            /*
+        |--------------------------------------------------------------------------
+        | JUMLAH SUDAH DINILAI
+        |--------------------------------------------------------------------------
+        |
+        | MK dianggap sudah dinilai apabila:
+        |
+        | - Formal mempunyai nilai "hasil", ATAU
+        | - Non-Formal mempunyai nilai "nilai"
+        |
+        */
 
             $mhs->jumlah_sudah_dinilai = $mkList->filter(function ($mk) use ($asesorId) {
-                // 1. Cek isi nilai angka Formal (kolom hasil)
+
+                // =========================
+                // FORMAL
+                // =========================
+
                 $hasFormalValue = false;
+
                 if ($mk->transferSks) {
+
                     $pFormal = $mk->transferSks->penilaian
                         ->where('asesor_id', $asesorId)
                         ->first();
-                    $hasFormalValue = $pFormal && ! is_null($pFormal->hasil);
+
+                    $hasFormalValue =
+                        $pFormal &&
+                        !is_null($pFormal->hasil);
                 }
 
-                // 2. Cek isi nilai angka Non-Formal (kolom nilai)
+
+                // =========================
+                // NON FORMAL
+                // =========================
+
                 $hasNonFormalValue = false;
+
                 if ($mk->transferSksNonFormal) {
+
                     $pNonFormal = $mk->transferSksNonFormal->penilaian
                         ->where('asesor_id', $asesorId)
                         ->first();
-                    $hasNonFormalValue = $pNonFormal && ! is_null($pNonFormal->nilai);
+
+                    $hasNonFormalValue =
+                        $pNonFormal &&
+                        !is_null($pNonFormal->nilai);
                 }
 
-                // Kembali true jika salah satu atau kedua nilai sudah diinput oleh asesor
+
+                /*
+            |--------------------------------------------------------------------------
+            | SUDAH DINILAI
+            |--------------------------------------------------------------------------
+            |
+            | Salah satu jenis asesmen sudah mempunyai nilai.
+            |
+            */
+
                 return $hasFormalValue || $hasNonFormalValue;
             })->count();
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | JUMLAH BELUM DINILAI / BELUM LENGKAP
+        |--------------------------------------------------------------------------
+        |
+        | Jangan hitung ulang menggunakan logika Formal / Non-Formal / CP.
+        |
+        | Karena jumlah_sudah_dinilai sudah menjadi sumber kebenaran
+        | untuk status "Telah Dinilai", maka:
+        |
+        | total MK - MK yang sudah dinilai
+        |
+        */
+
+            $mhs->jumlah_belum_dinilai =
+                $mhs->total_mk_pilihan -
+                $mhs->jumlah_sudah_dinilai;
+
 
             return $mhs;
         });
@@ -227,14 +236,14 @@ class TransferSksController extends Controller
         $pilihanMk = MataKuliahPilihan::with([
             'transferSks.cpmkItems',
 
-            'transferSks.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
+            'transferSks.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
 
-            'transferSksNonFormal.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
+            'transferSksNonFormal.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
 
             'mataKuliah.cps',
             'attachment',
             'cpLevels.cp',
-            'cpLevels.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
+            'cpLevels.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
         ])
             ->where('mahasiswa_id', $id)
             ->where(function ($q) {
@@ -259,12 +268,12 @@ class TransferSksController extends Controller
         $mkSpesifik = MataKuliahPilihan::with([
             'mahasiswa',
             'transferSks.cpmkItems',
-            'transferSks.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
-            'transferSksNonFormal.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
+            'transferSks.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
+            'transferSksNonFormal.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
             'mataKuliah.cps',
             'attachment',
             'cpLevels.cp',
-            'cpLevels.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
+            'cpLevels.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
         ])->findOrFail($pilihanMkId);
 
         $hasNonFormalFile = collect($mkSpesifik->attachment ?? [])->contains(function ($file) {
@@ -281,7 +290,7 @@ class TransferSksController extends Controller
             ]);
 
             $mkSpesifik->load([
-                'transferSksNonFormal.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
+                'transferSksNonFormal.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
             ]);
         }
 
@@ -292,7 +301,7 @@ class TransferSksController extends Controller
             ]);
 
             $mkSpesifik->load([
-                'transferSks.penilaian' => fn ($q) => $q->where('asesor_id', $asesorId),
+                'transferSks.penilaian' => fn($q) => $q->where('asesor_id', $asesorId),
             ]);
         }
 
@@ -348,7 +357,7 @@ class TransferSksController extends Controller
             return redirect()->route('asesmen.index')
                 ->with('success', 'Penilaian dan verifikasi dokumen berhasil disimpan.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal menyimpan: '.$e->getMessage());
+            return back()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
         }
     }
 
@@ -538,7 +547,7 @@ class TransferSksController extends Controller
         } catch (ModelNotFoundException $e) {
             return back()->with('error', 'Data induk ajuan mahasiswa tidak ditemukan.');
         } catch (\Throwable $e) {
-            return back()->with('error', 'Gagal menyimpan data: '.$e->getMessage());
+            return back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
         }
     }
 }
