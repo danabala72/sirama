@@ -49,22 +49,26 @@
                             </td>
                             <td class="text-sm text-center">
                                 @php
-                                    $belumDinilai = collect($mhs->mataKuliahPilihan ?? [])->filter(function($mk) {
-                                        // 1. Jika data transfer belum dibuat SAMA SEKALI
-                                        if (!$mk->transferSksNonFormal) {
-                                            return true;
-                                        }
+                                    $mkList = collect($mhs->mataKuliahPilihan ?? []);
+                                    $mkNonFormal = $mkList->filter(function($mk) {
+                                        return $mk->transferSksNonFormal !== null;
+                                    });
 
-                                        // 2. Jika data transfer sudah ada, tapi kolomnya masih ada yang NULL
-                                        return is_null($mk->transferSksNonFormal->kesenjangan) || 
-                                            is_null($mk->transferSksNonFormal->nilai) || 
-                                            is_null($mk->transferSksNonFormal->catatan_asesor);
+                                    $belumDinilai = $mkNonFormal->filter(function($mk) use ($asesorId) {
+                                        $pNonFormal = $mk->transferSksNonFormal->penilaian
+                                            ->where('asesor_id', $asesorId)
+                                            ->first();
+
+                                        return is_null($pNonFormal) ||
+                                            is_null($pNonFormal->kesenjangan) ||
+                                            is_null($pNonFormal->nilai) ||
+                                            is_null($pNonFormal->catatan_asesor);
                                     })->count();
                                 @endphp
 
                                 @if($belumDinilai > 0)
                                 <span class="badge bg-warning-lt" title="Ada mata kuliah yang belum lengkap penilaiannya">
-                                    {{ $belumDinilai }} / {{ count($mhs->mataKuliahPilihan ?? []) }} MK Belum Lengkap
+                                    {{ $belumDinilai }} / {{ $mkNonFormal->count() }} MK Belum Lengkap
                                 </span>
                                 @else
                                 <span class="badge bg-green-lt">

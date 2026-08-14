@@ -283,6 +283,20 @@
                                 !is_null($pNilai->hasil);
                                 }
 
+                                $isNonFormalDone = false;
+
+                                if ($mk->transferSksNonFormal) {
+
+                                $pNilai = $mk->transferSksNonFormal->penilaian
+                                ->where('asesor_id', $asesorId)
+                                ->first();
+
+                                $isNonFormalDone =
+                                $pNilai &&
+                                !is_null($pNilai->kesenjangan) &&
+                                !is_null($pNilai->nilai);
+                                }
+
                                 // ================= CPMK =================
                                 $isCpDone = $mk->cpLevels->isNotEmpty() &&
                                 $mk->cpLevels->every(function ($cp) use ($asesorId) {
@@ -300,7 +314,7 @@
 
                                 @endphp
 
-                                @if($isFormalDone && $isCpDone)
+                                @if($isCpDone && ($isFormalDone || $isNonFormalDone))
 
                                 <span class="badge bg-success-lt">
                                     Selesai Dinilai

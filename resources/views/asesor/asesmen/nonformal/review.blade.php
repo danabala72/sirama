@@ -12,6 +12,9 @@
 
             @foreach($pilihanMk as $mk)
             @if($mk->transferSksNonFormal)
+            @php
+                $penilaianNF = $mk->transferSksNonFormal->penilaian->first();
+            @endphp
             <div class="card mb-4 shadow-sm border-0">
                 <div class="card-header bg-purple-lt">
                     <div>
@@ -98,7 +101,7 @@
                                     name="penilaian[{{ $mk->transferSksNonFormal->id }}][kesenjangan]"
                                     rows="2"
                                     class="form-control"
-                                    placeholder="Evaluasi kesenjangan antara bukti portofolio dengan CPMK...">{{ old('penilaian.'.$mk->transferSksNonFormal->id.'.kesenjangan', $mk->transferSksNonFormal->kesenjangan) }}</textarea>
+                                    placeholder="Evaluasi kesenjangan antara bukti portofolio dengan CPMK...">{{ old('penilaian.'.$mk->transferSksNonFormal->id.'.kesenjangan', $penilaianNF?->kesenjangan) }}</textarea>
                                 @error('penilaian.'.$mk->transferSksNonFormal->id.'.kesenjangan')
                                 <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
@@ -109,7 +112,7 @@
                                 <input type="number"
                                     name="penilaian[{{ $mk->transferSksNonFormal->id }}][nilai]"
                                     class="form-control"
-                                    value="{{ old('penilaian.'.$mk->transferSksNonFormal->id.'.nilai', $mk->transferSksNonFormal->nilai) }}"
+                                    value="{{ old('penilaian.'.$mk->transferSksNonFormal->id.'.nilai', $penilaianNF?->nilai) }}"
                                     placeholder="0-100">
                                 @error('penilaian.'.$mk->transferSksNonFormal->id.'.nilai')
                                 <div class="text-danger small mt-1">{{ $message }}</div>
@@ -122,7 +125,7 @@
                                     name="penilaian[{{ $mk->transferSksNonFormal->id }}][catatan_asesor]"
                                     rows="2"
                                     class="form-control"
-                                    placeholder="Catatan keabsahan bukti atau rekomendasi...">{{ old('penilaian.'.$mk->transferSksNonFormal->id.'.catatan_asesor', $mk->transferSksNonFormal->catatan_asesor) }}</textarea>
+                                     placeholder="Catatan keabsahan bukti atau rekomendasi...">{{ old('penilaian.'.$mk->transferSksNonFormal->id.'.catatan_asesor', $penilaianNF?->catatan_asesor) }}</textarea>
                                 @error('penilaian.'.$mk->transferSksNonFormal->id.'.catatan_asesor')
                                 <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror

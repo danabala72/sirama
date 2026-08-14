@@ -91,6 +91,10 @@ class TransferSksController extends Controller
                     $q->where('asesor_id', $asesorId);
                 },
 
+                'mataKuliahPilihan.transferSksNonFormal.penilaian' => function ($q) use ($asesorId) {
+                    $q->where('asesor_id', $asesorId);
+                },
+
                 'user.jurusan',
             ])
             ->get();
@@ -120,6 +124,22 @@ class TransferSksController extends Controller
                         is_null($penilaianFormal->catatan_asesor);
                 }
 
+                // ================= NON FORMAL =================
+                $nonFormalBelum = false;
+
+                if ($mk->transferSksNonFormal) {
+
+                    $penilaianNonFormal = $mk->transferSksNonFormal->penilaian
+                        ->where('asesor_id', $asesorId)
+                        ->first();
+
+                    $nonFormalBelum =
+                        ! $penilaianNonFormal ||
+                        is_null($penilaianNonFormal->kesenjangan) ||
+                        is_null($penilaianNonFormal->nilai) ||
+                        is_null($penilaianNonFormal->catatan_asesor);
+                }
+
                 // ================= CP =================
                 $cpBelum = true;
 
@@ -139,7 +159,7 @@ class TransferSksController extends Controller
                     });
                 }
 
-                return $formalBelum || $cpBelum;
+                return $formalBelum || $nonFormalBelum || $cpBelum;
             })->count();
 
             $mhs->jumlah_sudah_dinilai = $mkList->filter(function ($mk) use ($asesorId) {
