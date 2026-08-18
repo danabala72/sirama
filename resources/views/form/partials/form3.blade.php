@@ -4,18 +4,21 @@
             <h3 class="card-title">Cari Mata Kuliah</h3>
         </div>
         <div class="">
-            @if(isset($mataKuliahPilihan) && isset($mataKuliah))
             @php
-            $kodeDipilih = $mataKuliahPilihan->pluck('kode_mk');
-            $mataKuliahTersisa = $mataKuliah->whereNotIn('kode_mk', $kodeDipilih);
+            $semesterIdAktif = request('semester_id', ($semester->where('is_active', true)->first()?->id));
+            $kodeDipilihSemester = $mataKuliahPilihan
+                ->where('mata_kuliah_semester_id', $semesterIdAktif)
+                ->pluck('kode_mk');
+            $mataKuliahTersisa = isset($mataKuliah)
+                ? $mataKuliah->whereNotIn('kode_mk', $kodeDipilihSemester)
+                : collect();
             @endphp
-            @endif
 
             @if(isset($mataKuliah) && !$mataKuliah->count())
             <div class="alert alert-danger my-2">
                 <p>Tidak ada mata kuliah yang bisa dipilih pada jursan dan semester yang dipilih</p>
             </div>
-            @elseif(isset($mataKuliahTersisa) && $mataKuliahTersisa->isEmpty())
+            @elseif(isset($mataKuliah) && $mataKuliahTersisa->isEmpty())
             <div class="alert alert-success my-2">
                 <p>Semua mata kuliah sudah dipilih</p>
             </div>
@@ -47,7 +50,7 @@
     </div>
 </form>
 
-@if(isset($mataKuliah) && $mataKuliah->count())
+@if(isset($mataKuliah) && $mataKuliah->count() || !empty($mataKuliahPilihan))
 <div class="card my-4">
     <div class="card-header bg-primary">
         <h3 class="card-title text-white">Tambah Mata Kuliah Pilihan</h3>
@@ -317,23 +320,33 @@
             const mata_kuliah_semester_id = this.dataset.mk_semester_id
             const form = document.getElementById('form-mk')
 
+            if (!form) {
+                return
+            }
+
             // ubah action ke update
             form.action = `/mata-kuliah-pilihan/${id}`
 
             // ubah method
-            document.getElementById('form-method').value = 'PUT'
+            const formMethod = document.getElementById('form-method')
+            if (formMethod) {
+                formMethod.value = 'PUT'
+            }
 
             // isi nilai
-            document.querySelector('[name="nilai_huruf"]').value = huruf
-            document.querySelector('[name="nilai_angka"]').value = angka
+            const nilaiHuruf = document.querySelector('[name="nilai_huruf"]')
+            const nilaiAngka = document.querySelector('[name="nilai_angka"]')
+
+            if (nilaiHuruf) nilaiHuruf.value = huruf
+            if (nilaiAngka) nilaiAngka.value = angka
+
             const sksInput = document.getElementById('in-sks')
             if (sksInput) {
                 sksInput.value = sks
             }
 
-            const hiddenMk = document.getElementById('hidden-mk-id');
+            const hiddenMk = document.getElementById('hidden-mk-id')
             const mkSemesterId = document.getElementById('hidden-mk-semester-id')
-
 
             if (hiddenMk) {
                 hiddenMk.value = id;
@@ -346,20 +359,25 @@
             const select = document.getElementById('select-api');
 
             if (select) {
-                // Gunakan removeAttribute
                 select.removeAttribute('required');
-
-                // Opsional: Jika ingin mendisable juga
                 select.disabled = true;
 
-                // Jika ingin menyembunyikan kontainer induknya
-                select.closest('.col-md-12').style.display = 'none';
+                const selectParent = select.closest('.col-md-12')
+                if (selectParent) {
+                    selectParent.style.display = 'none';
+                }
             }
 
-            document.getElementById('select-mk-wrapper').style.display = 'none';
+            const selectWrapper = document.getElementById('select-mk-wrapper')
+            if (selectWrapper) {
+                selectWrapper.style.display = 'none';
+            }
 
             // tampilkan form opsi
-            document.getElementById('input-opsi').style.display = 'block'
+            const inputOpsi = document.getElementById('input-opsi')
+            if (inputOpsi) {
+                inputOpsi.style.display = 'block'
+            }
 
             // scroll ke form
             form.scrollIntoView({

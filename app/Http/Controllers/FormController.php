@@ -46,6 +46,10 @@ class FormController extends Controller
             $attachments = collect();
         }
 
+        $attachment = ($step == 3)
+            ? Attachment::where('mahasiswa_id', $mahasiswa->id)->get()
+            : collect();
+
         $jurusan = ($step == 1)
             ? Jurusan::all()
             : collect();
@@ -67,6 +71,7 @@ class FormController extends Controller
             'title' => $titles[$step],
             'mahasiswa' => $mahasiswa,
             'attachments' => $attachments,
+            'attachment' => $attachment,
             'jurusan' => $jurusan,
             'semester' => $semester,
             'mataKuliahPilihan' => $mataKuliahPilihan,
@@ -169,16 +174,19 @@ class FormController extends Controller
         $semester = Semester::orderBy('id', 'desc')->get();
 
 
-        $mataKuliah = MataKuliah::where('status', 1)->where('jurusan_id', $jurusanId) // Filter ini yang tadi bikin kosong
+        $mataKuliah = MataKuliah::where('status', 1)->where('jurusan_id', $jurusanId)
             ->whereHas('semester', function ($q) use ($semesterId) {
-                $q->where('semester_id', $semesterId);
+                $q->where('semester.id', $semesterId);
             })
             ->with(['semester' => function ($q) use ($semesterId) {
-                $q->where('semester_id', $semesterId);
+                $q->where('semester.id', $semesterId);
             }])
             ->get();
 
         $mataKuliahPilihan = $mahasiswa->mataKuliahPilihan()
+            ->whereHas('mataKuliah', function ($q) use ($jurusanId) {
+                $q->where('jurusan_id', $jurusanId);
+            })
             ->with(['attachment', 'mkSemester'])
             ->get();
         return view('form.index', [

@@ -82,28 +82,31 @@
 </div>
 
 <script>
-    document.getElementById('nilai_huruf').addEventListener('input', function(e) {
-        let v = e.target.value.toUpperCase();
+    document.addEventListener('DOMContentLoaded', function() {
+        const nilaiHurufEl = document.getElementById('nilai_huruf');
+        if (!nilaiHurufEl) return;
 
-        let first = '';
-        let second = '';
+        nilaiHurufEl.addEventListener('input', function(e) {
+            let v = e.target.value.toUpperCase();
 
-        // Karakter pertama hanya boleh A, B, C, D, atau E
-        if (v.length >= 1) {
-            first = v[0].match(/[A-E]/) ? v[0] : '';
-        }
+            let first = '';
+            let second = '';
 
-        // Karakter kedua hanya boleh B (jika pertamanya A) atau C (jika pertamanya B)
-        if (v.length >= 2 && first !== '') {
-            if (first === 'A' && v[1] === 'B') {
-                second = 'B';
-            } else if (first === 'B' && v[1] === 'C') {
-                second = 'C';
-            } else {
-                second = ''; // Hapus jika mengetik karakter selain itu
+            if (v.length >= 1) {
+                first = v[0].match(/[A-E]/) ? v[0] : '';
             }
-        }
 
-        e.target.value = first + second;
+            if (v.length >= 2 && first !== '') {
+                if (first === 'A' && v[1] === 'B') {
+                    second = 'B';
+                } else if (first === 'B' && v[1] === 'C') {
+                    second = 'C';
+                } else {
+                    second = '';
+                }
+            }
+
+            e.target.value = first + second;
+        });
     });
 </script>
