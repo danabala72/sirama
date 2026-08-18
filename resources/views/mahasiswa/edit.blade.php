@@ -70,7 +70,19 @@
                             placeholder="••••••••">
                     </div>
 
-
+                    @if(isset($skemas) && $skemas->count())
+                    <div class="mb-4">
+                        <label class="block mb-2 text-sm font-bold text-gray-700">Skema</label>
+                        <select name="skema_id" class="w-full border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 rounded-md shadow-sm">
+                            <option value="">-- Tanpa Skema --</option>
+                            @foreach($skemas as $skema)
+                            <option value="{{ $skema->id }}" {{ old('skema_id', $user->skema_id) == $skema->id ? 'selected' : '' }}>
+                                {{ $skema->nama_skema }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
 
                     @if(!empty($user->mahasiswa))
                     <!-- Keterangan Data Diri -->

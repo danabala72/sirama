@@ -24,28 +24,37 @@ class MataKuliahController extends Controller
         $jurusanId = $user->jurusan_id;
         $semuaSemester = Semester::all();
         $semuaJurusan = Jurusan::all();
+        $skemaId = $request->skema_id;
 
-        $mks = MataKuliah::with(['jurusan', 'semester'])
+        $mks = MataKuliah::with(['jurusan', 'semester', 'skema'])
             ->when($role === 'AdminJurusan', function ($query) use ($jurusanId) {
                 return $query->where('jurusan_id', $jurusanId);
             })
             ->when($role === 'Admin' && $request->jurusan_id, function ($query) use ($request) {
                 return $query->where('jurusan_id', $request->jurusan_id);
             })
+            ->when($skemaId, function ($query) use ($skemaId) {
+                return $query->where('skema_id', $skemaId);
+            })
             ->get();
-        return view('mata-kuliah.index', compact('mks', 'semuaSemester', 'semuaJurusan'));
+
+        $skemas = \App\Models\Skema::when($role === 'AdminJurusan', function ($query) use ($jurusanId) {
+            return $query->where('jurusan_id', $jurusanId);
+        })->get();
+
+        return view('mata-kuliah.index', compact('mks', 'semuaSemester', 'semuaJurusan', 'skemas', 'skemaId'));
     }
 
     public function edit(MataKuliah $mk)
     {
-        // 1. Cari semester yang sedang aktif (is_active = 1)
+        $mk->load('jurusan', 'skema');
+
         $semesterAktif = Semester::where('is_active', 1)->first();
 
         if (!$semesterAktif) {
             return back()->with('error', 'Tidak ada semester yang sedang aktif. Silakan aktifkan satu semester di menu Semester.');
         }
 
-        // 2. Gunakan firstOrCreate agar jika data jembatannya tidak ada, langsung dibuat
         $mkSemester = MataKuliahSemester::firstOrCreate([
             'mata_kuliah_id' => $mk->id,
             'semester_id'    => $semesterAktif->id
@@ -73,6 +82,7 @@ class MataKuliahController extends Controller
             'sks'           => 'required|integer|min:1',
             'nilai_minimum' => 'nullable|integer|min:0|max:100',
             'jurusan_id'    => 'required|exists:jurusan,id',
+            'skema_id'      => 'nullable|exists:skema,id',
         ], [
             'kode_mk.unique' => 'Kode Mata Kuliah ini sudah digunakan oleh MK lain.',
         ]);
@@ -82,6 +92,7 @@ class MataKuliahController extends Controller
 
         $mk->update([
             'jurusan_id'    => $request->jurusan_id,
+            'skema_id'      => $request->skema_id,
             'kode_mk'       => strtoupper($request->kode_mk), // Konsistensi Uppercase
             'nama_mk'       => $request->nama_mk,
             'sks'           => $request->sks,
@@ -131,6 +142,7 @@ class MataKuliahController extends Controller
             'kode_mk' => 'required|unique:mata_kuliah,kode_mk',
             'nama_mk' => 'required|string',
             'jurusan_id' => 'required|exists:jurusan,id',
+            'skema_id' => 'nullable|exists:skema,id',
             'sks' => 'required|integer|min:1',
             'nilai_minimum' => 'nullable|integer',
             'semester_id' => 'required|integer|exists:semester,id'
@@ -138,6 +150,7 @@ class MataKuliahController extends Controller
 
         $mk = MataKuliah::create([
             'jurusan_id' => $request->jurusan_id,
+            'skema_id' => $request->skema_id,
             'kode_mk' => strtoupper($request->kode_mk),
             'nama_mk' => $request->nama_mk,
             'sks' => $request->sks,

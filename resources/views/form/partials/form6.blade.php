@@ -17,6 +17,9 @@
                     <label class="text-muted small">Mata Kuliah Target (Prodi Tujuan)</label>
                     <h5 class="mb-1">{{ $mk->nama_mk }}</h5>
                     <p class="text-primary font-weight-bold">{{ $mk->kode_mk }} </p>
+                    @if($mk->mataKuliah->skema?->nama_skema)
+                    <p class="text-muted small mb-0">Skema: {{ $mk->mataKuliah->skema->nama_skema }}</p>
+                    @endif
                 </div>
 
                 <!-- SISI KANAN: INPUT MAHASISWA -->

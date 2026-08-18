@@ -12,6 +12,7 @@ class MataKuliah extends Model
 
     protected $fillable = [
         'jurusan_id',
+        'skema_id',
         'kode_mk',
         'nama_mk',
         'sks',
@@ -22,6 +23,11 @@ class MataKuliah extends Model
     public function jurusan(): BelongsTo
     {
         return $this->belongsTo(Jurusan::class, 'jurusan_id');
+    }
+
+    public function skema(): BelongsTo
+    {
+        return $this->belongsTo(Skema::class, 'skema_id');
     }
 
     public function attachments(): HasMany

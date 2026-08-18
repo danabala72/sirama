@@ -10,6 +10,7 @@ use App\Http\Controllers\MataKuliahController;
 use App\Http\Controllers\MataKuliahPilihanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SemesterController;
+use App\Http\Controllers\SkemaController;
 use App\Http\Controllers\TransferSksController;
 use App\Http\Controllers\TransferSksNonFormalController;
 use App\Http\Controllers\UserController;
@@ -100,6 +101,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/mk/template', [MataKuliahController::class, 'templateDownload'])->name('mk.template');
         Route::post('/mk/import', [MataKuliahController::class, 'import'])->name('mk.import');
 
+        Route::get('/skema', [SkemaController::class, 'index'])->name('skema.index');
+        Route::post('/skema', [SkemaController::class, 'store'])->name('skema.store');
+        Route::get('/skema/{id}/edit', [SkemaController::class, 'edit'])->name('skema.edit');
+        Route::put('/skema/{id}', [SkemaController::class, 'update'])->name('skema.update');
+        Route::delete('/skema/{id}', [SkemaController::class, 'destroy'])->name('skema.destroy');
 
         Route::delete('/cpmk/{cpmk}', [CpMataKuliahController::class, 'destroy'])->name('cpmk.destroy');
         Route::put('/cpmk/{cpmk}/update', [CpMataKuliahController::class, 'update'])->name('cpmk.update');

@@ -20,6 +20,11 @@ class Jurusan extends Model
         return $this->hasMany(MataKuliah::class, 'jurusan_id');
     }
 
+    public function skema(): HasMany
+    {
+        return $this->hasMany(Skema::class, 'jurusan_id');
+    }
+
     public function adminJurusan()
     {
         return $this->hasOne(AdminJurusan::class, 'jurusan_id');

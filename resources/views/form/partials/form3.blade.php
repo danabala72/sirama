@@ -1,4 +1,3 @@
-<form action="{{ url('/mata-kuliah') }}" method="GET">
     <div class="">
         <div class="">
             <h3 class="card-title">Cari Mata Kuliah</h3>
@@ -48,7 +47,6 @@
             </form>
         </div>
     </div>
-</form>
 
 @if(isset($mataKuliah) && $mataKuliah->count() || !empty($mataKuliahPilihan))
 <div class="card my-4">
@@ -105,6 +103,7 @@
                 <tr>
                     <th>Kode MK</th>
                     <th>Nama MK</th>
+                    <th>Skema</th>
                     <th>SKS Asal</th>
                     <th>Bukti Pendukung</th>
                     <th>Nilai Huruf</th>
@@ -119,6 +118,8 @@
                     <td>{{ $mk->kode_mk }}</td>
 
                     <td>{{ $mk->nama_mk }}</td>
+
+                    <td>{{ $mk->mataKuliah->skema->nama_skema ?? '-' }}</td>
 
                     <td>
                         <span class="badge bg-blue-lt">

@@ -29,7 +29,8 @@ class TemplateMKExport implements FromArray, WithHeadings, ShouldAutoSize, WithT
             'nama_mk',
             'semester',
             'sks',
-            'nilai_minimum'
+            'nilai_minimum',
+            'nama_skema'
         ];
     }
 
@@ -38,7 +39,6 @@ class TemplateMKExport implements FromArray, WithHeadings, ShouldAutoSize, WithT
      */
     public function array(): array
     {
-        // Ambil label semester yang sedang aktif
         $semesterAktif = Semester::where('is_active', 1)->first()?->kode ?? '20261';
 
         return [
@@ -48,7 +48,8 @@ class TemplateMKExport implements FromArray, WithHeadings, ShouldAutoSize, WithT
                 'Nama Mata Kuliah',
                 $semesterAktif,
                 3,
-                60
+                60,
+                'Skema A'
             ]
         ];
     }

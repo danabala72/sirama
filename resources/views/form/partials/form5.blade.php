@@ -33,6 +33,9 @@
                         data-bs-target="#collapse{{ $mk->id }}">
 
                         {{$index + 1}}. {{ $mk->nama_mk }}
+                        @if($mk->mataKuliah->skema?->nama_skema)
+                        <span class="badge bg-blue-lt ms-2">{{ $mk->mataKuliah->skema->nama_skema }}</span>
+                        @endif
                         @if($isDanger)
                         <i class="ti ti-alert-triangle ms-2"></i>
                         @elseif($isWarning)

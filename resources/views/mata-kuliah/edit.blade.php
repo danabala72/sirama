@@ -32,6 +32,19 @@
                         <input type="hidden" name="jurusan_id" value="{{ $mk->jurusan_id }}">
                     </div>
 
+                    <!-- Skema -->
+                    <div class="mb-4">
+                        <label class="block mb-2 text-sm font-bold text-gray-700">Skema</label>
+                        <select name="skema_id" class="w-full border-gray-300 focus:border-emerald-500 focus:ring focus:ring-emerald-200 rounded-md shadow-sm">
+                            <option value="">-- Tanpa Skema --</option>
+                            @foreach($mk->jurusan->skema as $skema)
+                            <option value="{{ $skema->id }}" {{ old('skema_id', $mk->skema_id) == $skema->id ? 'selected' : '' }}>
+                                {{ $skema->nama_skema }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <!-- Kode MK -->
                     <div class="mb-4">
                         <label class="block mb-2 text-sm font-bold text-gray-700">Kode Mata Kuliah</label>

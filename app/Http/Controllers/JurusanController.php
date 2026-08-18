@@ -31,8 +31,9 @@ class JurusanController extends Controller
     public function edit(Jurusan $jurusan)
     {
         $semuaSemester = Semester::orderBy('kode', 'asc')->get();
-        $jurusan = $jurusan->load('mataKuliah.semester');
-        return view('jurusan.edit', compact('jurusan', 'semuaSemester'));
+        $jurusan = $jurusan->load('mataKuliah.semester', 'skema');
+        $skemas = $jurusan->skema;
+        return view('jurusan.edit', compact('jurusan', 'semuaSemester', 'skemas'));
     }
 
     public function create()

@@ -78,4 +78,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Jurusan::class, 'jurusan_id');
     }
+
+    public function skema()
+    {
+        return $this->belongsTo(Skema::class, 'skema_id');
+    }
 }

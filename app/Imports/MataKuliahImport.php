@@ -5,30 +5,34 @@ namespace App\Imports;
 use App\Models\MataKuliah;
 use App\Models\Jurusan;
 use App\Models\Semester;
+use App\Models\Skema;
 use Maatwebsite\Excel\Concerns\ToModel;
-use Maatwebsite\Excel\Concerns\WithHeadingRow; // Agar bisa baca header teks
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Throwable;
 
 class MataKuliahImport implements ToModel, WithHeadingRow
 {
     public function model(array $row)
     {
-        // 1. Cari Jurusan berdasarkan Kode (dari Excel)
         $jurusan = Jurusan::where('kode_jurusan', $row['kode_jurusan'])->first();
-
-        // 2. Cari Semester berdasarkan Label (dari Excel)
         $semester = Semester::where('kode', $row['semester'])->first();
 
-        // Jika data referensi tidak ditemukan, baris ini dilewati (skip)
         if (!$jurusan || !$semester) {
             return null;
         }
 
-        // 3. Simpan ke Database
+        $skema = null;
+        if (!empty($row['nama_skema'])) {
+            $skema = Skema::where('jurusan_id', $jurusan->id)
+                ->where('nama_skema', $row['nama_skema'])
+                ->first();
+        }
+
         $mk = MataKuliah::updateOrCreate(
             ['kode_mk' => trim($row['kode_mk'])],
             [
                 'jurusan_id'    => $jurusan->id,
+                'skema_id'      => $skema?->id,
                 'nama_mk'       => $row['nama_mk'],
                 'sks'           => $row['sks'],
                 'nilai_minimum' => $row['nilai_minimum'],

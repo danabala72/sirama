@@ -68,7 +68,8 @@ class UserController extends Controller
     {
         $asesors = Asesor::with('user')->get();
         $selectedAsesors = $user->mahasiswa ? $user->mahasiswa->asesors->pluck('id')->toArray() : [];
-        return view('mahasiswa.edit', compact('user', 'asesors', 'selectedAsesors'));
+        $skemas = \App\Models\Skema::where('jurusan_id', Auth::user()->jurusan_id)->get();
+        return view('mahasiswa.edit', compact('user', 'asesors', 'selectedAsesors', 'skemas'));
     }
 
     public function asesorEdit(User $user)
@@ -80,7 +81,8 @@ class UserController extends Controller
 
     public function create()
     {
-        return view('mahasiswa.create');
+        $skemas = \App\Models\Skema::where('jurusan_id', Auth::user()->jurusan_id)->get();
+        return view('mahasiswa.create', compact('skemas'));
     }
 
     public function asesorCreate()
@@ -93,6 +95,7 @@ class UserController extends Controller
         $request->validate([
             'username' => 'required|string|max:255|unique:users,username',
             'password' => 'required|string|min:6|confirmed',
+            'skema_id' => 'nullable|exists:skema,id',
         ]);
 
         $roleMhs = Role::where('role', ROLES::MAHASISWA)->first();
@@ -102,7 +105,8 @@ class UserController extends Controller
             'username' => $request->username,
             'password' => Hash::make($request->password),
             'role_id'  => $roleMhs->id ?? null,
-            'jurusan_id' => $jurusanId
+            'jurusan_id' => $jurusanId,
+            'skema_id' => $request->skema_id,
         ]);
 
         return redirect()->route('mahasiswa.index')->with('success', 'User baru berhasil dibuat.');
@@ -149,12 +153,14 @@ class UserController extends Controller
             'password_confirmation' => 'required_with:password|same:password',
             'asesor_ids' => 'nullable|array',
             'asesor_ids.*' => 'exists:asesor,id',
+            'skema_id' => 'nullable|exists:skema,id',
 
         ]);
 
         $roleMhs = Role::where('role', ROLES::MAHASISWA)->first();
         $user->username = $request->username;
         $user->role_id = $roleMhs->id;
+        $user->skema_id = $request->skema_id;
 
         // Hanya update password jika diisi
         if ($request->filled('password')) {

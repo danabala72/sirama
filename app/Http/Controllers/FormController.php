@@ -61,7 +61,7 @@ class FormController extends Controller
         $mataKuliahPilihan = ($step == 5 || $step == 6)
             ? MataKuliahPilihan::query()
             ->whereHas('mataKuliah.cps')
-            ->with(['mataKuliah.cps', 'cpLevels', 'transferSks.cpmkItems'])
+            ->with(['mataKuliah.cps', 'mataKuliah.skema', 'cpLevels', 'transferSks.cpmkItems'])
             ->where('mahasiswa_id', $mahasiswa->id)
             ->get()
             : collect();
@@ -170,11 +170,21 @@ class FormController extends Controller
 
         $jurusanId = $jurusan->id;
         $semesterId = $request->semester_id;
+        $userSkemaId = Auth::user()->skema_id;
 
         $semester = Semester::orderBy('id', 'desc')->get();
+        $skemas = \App\Models\Skema::where('jurusan_id', $jurusanId)->get();
 
+        $mataKuliahQuery = MataKuliah::where('status', 1)->where('jurusan_id', $jurusanId);
 
-        $mataKuliah = MataKuliah::where('status', 1)->where('jurusan_id', $jurusanId)
+        if ($userSkemaId) {
+            $mataKuliahQuery->where(function ($q) use ($userSkemaId) {
+                $q->where('skema_id', null)
+                  ->orWhere('skema_id', $userSkemaId);
+            });
+        }
+
+        $mataKuliah = $mataKuliahQuery
             ->whereHas('semester', function ($q) use ($semesterId) {
                 $q->where('semester.id', $semesterId);
             })
@@ -184,10 +194,16 @@ class FormController extends Controller
             ->get();
 
         $mataKuliahPilihan = $mahasiswa->mataKuliahPilihan()
-            ->whereHas('mataKuliah', function ($q) use ($jurusanId) {
+            ->whereHas('mataKuliah', function ($q) use ($jurusanId, $userSkemaId) {
                 $q->where('jurusan_id', $jurusanId);
+                if ($userSkemaId) {
+                    $q->where(function ($q2) use ($userSkemaId) {
+                        $q2->where('skema_id', null)
+                           ->orWhere('skema_id', $userSkemaId);
+                    });
+                }
             })
-            ->with(['attachment', 'mkSemester'])
+            ->with(['attachment', 'mkSemester', 'mataKuliah.skema'])
             ->get();
         return view('form.index', [
             'step'       => 3,
@@ -196,9 +212,10 @@ class FormController extends Controller
             'mahasiswa'  => $mahasiswa,
             'attachment' => Attachment::where('mahasiswa_id', $mahasiswa->id)->get(),
             'semester'   => $semester,
-            'jurusan'    => Jurusan::all(),
+            'jurusan'    => \App\Models\Jurusan::all(),
             'mataKuliahPilihan' => $mataKuliahPilihan,
-            'selected_semester' => $semesterId
+            'selected_semester' => $semesterId,
+            'skemas' => $skemas,
         ]);
     }
     public function finalize()

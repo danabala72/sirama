@@ -19,7 +19,7 @@
 
         <div class="d-flex flex-wrap gap-2 mb-3">
             <button type="button" class="btn btn-outline-info btn-sm inline-flex items-center gap-x-2 my-2" data-bs-toggle="modal" data-bs-target="#modalTambahMK">
-                <svg xmlns="http://w3.org" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <svg xmlns="http://www.w3.org/2000/2000" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
                 <span class="hidden sm:inline">Tambah MK</span>
@@ -27,7 +27,7 @@
 
 
             <button type="button" class="inline-flex items-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 btn btn-sm btn-outline-success my-2" data-bs-toggle="modal" data-bs-target="#modalImport">
-                <svg xmlns="http://w3.org" class="w-4 h-4" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/2000" class="w-4 h-4" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M14 3v4a1 1 0 0 0 1 1h4" />
                     <path d="M5 13v-8a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2h-5.5" />
@@ -36,6 +36,19 @@
                 </svg>
                 Import Mata Kuliah
             </button>
+
+            @if(isset($skemas) && $skemas->count())
+            <form action="{{ route('mk.index') }}" method="GET" class="d-flex align-items-center gap-2 my-2">
+                <select name="skema_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">-- Semua Skema --</option>
+                    @foreach($skemas as $skema)
+                    <option value="{{ $skema->id }}" {{ ($skemaId ?? request('skema_id')) == $skema->id ? 'selected' : '' }}>
+                        {{ $skema->nama_skema }}
+                    </option>
+                    @endforeach
+                </select>
+            </form>
+            @endif
         </div>
         <!-- Card Wrapper -->
         <!-- Card Wrapper -->
@@ -46,6 +59,7 @@
                         <tr class="bg-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             <th class="text-nowrap w-1">No</th>
                             <th class="text-nowrap">Jurusan</th>
+                            <th class="text-nowrap">Skema</th>
                             <th class="text-nowrap">Kode MK</th>
                             <th class="text-nowrap">Nama Mata Kuliah</th>
                             <th class="text-nowrap">Semester</th>
@@ -62,6 +76,7 @@
                             <td class="text-sm">
                                 <div class="font-bold text-emerald-600">{{ $mk->jurusan->nama_jurusan ?? '-' }}</div>
                             </td>
+                            <td class="text-sm">{{ $mk->skema->nama_skema ?? '-' }}</td>
                             <td class="text-sm font-medium">
                                 <span class="badge bg-blue-lt">{{ $mk->kode_mk }}</span>
                             </td>
@@ -126,7 +141,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="px-5 py-10 text-center text-gray-500 italic">Belum ada data mata kuliah.</td>
+                            <td colspan="8" class="px-5 py-10 text-center text-gray-500 italic">Belum ada data mata kuliah.</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -235,9 +250,9 @@
 
                             <div class="mt-3 p-2 bg-light rounded border">
                                 <small class="text-muted d-block mb-1 font-bold text-uppercase">Format Header Excel:</small>
-                                <code class="text-primary" style="font-size: 0.75rem;">
-                                    kode_jurusan, kode_mk, nama_mk, semester, sks, nilai_minimum
-                                </code>
+                            <code class="text-primary" style="font-size: 0.75rem;">
+                                kode_jurusan, kode_mk, nama_mk, semester, sks, nilai_minimum, nama_skema
+                            </code>
                             </div>
                         </div>
                         <div class="text-center">
