@@ -76,7 +76,13 @@
                             <td class="text-sm">
                                 <div class="font-bold text-emerald-600">{{ $mk->jurusan->nama_jurusan ?? '-' }}</div>
                             </td>
-                            <td class="text-sm">{{ $mk->skema->nama_skema ?? '-' }}</td>
+                            <td class="text-sm">
+                                @forelse($mk->skema as $skema)
+                                <span class="badge bg-blue-lt me-1">{{ $skema->nama_skema }}</span>
+                                @empty
+                                <span class="text-muted">-</span>
+                                @endforelse
+                            </td>
                             <td class="text-sm font-medium">
                                 <span class="badge bg-blue-lt">{{ $mk->kode_mk }}</span>
                             </td>
@@ -192,6 +198,14 @@
                                 <input type="text" name="nama_mk" class="form-control" placeholder="Nama Lengkap MK" required>
                             </div>
                             <div class="mb-4">
+                                <label class="block mb-2 text-sm font-bold text-gray-700">Skema</label>
+                                <select id="skema-select-modal" name="skema_ids[]" multiple placeholder="Pilih satu atau lebih skema..." autocomplete="off">
+                                    @foreach($skemas as $skema)
+                                    <option value="{{ $skema->id }}">{{ $skema->nama_skema }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-4">
                                 <label class="block mb-2 text-sm font-bold text-gray-700">Tawarkan pada Semester</label>
                                 <select name="semester_id"
                                     class="w-full border-gray-300 focus:border-emerald-500 focus:ring focus:ring-emerald-200 rounded-md shadow-sm select2"
@@ -253,6 +267,9 @@
                             <code class="text-primary" style="font-size: 0.75rem;">
                                 kode_jurusan, kode_mk, nama_mk, semester, sks, nilai_minimum, nama_skema
                             </code>
+                            <small class="text-muted d-block mt-2" style="font-size: 0.75rem;">
+                                *Kolom <b>nama_skema</b> bisa diisi lebih dari 1 skema dengan dipisah koma, contoh: <b>Skema A, Skema B</b>
+                            </small>
                             </div>
                         </div>
                         <div class="text-center">
@@ -309,6 +326,67 @@
                 }
             });
         })();
+
+        const skemaSelect = document.querySelector('#skema-select-modal');
+
+        if (window.TomSelect && skemaSelect) {
+            new TomSelect(skemaSelect, {
+                plugins: ['remove_button'],
+                dropdownParent: 'body',
+                copyClassesToDropdown: true,
+                onItemAdd: function() {
+                    this.setTextboxValue('');
+                    this.refreshOptions();
+                }
+            });
+        }
     </script>
     @endpush
+
+    <style>
+        .ts-wrapper.single .ts-control,
+        .ts-wrapper.multi .ts-control {
+            border: 1px solid #dce1e7 !important;
+            border-radius: 4px !important;
+            min-height: calc(1.5em + 0.75rem + 2px);
+            padding: 0.4375rem 0.75rem !important;
+        }
+
+        .ts-dropdown {
+            z-index: 9999 !important;
+            background: #ffffff !important;
+            border: 1px solid #dce1e7 !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+            border-radius: 4px !important;
+            margin-top: 2px !important;
+        }
+
+        .ts-control:focus,
+        .focus .ts-control {
+            outline: none !important;
+            border-color: #10b981 !important;
+            box-shadow: 0 0 0 0.05rem #2563eb !important;
+        }
+
+        .ts-dropdown .option {
+            padding: 0.5rem 0.75rem !important;
+        }
+
+        .ts-dropdown .option.active {
+            background-color: #f0fdf4 !important;
+            color: #059669 !important;
+            cursor: pointer !important;
+        }
+
+        .ts-dropdown .option:hover {
+            background-color: #f0fdf4 !important;
+            color: #059669 !important;
+        }
+
+        .ts-dropdown .option {
+            outline: none !important;
+            border: none !important;
+        }
+    </style>
+
 </x-app-layout>

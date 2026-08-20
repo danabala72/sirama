@@ -119,7 +119,15 @@
 
                     <td>{{ $mk->nama_mk }}</td>
 
-                    <td>{{ $mk->mataKuliah->skema->nama_skema ?? '-' }}</td>
+                    <td>
+                        @if($mk->mataKuliah->skema->count() > 0)
+                            @foreach($mk->mataKuliah->skema as $skema)
+                            <span class="badge bg-blue-lt me-1">{{ $skema->nama_skema }}</span>
+                            @endforeach
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
+                    </td>
 
                     <td>
                         <span class="badge bg-blue-lt">

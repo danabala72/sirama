@@ -35,10 +35,9 @@
                     <!-- Skema -->
                     <div class="mb-4">
                         <label class="block mb-2 text-sm font-bold text-gray-700">Skema</label>
-                        <select name="skema_id" class="w-full border-gray-300 focus:border-emerald-500 focus:ring focus:ring-emerald-200 rounded-md shadow-sm">
-                            <option value="">-- Tanpa Skema --</option>
+                        <select id="skema-select-edit" name="skema_ids[]" multiple placeholder="Pilih satu atau lebih skema..." autocomplete="off">
                             @foreach($mk->jurusan->skema as $skema)
-                            <option value="{{ $skema->id }}" {{ old('skema_id', $mk->skema_id) == $skema->id ? 'selected' : '' }}>
+                            <option value="{{ $skema->id }}" {{ $mk->skema->contains('id', $skema->id) ? 'selected' : '' }}>
                                 {{ $skema->nama_skema }}
                             </option>
                             @endforeach
@@ -306,11 +305,23 @@
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // 1. Cari apakah ada elemen error di dalam form import
+            const skemaSelect = document.querySelector('#skema-select-edit');
+
+            if (window.TomSelect && skemaSelect) {
+                new TomSelect(skemaSelect, {
+                    plugins: ['remove_button'],
+                    dropdownParent: 'body',
+                    copyClassesToDropdown: true,
+                    onItemAdd: function() {
+                        this.setTextboxValue('');
+                        this.refreshOptions();
+                    }
+                });
+            }
+
             const errorElement = document.getElementById('error-import-trigger');
             const modalElement = document.getElementById('modalImportCp');
 
-            // 2. Jika elemen error ditemukan, tampilkan modalnya
             if (errorElement && modalElement) {
                 const modalImport = new bootstrap.Modal(modalElement);
                 modalImport.show();
@@ -318,5 +329,50 @@
         });
     </script>
 
+    <style>
+        .ts-wrapper.single .ts-control,
+        .ts-wrapper.multi .ts-control {
+            border: 1px solid #dce1e7 !important;
+            border-radius: 4px !important;
+            min-height: calc(1.5em + 0.75rem + 2px);
+            padding: 0.4375rem 0.75rem !important;
+        }
+
+        .ts-dropdown {
+            z-index: 9999 !important;
+            background: #ffffff !important;
+            border: 1px solid #dce1e7 !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+            border-radius: 4px !important;
+            margin-top: 2px !important;
+        }
+
+        .ts-control:focus,
+        .focus .ts-control {
+            outline: none !important;
+            border-color: #10b981 !important;
+            box-shadow: 0 0 0 0.05rem #2563eb !important;
+        }
+
+        .ts-dropdown .option {
+            padding: 0.5rem 0.75rem !important;
+        }
+
+        .ts-dropdown .option.active {
+            background-color: #f0fdf4 !important;
+            color: #059669 !important;
+            cursor: pointer !important;
+        }
+
+        .ts-dropdown .option:hover {
+            background-color: #f0fdf4 !important;
+            color: #059669 !important;
+        }
+
+        .ts-dropdown .option {
+            outline: none !important;
+            border: none !important;
+        }
+    </style>
 
 </x-app-layout>

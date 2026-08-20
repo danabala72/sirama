@@ -178,6 +178,24 @@
                         <div class="col-12 col-lg-6">
                             <div class="p-3 bg-green-lt border border-green-subtle rounded-3 h-100">
 
+                               <label class="form-label fw-bold text-green small uppercase mb-2">
+                                    Mata Kuliah Asal
+                                </label>
+
+
+                                @if($mk->transferSks && ($mk->transferSks->kode_mk_asal || $mk->transferSks->nama_mk_asal))
+                                <div class="mb-3">
+                                    <span class="text-muted small">Kode MK Asal:</span>
+                                    <span class="fw-semibold small ms-1">{{ $mk->transferSks->kode_mk_asal ?? '' }}</span>
+                                </div>
+                                <div class="mb-3">
+                                    <span class="text-muted small">Nama MK Asal:</span>
+                                    <span class="fw-semibold small ms-1">{{ $mk->transferSks->nama_mk_asal ?? '' }}</span>
+                                </div>
+                                @endif
+
+                                <hr class="mt-3 mb-3 border-green-subtle">
+
                                 <label class="form-label fw-bold text-green small uppercase mb-2">
                                     CPMK Mata Kuliah Asal
                                 </label>

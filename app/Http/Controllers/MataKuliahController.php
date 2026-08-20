@@ -34,7 +34,9 @@ class MataKuliahController extends Controller
                 return $query->where('jurusan_id', $request->jurusan_id);
             })
             ->when($skemaId, function ($query) use ($skemaId) {
-                return $query->where('skema_id', $skemaId);
+                return $query->whereHas('skema', function ($q) use ($skemaId) {
+                    $q->where('skema.id', $skemaId);
+                });
             })
             ->get();
 
@@ -82,7 +84,8 @@ class MataKuliahController extends Controller
             'sks'           => 'required|integer|min:1',
             'nilai_minimum' => 'nullable|integer|min:0|max:100',
             'jurusan_id'    => 'required|exists:jurusan,id',
-            'skema_id'      => 'nullable|exists:skema,id',
+            'skema_ids'     => 'nullable|array',
+            'skema_ids.*'   => 'exists:skema,id',
         ], [
             'kode_mk.unique' => 'Kode Mata Kuliah ini sudah digunakan oleh MK lain.',
         ]);
@@ -92,12 +95,17 @@ class MataKuliahController extends Controller
 
         $mk->update([
             'jurusan_id'    => $request->jurusan_id,
-            'skema_id'      => $request->skema_id,
             'kode_mk'       => strtoupper($request->kode_mk), // Konsistensi Uppercase
             'nama_mk'       => $request->nama_mk,
             'sks'           => $request->sks,
             'nilai_minimum' => $request->nilai_minimum ?? 60, // Default 60 jika kosong
         ]);
+
+        if ($request->filled('skema_ids')) {
+            $mk->skema()->sync($request->skema_ids);
+        } else {
+            $mk->skema()->detach();
+        }
         if ($request->semester_id) {
             // Cari apakah sudah ada relasi di tabel pivot, jika ada update, jika tidak insert
             DB::table('mata_kuliah_semester')->updateOrInsert(
@@ -142,7 +150,8 @@ class MataKuliahController extends Controller
             'kode_mk' => 'required|unique:mata_kuliah,kode_mk',
             'nama_mk' => 'required|string',
             'jurusan_id' => 'required|exists:jurusan,id',
-            'skema_id' => 'nullable|exists:skema,id',
+            'skema_ids' => 'nullable|array',
+            'skema_ids.*' => 'exists:skema,id',
             'sks' => 'required|integer|min:1',
             'nilai_minimum' => 'nullable|integer',
             'semester_id' => 'required|integer|exists:semester,id'
@@ -150,12 +159,15 @@ class MataKuliahController extends Controller
 
         $mk = MataKuliah::create([
             'jurusan_id' => $request->jurusan_id,
-            'skema_id' => $request->skema_id,
             'kode_mk' => strtoupper($request->kode_mk),
             'nama_mk' => $request->nama_mk,
             'sks' => $request->sks,
             'nilai_minimum' => $request->nilai_minimum ?? 60,
         ]);
+
+        if ($request->filled('skema_ids')) {
+            $mk->skema()->sync($request->skema_ids);
+        }
 
         if ($request->semester_id) {
             DB::table('mata_kuliah_semester')->updateOrInsert(

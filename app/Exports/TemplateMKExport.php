@@ -49,7 +49,7 @@ class TemplateMKExport implements FromArray, WithHeadings, ShouldAutoSize, WithT
                 $semesterAktif,
                 3,
                 60,
-                'Skema A'
+                    'Skema A, Skema B'
             ]
         ];
     }

@@ -179,8 +179,10 @@ class FormController extends Controller
 
         if ($userSkemaId) {
             $mataKuliahQuery->where(function ($q) use ($userSkemaId) {
-                $q->where('skema_id', null)
-                  ->orWhere('skema_id', $userSkemaId);
+                $q->whereDoesntHave('skema')
+                  ->orWhereHas('skema', function ($q2) use ($userSkemaId) {
+                      $q2->where('skema.id', $userSkemaId);
+                  });
             });
         }
 
@@ -198,8 +200,10 @@ class FormController extends Controller
                 $q->where('jurusan_id', $jurusanId);
                 if ($userSkemaId) {
                     $q->where(function ($q2) use ($userSkemaId) {
-                        $q2->where('skema_id', null)
-                           ->orWhere('skema_id', $userSkemaId);
+                        $q2->whereDoesntHave('skema')
+                           ->orWhereHas('skema', function ($q3) use ($userSkemaId) {
+                               $q3->where('skema.id', $userSkemaId);
+                           });
                     });
                 }
             })

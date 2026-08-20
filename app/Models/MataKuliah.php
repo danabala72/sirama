@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MataKuliah extends Model
@@ -12,7 +13,6 @@ class MataKuliah extends Model
 
     protected $fillable = [
         'jurusan_id',
-        'skema_id',
         'kode_mk',
         'nama_mk',
         'sks',
@@ -25,9 +25,9 @@ class MataKuliah extends Model
         return $this->belongsTo(Jurusan::class, 'jurusan_id');
     }
 
-    public function skema(): BelongsTo
+    public function skema(): BelongsToMany
     {
-        return $this->belongsTo(Skema::class, 'skema_id');
+        return $this->belongsToMany(Skema::class, 'mata_kuliah_skema');
     }
 
     public function attachments(): HasMany

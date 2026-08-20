@@ -21,24 +21,31 @@ class MataKuliahImport implements ToModel, WithHeadingRow
             return null;
         }
 
-        $skema = null;
+        $skemaIds = [];
         if (!empty($row['nama_skema'])) {
-            $skema = Skema::where('jurusan_id', $jurusan->id)
-                ->where('nama_skema', $row['nama_skema'])
-                ->first();
+            $names = array_map('trim', explode(',', $row['nama_skema']));
+            $skemaIds = Skema::where('jurusan_id', $jurusan->id)
+                ->whereIn('nama_skema', $names)
+                ->pluck('id')
+                ->toArray();
         }
 
         $mk = MataKuliah::updateOrCreate(
             ['kode_mk' => trim($row['kode_mk'])],
             [
                 'jurusan_id'    => $jurusan->id,
-                'skema_id'      => $skema?->id,
                 'nama_mk'       => $row['nama_mk'],
                 'sks'           => $row['sks'],
                 'nilai_minimum' => $row['nilai_minimum'],
                 'status'        => 1,
             ]
         );
+
+        if (!empty($skemaIds)) {
+            $mk->skema()->sync($skemaIds);
+        } else {
+            $mk->skema()->detach();
+        }
 
         $mk->semester()->syncWithoutDetaching([$semester->id]);
 
