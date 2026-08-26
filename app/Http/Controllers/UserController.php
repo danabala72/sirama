@@ -370,12 +370,21 @@ class UserController extends Controller
         ])->findOrFail($id);
 
         // =========================
-        // SEMUA MK
+        // DAFTAR MK REPORT
+        // =========================
+        //
+        // Tetap pertahankan daftar MK dari master semester aktif seperti
+        // report lama, tetapi jangan menjadikannya satu-satunya sumber.
+        // mata_kuliah_pilihan menyimpan mata_kuliah_semester_id dan
+        // merupakan referensi MK yang benar-benar dipilih mahasiswa.
+        //
+        // Dengan cara ini data lama dan data baru tetap dapat ditampilkan.
         // =========================
 
         $jurusanId = $mhs->jurusan->id ?? null;
 
-        $mataKuliah = MataKuliahSemester::with([
+        // Sumber master: perilaku report lama tetap dipertahankan.
+        $mataKuliahMaster = MataKuliahSemester::with([
             'mataKuliah',
             'semester',
         ])
@@ -390,78 +399,133 @@ class UserController extends Controller
             ->orderBy('semester_id')
             ->get();
 
+        // Sumber mahasiswa: MK yang benar-benar dipilih/diproses.
+        $mkPilihanList = $mhs->mataKuliahPilihan
+            ->filter(function ($item) use ($jenis) {
+                $hasFormal = (bool) $item->transferSks;
+                $hasNonFormal = (bool) $item->transferSksNonFormal;
+
+                return match ($jenis) {
+                    'formal' => $hasFormal,
+                    'nonformal' => $hasNonFormal,
+                    default => $hasFormal || $hasNonFormal,
+                };
+            })
+            ->values();
+
+        // Tidak memakai relationship mataKuliahSemester pada
+        // MataKuliahPilihan. FK yang sudah tersimpan digunakan langsung.
+        $mkSemesterIds = $mkPilihanList
+            ->pluck('mata_kuliah_semester_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $mkSemesterById = $mkSemesterIds->isNotEmpty()
+            ? MataKuliahSemester::with(['mataKuliah', 'semester'])
+            ->whereIn('id', $mkSemesterIds)
+            ->get()
+            ->keyBy('id')
+            : collect();
+
         $rows = [];
-        $jurusan = $mhs->jurusan->toArray();
+        $jurusan = $mhs->jurusan?->toArray() ?? [];
+
         $asesorNames = $mhs->asesors
             ->take(3)
             ->values()
             ->map(fn($asesor) => $asesor->name)
             ->toArray();
 
-        foreach ($mataKuliah as $index => $mkSemester) {
+        // Utamakan FK mata_kuliah_semester_id.
+        // Kode MK menjadi fallback untuk data lama.
+        $mkPilihanBySemesterId = $mkPilihanList
+            ->filter(fn($item) => !empty($item->mata_kuliah_semester_id))
+            ->keyBy('mata_kuliah_semester_id');
 
+        $mkPilihanByKode = $mkPilihanList
+            ->filter(fn($item) => !empty($item->kode_mk))
+            ->keyBy('kode_mk');
+
+        $processedCodes = collect();
+
+        // =========================================================
+        // 1. MASTER MK - mempertahankan perilaku report sebelumnya
+        // =========================================================
+        foreach ($mataKuliahMaster as $mkSemester) {
             $mk = $mkSemester->mataKuliah;
-
 
             if (!$mk) {
                 continue;
             }
 
+            $mkPilihan = $mkPilihanBySemesterId->get($mkSemester->id)
+                ?? $mkPilihanByKode->get($mk->kode_mk);
 
-
-            // cek MK dipilih mahasiswa
-            $mkPilihan = $mhs->mataKuliahPilihan
-                ->first(function ($item) use ($mk, $jenis) {
-                    $hasMatchingMk = $item->kode_mk === $mk->kode_mk;
-                    $hasFormal = (bool) $item->transferSks;
-                    $hasNonFormal = (bool) $item->transferSksNonFormal;
-
-                    return match ($jenis) {
-                        'formal' => $hasMatchingMk && $hasFormal,
-                        'nonformal' => $hasMatchingMk && $hasNonFormal,
-                        default => $hasMatchingMk && ($hasFormal || $hasNonFormal),
-                    };
-                });
-            // default kosong
             $nilaiMandiri = null;
-
             $asesor1 = null;
             $asesor2 = null;
             $asesor3 = null;
-
             $rataRata = null;
 
-            $status = $mk->status;
-
-            // isi hanya jika dipilih
             if ($mkPilihan) {
                 $nilaiMandiri = $mkPilihan->nilai_angka;
-                [$asesor1, $asesor2, $asesor3, $rataRata] = $this->calculateAssessmentValue($mkPilihan, $jenis);
+
+                [$asesor1, $asesor2, $asesor3, $rataRata] =
+                    $this->calculateAssessmentValue($mkPilihan, $jenis);
+
+                $processedCodes->push($mk->kode_mk);
             }
 
-
             $rows[] = [
-                'no' => $index + 1,
-
+                'no' => count($rows) + 1,
                 'semester' => $mkSemester->semester->label ?? '',
-
                 'kode_mk' => $mk->kode_mk,
-
                 'mata_kuliah' => $mk->nama_mk,
-
                 'nilai_mandiri' => $nilaiMandiri,
-
                 'asesor_1' => $asesor1,
                 'asesor_2' => $asesor2,
                 'asesor_3' => $asesor3,
-
                 'rata_rata' => $rataRata,
-
                 'minimum' => $mk->nilai_minimum,
-
-                'status' => $status,
+                'status' => $mk->status,
             ];
         }
+
+        // =========================================================
+        // 2. MK PILIHAN YANG TIDAK ADA DI MASTER SEMESTER AKTIF
+        // =========================================================
+        // Ini yang memperbaiki kasus mahasiswa yang sudah mempunyai
+        // penilaian tetapi MK-nya tidak masuk query master semester aktif.
+        foreach ($mkPilihanList as $mkPilihan) {
+            $mk = $mkPilihan->mataKuliah;
+
+            if (!$mk || $processedCodes->contains($mk->kode_mk)) {
+                continue;
+            }
+
+            $mkSemester = $mkSemesterById->get($mkPilihan->mata_kuliah_semester_id);
+
+            [$asesor1, $asesor2, $asesor3, $rataRata] =
+                $this->calculateAssessmentValue($mkPilihan, $jenis);
+
+            $rows[] = [
+                'no' => count($rows) + 1,
+                'semester' => $mkSemester?->semester?->label ?? '',
+                'kode_mk' => $mk->kode_mk,
+                'mata_kuliah' => $mk->nama_mk,
+                'nilai_mandiri' => $mkPilihan->nilai_angka,
+                'asesor_1' => $asesor1,
+                'asesor_2' => $asesor2,
+                'asesor_3' => $asesor3,
+                'rata_rata' => $rataRata,
+                'minimum' => $mk->nilai_minimum,
+                'status' => $mk->status,
+            ];
+
+            $processedCodes->push($mk->kode_mk);
+        }
+
         $namaClean = str_replace(' ', '_', $mhs['name']);
 
         $timestamp = time();
@@ -534,262 +598,243 @@ class UserController extends Controller
             return [null, null, null, null];
         }
 
-        // =========================================================
-        // LOAD DATA
-        // =========================================================
+        /*
+    |--------------------------------------------------------------------------
+    | LOAD
+    |--------------------------------------------------------------------------
+    */
         $mkPilihan->loadMissing([
             'transferSks.penilaian',
             'transferSksNonFormal.penilaian',
             'mahasiswa.asesors',
         ]);
 
-        // =========================================================
-        // MASTER ASESOR MAHASISWA
-        // =========================================================
         $mahasiswa = $mkPilihan->mahasiswa;
 
-        $masterAsesorIds = $mahasiswa?->asesors
+        /*
+    |--------------------------------------------------------------------------
+    | URUTAN ASESOR
+    |--------------------------------------------------------------------------
+    */
+        $asesorIds = $mahasiswa?->asesors
             ? $mahasiswa->asesors
             ->pluck('id')
+            ->take(3)
             ->values()
             : collect();
 
-        // =========================================================
-        // DATA BARU - FORMAL
-        // penilaian_transfer_sks
-        //
-        // asesor_id + hasil
-        // =========================================================
-        $formalNilai = collect();
+        /*
+    |--------------------------------------------------------------------------
+    | DATA BARU - FORMAL
+    |--------------------------------------------------------------------------
+    */
+        $formalBaru = collect();
 
         if ($mkPilihan->transferSks) {
-            $formalNilai = $mkPilihan->transferSks
+            $formalBaru = $mkPilihan->transferSks
                 ->penilaian
                 ->filter(
-                    fn($p) =>
-                    $p->asesor_id !== null &&
-                        is_numeric($p->hasil)
+                    fn($item) =>
+                    $item->asesor_id !== null &&
+                        is_numeric($item->hasil)
                 )
                 ->keyBy('asesor_id');
         }
 
-        // =========================================================
-        // DATA BARU - NONFORMAL
-        // penilaian_transfer_nonformal
-        //
-        // asesor_id + nilai
-        // =========================================================
-        $nonformalNilai = collect();
+        /*
+    |--------------------------------------------------------------------------
+    | DATA BARU - NONFORMAL
+    |--------------------------------------------------------------------------
+    */
+        $nonformalBaru = collect();
 
         if ($mkPilihan->transferSksNonFormal) {
-            $nonformalNilai = $mkPilihan->transferSksNonFormal
+            $nonformalBaru = $mkPilihan->transferSksNonFormal
                 ->penilaian
                 ->filter(
-                    fn($p) =>
-                    $p->asesor_id !== null &&
-                        is_numeric($p->nilai)
+                    fn($item) =>
+                    $item->asesor_id !== null &&
+                        is_numeric($item->nilai)
                 )
                 ->keyBy('asesor_id');
         }
 
-        // =========================================================
-        // LEGACY VALUE
-        //
-        // Data lama:
-        //
-        // transfer_sks.hasil
-        // transfer_sks_nonformal.nilai
-        //
-        // Kita simpan sebagai fallback saja.
-        // =========================================================
+        /*
+    |--------------------------------------------------------------------------
+    | FALLBACK LEGACY
+    |--------------------------------------------------------------------------
+    |
+    | IMPORTANT:
+    | Jangan memanggil:
+    |
+    |     $mkPilihan->transferSks->hasil
+    |
+    | secara langsung.
+    |
+    | Kita hanya membaca attribute jika memang ada.
+    |--------------------------------------------------------------------------
+    */
+
         $legacyFormal = null;
-        $legacyNonFormal = null;
 
         if ($mkPilihan->transferSks) {
-            $legacyFormal = is_numeric($mkPilihan->transferSks->hasil ?? null)
-                ? (float) $mkPilihan->transferSks->hasil
-                : null;
+
+            $attributes = $mkPilihan->transferSks->getAttributes();
+
+            if (
+                array_key_exists('hasil', $attributes) &&
+                is_numeric($attributes['hasil'])
+            ) {
+                $legacyFormal = (float) $attributes['hasil'];
+            }
         }
+
+        $legacyNonformal = null;
 
         if ($mkPilihan->transferSksNonFormal) {
-            $legacyNonFormal = is_numeric($mkPilihan->transferSksNonFormal->nilai ?? null)
-                ? (float) $mkPilihan->transferSksNonFormal->nilai
-                : null;
+
+            $attributes = $mkPilihan
+                ->transferSksNonFormal
+                ->getAttributes();
+
+            if (
+                array_key_exists('nilai', $attributes) &&
+                is_numeric($attributes['nilai'])
+            ) {
+                $legacyNonformal = (float) $attributes['nilai'];
+            }
         }
 
-        // =========================================================
-        // JIKA TIDAK ADA ASESOR MASTER
-        //
-        // Untuk data baru, gunakan asesor_id yang ada di penilaian.
-        // =========================================================
-        if ($masterAsesorIds->isEmpty()) {
-            $masterAsesorIds = $formalNilai
+        /*
+    |--------------------------------------------------------------------------
+    | FALLBACK ASESOR
+    |--------------------------------------------------------------------------
+    |
+    | Kalau mahasiswa tidak mempunyai master asesor,
+    | gunakan asesor yang terdapat pada data penilaian baru.
+    |--------------------------------------------------------------------------
+    */
+        if ($asesorIds->isEmpty()) {
+
+            $asesorIds = $formalBaru
                 ->keys()
-                ->concat($nonformalNilai->keys())
+                ->concat($nonformalBaru->keys())
                 ->unique()
-                ->values();
+                ->values()
+                ->take(3);
         }
 
-        // =========================================================
-        // JIKA MASIH TIDAK ADA ASESOR
-        // =========================================================
-        if ($masterAsesorIds->isEmpty()) {
-            return [
-                null,
-                null,
-                null,
-                null,
-            ];
-        }
+        /*
+    |--------------------------------------------------------------------------
+    | HASIL ASESOR
+    |--------------------------------------------------------------------------
+    */
+        $hasil = [
+            null,
+            null,
+            null,
+        ];
 
-        // =========================================================
-        // HASIL
-        // =========================================================
-        $asesor1 = null;
-        $asesor2 = null;
-        $asesor3 = null;
+        foreach ($asesorIds as $index => $asesorId) {
 
-        // =========================================================
-        // LOOP ASESOR
-        // =========================================================
-        foreach ($masterAsesorIds->take(3) as $posisi => $asesorId) {
+            /*
+        |--------------------------------------------------------------------------
+        | FORMAL
+        |--------------------------------------------------------------------------
+        */
+            $formal = null;
 
-            $pformal = $formalNilai->get($asesorId);
-            $pnonformal = $nonformalNilai->get($asesorId);
+            $penilaianFormal = $formalBaru->get($asesorId);
 
-            $hasFormalBaru =
-                $pformal &&
-                is_numeric($pformal->hasil);
+            if (
+                $penilaianFormal &&
+                is_numeric($penilaianFormal->hasil)
+            ) {
+                // PRIORITAS 1: DATA BARU
+                $formal = (float) $penilaianFormal->hasil;
+            } elseif ($legacyFormal !== null) {
+                // PRIORITAS 2: DATA LAMA
+                $formal = $legacyFormal;
+            }
 
-            $hasNonFormalBaru =
-                $pnonformal &&
-                is_numeric($pnonformal->nilai);
+            /*
+        |--------------------------------------------------------------------------
+        | NONFORMAL
+        |--------------------------------------------------------------------------
+        */
+            $nonformal = null;
 
-            // =====================================================
-            // DEFAULT
-            // =====================================================
-            $nilaiAkhir = null;
+            $penilaianNonformal = $nonformalBaru->get($asesorId);
 
-            // =====================================================
-            // FORMAL
-            // =====================================================
+            if (
+                $penilaianNonformal &&
+                is_numeric($penilaianNonformal->nilai)
+            ) {
+                // PRIORITAS 1: DATA BARU
+                $nonformal = (float) $penilaianNonformal->nilai;
+            } elseif ($legacyNonformal !== null) {
+                // PRIORITAS 2: DATA LAMA
+                $nonformal = $legacyNonformal;
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | HITUNG NILAI
+        |--------------------------------------------------------------------------
+        */
+            $nilai = null;
+
             if ($jenis === 'formal') {
 
-                if ($hasFormalBaru) {
-
-                    // PRIORITAS 1: DATA BARU
-                    $nilaiAkhir = (float) $pformal->hasil;
-                } elseif ($legacyFormal !== null) {
-
-                    // PRIORITAS 2: DATA LEGACY
-                    //
-                    // Legacy tidak mempunyai asesor_id.
-                    // Karena itu nilai legacy dianggap sebagai
-                    // nilai bersama untuk asesor yang ditampilkan.
-                    $nilaiAkhir = $legacyFormal;
-                }
-
-                // =====================================================
-                // NONFORMAL
-                // =====================================================
+                $nilai = $formal;
             } elseif ($jenis === 'nonformal') {
 
-                if ($hasNonFormalBaru) {
-
-                    // PRIORITAS 1: DATA BARU
-                    $nilaiAkhir = (float) $pnonformal->nilai;
-                } elseif ($legacyNonFormal !== null) {
-
-                    // PRIORITAS 2: DATA LEGACY
-                    $nilaiAkhir = $legacyNonFormal;
-                }
-
-                // =====================================================
-                // FINAL
-                // =====================================================
+                $nilai = $nonformal;
             } else {
 
-                // -------------------------------------------------
-                // FORMAL
-                // -------------------------------------------------
-                $fNilai = $hasFormalBaru
-                    ? (float) $pformal->hasil
-                    : ($legacyFormal !== null ? $legacyFormal : null);
+                // FINAL
+                if ($formal !== null) {
 
-                // -------------------------------------------------
-                // NONFORMAL
-                // -------------------------------------------------
-                $nfNilai = $hasNonFormalBaru
-                    ? (float) $pnonformal->nilai
-                    : ($legacyNonFormal !== null ? $legacyNonFormal : null);
+                    $nilai = $formal + (($nonformal ?? 0) * 0.10);
+                } elseif ($nonformal !== null) {
 
-                // -------------------------------------------------
-                // Keduanya tidak ada
-                // -------------------------------------------------
-                if ($fNilai === null && $nfNilai === null) {
-
-                    $nilaiAkhir = null;
-
-                    // -------------------------------------------------
-                    // Formal tidak ada → nonformal
-                    // -------------------------------------------------
-                } elseif ($fNilai === null) {
-
-                    $nilaiAkhir = $nfNilai;
-
-                    // -------------------------------------------------
-                    // Formal ada → formal + nonformal 10%
-                    // -------------------------------------------------
-                } else {
-
-                    $nilaiAkhir =
-                        $fNilai +
-                        (($nfNilai ?? 0) * 0.1);
+                    $nilai = $nonformal;
                 }
             }
 
-            // =====================================================
-            // ROUND
-            // =====================================================
-            if ($nilaiAkhir !== null) {
+            /*
+        |--------------------------------------------------------------------------
+        | NORMALISASI
+        |--------------------------------------------------------------------------
+        */
+            if ($nilai !== null) {
 
-                $nilaiAkhir = (float) round($nilaiAkhir, 2);
+                $nilai = round($nilai, 2);
 
-                // FINAL MAX 85
                 if ($jenis === 'final') {
-                    $nilaiAkhir = min($nilaiAkhir, 85);
+                    $nilai = min($nilai, 85);
                 }
-            }
 
-            // =====================================================
-            // MASUKKAN KE POSISI ASESOR
-            // =====================================================
-            if ($posisi === 0) {
-                $asesor1 = $nilaiAkhir;
-            } elseif ($posisi === 1) {
-                $asesor2 = $nilaiAkhir;
-            } elseif ($posisi === 2) {
-                $asesor3 = $nilaiAkhir;
+                $hasil[$index] = (float) $nilai;
             }
         }
 
-        // =========================================================
-        // RATA-RATA
-        // =========================================================
-        $nilaiAsesor = collect([
-            $asesor1,
-            $asesor2,
-            $asesor3,
-        ])->filter(fn($value) => $value !== null);
+        /*
+    |--------------------------------------------------------------------------
+    | RATA-RATA
+    |--------------------------------------------------------------------------
+    */
+        $nilaiAsesor = collect($hasil)
+            ->filter(fn($value) => $value !== null);
 
         $rataRata = $nilaiAsesor->isNotEmpty()
             ? (float) round($nilaiAsesor->avg(), 2)
             : null;
 
         return [
-            $asesor1,
-            $asesor2,
-            $asesor3,
+            $hasil[0],
+            $hasil[1],
+            $hasil[2],
             $rataRata,
         ];
     }
