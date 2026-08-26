@@ -67,134 +67,65 @@ class TransferSksController extends Controller
         $mahasiswas = Mahasiswa::query()
             ->locked()
 
-            // Mahasiswa yang di-assign ke asesor ini
             ->whereHas('asesors', function ($query) use ($asesorId) {
                 $query->where('asesor_id', $asesorId);
             })
 
-            // Pastikan ada data MK + CP
             ->whereHas('mataKuliahPilihan.mataKuliah.cps')
 
             ->with([
-                'mataKuliahPilihan' => function ($query) {
-                    $query->whereHas('mataKuliah.cps');
-                },
-
-                // CP + penilaian asesor
-                'mataKuliahPilihan.cpLevels.penilaian' => function ($q) use ($asesorId) {
-                    $q->where('asesor_id', $asesorId);
-                },
-
-                // Formal + penilaian asesor
-                'mataKuliahPilihan.transferSks.penilaian' => function ($q) use ($asesorId) {
-                    $q->where('asesor_id', $asesorId);
-                },
-
-                // Non-Formal + penilaian asesor
-                'mataKuliahPilihan.transferSksNonFormal.penilaian' => function ($q) use ($asesorId) {
-                    $q->where('asesor_id', $asesorId);
-                },
-
                 'user.jurusan',
+
+                'mataKuliahPilihan' => function ($query) {
+                    $query
+                        ->whereHas('mataKuliah.cps')
+                        ->with([
+                            'transferSks.penilaian',
+                            'transferSksNonFormal.penilaian',
+                        ]);
+                },
             ])
+
             ->get();
 
-        $mahasiswas->map(function ($mhs) use ($asesorId) {
+        $mahasiswas->each(function ($mhs) use ($asesorId) {
 
-            $mkList = collect($mhs->mataKuliahPilihan ?? []);
-
-            /*
-        |--------------------------------------------------------------------------
-        | TOTAL MATA KULIAH
-        |--------------------------------------------------------------------------
-        */
+            $mkList = $mhs->mataKuliahPilihan;
 
             $mhs->total_mk_pilihan = $mkList->count();
 
-
-            /*
-        |--------------------------------------------------------------------------
-        | JUMLAH SUDAH DINILAI
-        |--------------------------------------------------------------------------
-        |
-        | MK dianggap sudah dinilai apabila:
-        |
-        | - Formal mempunyai nilai "hasil", ATAU
-        | - Non-Formal mempunyai nilai "nilai"
-        |
-        */
-
             $mhs->jumlah_sudah_dinilai = $mkList->filter(function ($mk) use ($asesorId) {
-
-                // =========================
-                // FORMAL
-                // =========================
 
                 $hasFormalValue = false;
 
                 if ($mk->transferSks) {
 
-                    $pFormal = $mk->transferSks->penilaian
-                        ->where('asesor_id', $asesorId)
-                        ->first();
+                    $penilaian = $mk->transferSks->penilaian
+                        ->firstWhere('asesor_id', $asesorId);
 
                     $hasFormalValue =
-                        $pFormal &&
-                        !is_null($pFormal->hasil);
+                        $penilaian &&
+                        !is_null($penilaian->hasil);
                 }
-
-
-                // =========================
-                // NON FORMAL
-                // =========================
 
                 $hasNonFormalValue = false;
 
                 if ($mk->transferSksNonFormal) {
 
-                    $pNonFormal = $mk->transferSksNonFormal->penilaian
-                        ->where('asesor_id', $asesorId)
-                        ->first();
+                    $penilaian = $mk->transferSksNonFormal->penilaian
+                        ->firstWhere('asesor_id', $asesorId);
 
                     $hasNonFormalValue =
-                        $pNonFormal &&
-                        !is_null($pNonFormal->nilai);
+                        $penilaian &&
+                        !is_null($penilaian->nilai);
                 }
-
-
-                /*
-            |--------------------------------------------------------------------------
-            | SUDAH DINILAI
-            |--------------------------------------------------------------------------
-            |
-            | Salah satu jenis asesmen sudah mempunyai nilai.
-            |
-            */
 
                 return $hasFormalValue || $hasNonFormalValue;
             })->count();
 
-
-            /*
-        |--------------------------------------------------------------------------
-        | JUMLAH BELUM DINILAI / BELUM LENGKAP
-        |--------------------------------------------------------------------------
-        |
-        | Jangan hitung ulang menggunakan logika Formal / Non-Formal / CP.
-        |
-        | Karena jumlah_sudah_dinilai sudah menjadi sumber kebenaran
-        | untuk status "Telah Dinilai", maka:
-        |
-        | total MK - MK yang sudah dinilai
-        |
-        */
-
             $mhs->jumlah_belum_dinilai =
                 $mhs->total_mk_pilihan -
                 $mhs->jumlah_sudah_dinilai;
-
-
-            return $mhs;
         });
 
         return view('asesor.asesmen.index', compact('mahasiswas'));
